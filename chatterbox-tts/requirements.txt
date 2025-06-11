@@ -23,7 +23,7 @@ pydantic-core==2.27.0
 
 # --- Scientific Computing & ML Libraries ---
 numpy==1.26.4
-librosa==0.10.2
+librosa==0.11.0
 safetensors==0.4.5
 soundfile==0.12.1
 
