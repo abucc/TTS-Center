@@ -1,0 +1,107 @@
+[
+  {
+    "name": "Brian",
+    "gender": "male",
+    "locale": "en-US",
+    "engine": "streamlabs-polly",
+    "description": "Brian voice"
+  },
+  {
+    "name": "Emma",
+    "gender": "female",
+    "locale": "en-US",
+    "engine": "streamlabs-polly",
+    "description": "Emma voice"
+  },
+  {
+    "name": "Russell",
+    "gender": "male",
+    "locale": "en-AU",
+    "engine": "streamlabs-polly",
+    "description": "Russell Australian voice"
+  },
+  {
+    "name": "Joey",
+    "gender": "male",
+    "locale": "en-US",
+    "engine": "streamlabs-polly",
+    "description": "Joey voice"
+  },
+  {
+    "name": "Matthew",
+    "gender": "male",
+    "locale": "en-US",
+    "engine": "streamlabs-polly",
+    "description": "Matthew voice"
+  },
+  {
+    "name": "Joanna",
+    "gender": "female",
+    "locale": "en-US",
+    "engine": "streamlabs-polly",
+    "description": "Joanna voice"
+  },
+  {
+    "name": "Kimberly",
+    "gender": "female",
+    "locale": "en-US",
+    "engine": "streamlabs-polly",
+    "description": "Kimberly voice"
+  },
+  {
+    "name": "Amy",
+    "gender": "female",
+    "locale": "en-GB",
+    "engine": "streamlabs-polly",
+    "description": "Amy British voice"
+  },
+  {
+    "name": "Geraint",
+    "gender": "male",
+    "locale": "en-GB",
+    "engine": "streamlabs-polly",
+    "description": "Geraint Welsh voice"
+  },
+  {
+    "name": "Nicole",
+    "gender": "female",
+    "locale": "en-AU",
+    "engine": "streamlabs-polly",
+    "description": "Nicole Australian voice"
+  },
+  {
+    "name": "Justin",
+    "gender": "male",
+    "locale": "en-US",
+    "engine": "streamlabs-polly",
+    "description": "Justin voice"
+  },
+  {
+    "name": "Ivy",
+    "gender": "female",
+    "locale": "en-US",
+    "engine": "streamlabs-polly",
+    "description": "Ivy voice"
+  },
+  {
+    "name": "Kendra",
+    "gender": "female",
+    "locale": "en-US",
+    "engine": "streamlabs-polly",
+    "description": "Kendra voice"
+  },
+  {
+    "name": "Salli",
+    "gender": "female",
+    "locale": "en-US",
+    "engine": "streamlabs-polly",
+    "description": "Salli voice"
+  },
+  {
+    "name": "Raveena",
+    "gender": "female",
+    "locale": "en-IN",
+    "engine": "streamlabs-polly",
+    "description": "Raveena Indian voice"
+  }
+]

@@ -1,0 +1,182 @@
+version: '3.8'
+
+services:
+  # Kokoro ONNX TTS
+  kokoro-onnx:
+    build:
+      context: ./kokoro-onnx
+      dockerfile: Dockerfile
+    container_name: kokoro-onnx
+    restart: unless-stopped
+    ports:
+      - "8001:8000"
+    environment:
+      - MODEL_PATH=/app/models
+      - MAX_WORKERS=4
+    volumes:
+      - ./models/kokoro:/app/models
+      - ./cache:/app/cache
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+        reservations:
+          memory: 2G
+
+  # Chatterbox TTS Server
+  chatterbox-tts:
+    build:
+      context: ./chatterbox-tts
+      dockerfile: Dockerfile
+    container_name: chatterbox-tts
+    restart: unless-stopped
+    ports:
+      - "8002:8000"
+    environment:
+      - MODELS_DIR=/app/models
+      - CACHE_DIR=/app/cache
+    volumes:
+      - ./models/chatterbox:/app/models
+      - ./cache:/app/cache
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 3G
+        reservations:
+          memory: 1G
+
+  # OpenAI Edge TTS
+  openai-edge-tts:
+    build:
+      context: ./openai-edge-tts
+      dockerfile: Dockerfile
+    container_name: openai-edge-tts
+    restart: unless-stopped
+    ports:
+      - "8003:8000"
+    environment:
+      - EDGE_TTS_CACHE_DIR=/app/cache
+    volumes:
+      - ./cache:/app/cache
+      - ./voices:/app/voices
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 512M
+
+  # Streamlabs TTS
+  streamlabs-tts:
+    build:
+      context: ./streamlabs-tts
+      dockerfile: Dockerfile
+    container_name: streamlabs-tts
+    restart: unless-stopped
+    ports:
+      - "8004:8000"
+    volumes:
+      - ./voices:/app/voices
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
+
+  # Unified TTS Gateway/API
+  tts-gateway:
+    build:
+      context: ./tts-gateway
+      dockerfile: Dockerfile
+    container_name: tts-gateway
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - KOKORO_URL=http://kokoro-onnx:8000
+      - CHATTERBOX_URL=http://chatterbox-tts:8000
+      - EDGE_TTS_URL=http://openai-edge-tts:8000
+      - STREAMLABS_URL=http://streamlabs-tts:8000
+      - CORS_ORIGINS=*
+    depends_on:
+      - kokoro-onnx
+      - chatterbox-tts
+      - openai-edge-tts
+      - streamlabs-tts
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 512M
+
+  # Nginx Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    container_name: tts-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/ssl:/etc/nginx/ssl
+      - ./web:/usr/share/nginx/html
+    depends_on:
+      - tts-gateway
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 128M
+
+  # Redis for caching (optional but recommended)
+  redis:
+    image: redis:7-alpine
+    container_name: tts-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes --maxmemory 1gb --maxmemory-policy allkeys-lru
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 512M
+
+volumes:
+  redis-data:
+
+networks:
+  default:
+    name: tts-network

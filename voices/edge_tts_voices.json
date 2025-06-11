@@ -1,0 +1,2116 @@
+[
+  {
+    "name": "af-ZA-AdriNeural",
+    "gender": "female",
+    "locale": "af-ZA",
+    "engine": "edge-tts",
+    "description": "AdriNeural Neural af-ZA"
+  },
+  {
+    "name": "af-ZA-WillemNeural",
+    "gender": "male",
+    "locale": "af-ZA",
+    "engine": "edge-tts",
+    "description": "WillemNeural Neural af-ZA"
+  },
+  {
+    "name": "sq-AL-AnilaNeural",
+    "gender": "female",
+    "locale": "sq-AL",
+    "engine": "edge-tts",
+    "description": "AnilaNeural Neural sq-AL"
+  },
+  {
+    "name": "sq-AL-IlirNeural",
+    "gender": "male",
+    "locale": "sq-AL",
+    "engine": "edge-tts",
+    "description": "IlirNeural Neural sq-AL"
+  },
+  {
+    "name": "am-ET-AmehaNeural",
+    "gender": "male",
+    "locale": "am-ET",
+    "engine": "edge-tts",
+    "description": "AmehaNeural Neural am-ET"
+  },
+  {
+    "name": "am-ET-MekdesNeural",
+    "gender": "female",
+    "locale": "am-ET",
+    "engine": "edge-tts",
+    "description": "MekdesNeural Neural am-ET"
+  },
+  {
+    "name": "ar-DZ-AminaNeural",
+    "gender": "female",
+    "locale": "ar-DZ",
+    "engine": "edge-tts",
+    "description": "AminaNeural Neural ar-DZ"
+  },
+  {
+    "name": "ar-DZ-IsmaelNeural",
+    "gender": "male",
+    "locale": "ar-DZ",
+    "engine": "edge-tts",
+    "description": "IsmaelNeural Neural ar-DZ"
+  },
+  {
+    "name": "ar-BH-AliNeural",
+    "gender": "male",
+    "locale": "ar-BH",
+    "engine": "edge-tts",
+    "description": "AliNeural Neural ar-BH"
+  },
+  {
+    "name": "ar-BH-LailaNeural",
+    "gender": "female",
+    "locale": "ar-BH",
+    "engine": "edge-tts",
+    "description": "LailaNeural Neural ar-BH"
+  },
+  {
+    "name": "ar-EG-SalmaNeural",
+    "gender": "female",
+    "locale": "ar-EG",
+    "engine": "edge-tts",
+    "description": "SalmaNeural Neural ar-EG"
+  },
+  {
+    "name": "ar-EG-ShakirNeural",
+    "gender": "male",
+    "locale": "ar-EG",
+    "engine": "edge-tts",
+    "description": "ShakirNeural Neural ar-EG"
+  },
+  {
+    "name": "ar-IQ-BasselNeural",
+    "gender": "male",
+    "locale": "ar-IQ",
+    "engine": "edge-tts",
+    "description": "BasselNeural Neural ar-IQ"
+  },
+  {
+    "name": "ar-IQ-RanaNeural",
+    "gender": "female",
+    "locale": "ar-IQ",
+    "engine": "edge-tts",
+    "description": "RanaNeural Neural ar-IQ"
+  },
+  {
+    "name": "ar-JO-SanaNeural",
+    "gender": "female",
+    "locale": "ar-JO",
+    "engine": "edge-tts",
+    "description": "SanaNeural Neural ar-JO"
+  },
+  {
+    "name": "ar-JO-TaimNeural",
+    "gender": "male",
+    "locale": "ar-JO",
+    "engine": "edge-tts",
+    "description": "TaimNeural Neural ar-JO"
+  },
+  {
+    "name": "ar-KW-FahedNeural",
+    "gender": "male",
+    "locale": "ar-KW",
+    "engine": "edge-tts",
+    "description": "FahedNeural Neural ar-KW"
+  },
+  {
+    "name": "ar-KW-NouraNeural",
+    "gender": "female",
+    "locale": "ar-KW",
+    "engine": "edge-tts",
+    "description": "NouraNeural Neural ar-KW"
+  },
+  {
+    "name": "ar-LB-LaylaNeural",
+    "gender": "female",
+    "locale": "ar-LB",
+    "engine": "edge-tts",
+    "description": "LaylaNeural Neural ar-LB"
+  },
+  {
+    "name": "ar-LB-RamiNeural",
+    "gender": "male",
+    "locale": "ar-LB",
+    "engine": "edge-tts",
+    "description": "RamiNeural Neural ar-LB"
+  },
+  {
+    "name": "ar-LY-ImanNeural",
+    "gender": "female",
+    "locale": "ar-LY",
+    "engine": "edge-tts",
+    "description": "ImanNeural Neural ar-LY"
+  },
+  {
+    "name": "ar-LY-OmarNeural",
+    "gender": "male",
+    "locale": "ar-LY",
+    "engine": "edge-tts",
+    "description": "OmarNeural Neural ar-LY"
+  },
+  {
+    "name": "ar-MA-JamalNeural",
+    "gender": "male",
+    "locale": "ar-MA",
+    "engine": "edge-tts",
+    "description": "JamalNeural Neural ar-MA"
+  },
+  {
+    "name": "ar-MA-MounaNeural",
+    "gender": "female",
+    "locale": "ar-MA",
+    "engine": "edge-tts",
+    "description": "MounaNeural Neural ar-MA"
+  },
+  {
+    "name": "ar-OM-AbdullahNeural",
+    "gender": "male",
+    "locale": "ar-OM",
+    "engine": "edge-tts",
+    "description": "AbdullahNeural Neural ar-OM"
+  },
+  {
+    "name": "ar-OM-AyshaNeural",
+    "gender": "female",
+    "locale": "ar-OM",
+    "engine": "edge-tts",
+    "description": "AyshaNeural Neural ar-OM"
+  },
+  {
+    "name": "ar-QA-AmalNeural",
+    "gender": "female",
+    "locale": "ar-QA",
+    "engine": "edge-tts",
+    "description": "AmalNeural Neural ar-QA"
+  },
+  {
+    "name": "ar-QA-MoazNeural",
+    "gender": "male",
+    "locale": "ar-QA",
+    "engine": "edge-tts",
+    "description": "MoazNeural Neural ar-QA"
+  },
+  {
+    "name": "ar-SA-HamedNeural",
+    "gender": "male",
+    "locale": "ar-SA",
+    "engine": "edge-tts",
+    "description": "HamedNeural Neural ar-SA"
+  },
+  {
+    "name": "ar-SA-ZariyahNeural",
+    "gender": "female",
+    "locale": "ar-SA",
+    "engine": "edge-tts",
+    "description": "ZariyahNeural Neural ar-SA"
+  },
+  {
+    "name": "ar-SY-AmanyNeural",
+    "gender": "female",
+    "locale": "ar-SY",
+    "engine": "edge-tts",
+    "description": "AmanyNeural Neural ar-SY"
+  },
+  {
+    "name": "ar-SY-LaithNeural",
+    "gender": "male",
+    "locale": "ar-SY",
+    "engine": "edge-tts",
+    "description": "LaithNeural Neural ar-SY"
+  },
+  {
+    "name": "ar-TN-HediNeural",
+    "gender": "male",
+    "locale": "ar-TN",
+    "engine": "edge-tts",
+    "description": "HediNeural Neural ar-TN"
+  },
+  {
+    "name": "ar-TN-ReemNeural",
+    "gender": "female",
+    "locale": "ar-TN",
+    "engine": "edge-tts",
+    "description": "ReemNeural Neural ar-TN"
+  },
+  {
+    "name": "ar-AE-FatimaNeural",
+    "gender": "female",
+    "locale": "ar-AE",
+    "engine": "edge-tts",
+    "description": "FatimaNeural Neural ar-AE"
+  },
+  {
+    "name": "ar-AE-HamdanNeural",
+    "gender": "male",
+    "locale": "ar-AE",
+    "engine": "edge-tts",
+    "description": "HamdanNeural Neural ar-AE"
+  },
+  {
+    "name": "ar-YE-MaryamNeural",
+    "gender": "female",
+    "locale": "ar-YE",
+    "engine": "edge-tts",
+    "description": "MaryamNeural Neural ar-YE"
+  },
+  {
+    "name": "ar-YE-SalehNeural",
+    "gender": "male",
+    "locale": "ar-YE",
+    "engine": "edge-tts",
+    "description": "SalehNeural Neural ar-YE"
+  },
+  {
+    "name": "az-AZ-BabekNeural",
+    "gender": "male",
+    "locale": "az-AZ",
+    "engine": "edge-tts",
+    "description": "BabekNeural Neural az-AZ"
+  },
+  {
+    "name": "az-AZ-BanuNeural",
+    "gender": "female",
+    "locale": "az-AZ",
+    "engine": "edge-tts",
+    "description": "BanuNeural Neural az-AZ"
+  },
+  {
+    "name": "bn-BD-NabanitaNeural",
+    "gender": "female",
+    "locale": "bn-BD",
+    "engine": "edge-tts",
+    "description": "NabanitaNeural Neural bn-BD"
+  },
+  {
+    "name": "bn-BD-PradeepNeural",
+    "gender": "male",
+    "locale": "bn-BD",
+    "engine": "edge-tts",
+    "description": "PradeepNeural Neural bn-BD"
+  },
+  {
+    "name": "bn-IN-BashkarNeural",
+    "gender": "male",
+    "locale": "bn-IN",
+    "engine": "edge-tts",
+    "description": "BashkarNeural Neural bn-IN"
+  },
+  {
+    "name": "bn-IN-TanishaaNeural",
+    "gender": "female",
+    "locale": "bn-IN",
+    "engine": "edge-tts",
+    "description": "TanishaaNeural Neural bn-IN"
+  },
+  {
+    "name": "bs-BA-GoranNeural",
+    "gender": "male",
+    "locale": "bs-BA",
+    "engine": "edge-tts",
+    "description": "GoranNeural Neural bs-BA"
+  },
+  {
+    "name": "bs-BA-VesnaNeural",
+    "gender": "female",
+    "locale": "bs-BA",
+    "engine": "edge-tts",
+    "description": "VesnaNeural Neural bs-BA"
+  },
+  {
+    "name": "bg-BG-BorislavNeural",
+    "gender": "male",
+    "locale": "bg-BG",
+    "engine": "edge-tts",
+    "description": "BorislavNeural Neural bg-BG"
+  },
+  {
+    "name": "bg-BG-KalinaNeural",
+    "gender": "female",
+    "locale": "bg-BG",
+    "engine": "edge-tts",
+    "description": "KalinaNeural Neural bg-BG"
+  },
+  {
+    "name": "my-MM-NilarNeural",
+    "gender": "female",
+    "locale": "my-MM",
+    "engine": "edge-tts",
+    "description": "NilarNeural Neural my-MM"
+  },
+  {
+    "name": "my-MM-ThihaNeural",
+    "gender": "male",
+    "locale": "my-MM",
+    "engine": "edge-tts",
+    "description": "ThihaNeural Neural my-MM"
+  },
+  {
+    "name": "ca-ES-EnricNeural",
+    "gender": "male",
+    "locale": "ca-ES",
+    "engine": "edge-tts",
+    "description": "EnricNeural Neural ca-ES"
+  },
+  {
+    "name": "ca-ES-JoanaNeural",
+    "gender": "female",
+    "locale": "ca-ES",
+    "engine": "edge-tts",
+    "description": "JoanaNeural Neural ca-ES"
+  },
+  {
+    "name": "zh-HK-HiuGaaiNeural",
+    "gender": "female",
+    "locale": "zh-HK",
+    "engine": "edge-tts",
+    "description": "HiuGaaiNeural Neural zh-HK"
+  },
+  {
+    "name": "zh-HK-HiuMaanNeural",
+    "gender": "female",
+    "locale": "zh-HK",
+    "engine": "edge-tts",
+    "description": "HiuMaanNeural Neural zh-HK"
+  },
+  {
+    "name": "zh-HK-WanLungNeural",
+    "gender": "male",
+    "locale": "zh-HK",
+    "engine": "edge-tts",
+    "description": "WanLungNeural Neural zh-HK"
+  },
+  {
+    "name": "zh-CN-XiaoxiaoNeural",
+    "gender": "female",
+    "locale": "zh-CN",
+    "engine": "edge-tts",
+    "description": "XiaoxiaoNeural Neural zh-CN"
+  },
+  {
+    "name": "zh-CN-XiaoyiNeural",
+    "gender": "female",
+    "locale": "zh-CN",
+    "engine": "edge-tts",
+    "description": "XiaoyiNeural Neural zh-CN"
+  },
+  {
+    "name": "zh-CN-YunjianNeural",
+    "gender": "male",
+    "locale": "zh-CN",
+    "engine": "edge-tts",
+    "description": "YunjianNeural Neural zh-CN"
+  },
+  {
+    "name": "zh-CN-YunxiNeural",
+    "gender": "male",
+    "locale": "zh-CN",
+    "engine": "edge-tts",
+    "description": "YunxiNeural Neural zh-CN"
+  },
+  {
+    "name": "zh-CN-YunxiaNeural",
+    "gender": "male",
+    "locale": "zh-CN",
+    "engine": "edge-tts",
+    "description": "YunxiaNeural Neural zh-CN"
+  },
+  {
+    "name": "zh-CN-YunyangNeural",
+    "gender": "male",
+    "locale": "zh-CN",
+    "engine": "edge-tts",
+    "description": "YunyangNeural Neural zh-CN"
+  },
+  {
+    "name": "zh-CN-liaoning-XiaobeiNeural",
+    "gender": "female",
+    "locale": "zh-CN-liaoning",
+    "engine": "edge-tts",
+    "description": "XiaobeiNeural Neural zh-CN-liaoning"
+  },
+  {
+    "name": "zh-TW-HsiaoChenNeural",
+    "gender": "female",
+    "locale": "zh-TW",
+    "engine": "edge-tts",
+    "description": "HsiaoChenNeural Neural zh-TW"
+  },
+  {
+    "name": "zh-TW-YunJheNeural",
+    "gender": "male",
+    "locale": "zh-TW",
+    "engine": "edge-tts",
+    "description": "YunJheNeural Neural zh-TW"
+  },
+  {
+    "name": "zh-TW-HsiaoYuNeural",
+    "gender": "female",
+    "locale": "zh-TW",
+    "engine": "edge-tts",
+    "description": "HsiaoYuNeural Neural zh-TW"
+  },
+  {
+    "name": "zh-CN-shaanxi-XiaoniNeural",
+    "gender": "female",
+    "locale": "zh-CN-shaanxi",
+    "engine": "edge-tts",
+    "description": "XiaoniNeural Neural zh-CN-shaanxi"
+  },
+  {
+    "name": "hr-HR-GabrijelaNeural",
+    "gender": "female",
+    "locale": "hr-HR",
+    "engine": "edge-tts",
+    "description": "GabrijelaNeural Neural hr-HR"
+  },
+  {
+    "name": "hr-HR-SreckoNeural",
+    "gender": "male",
+    "locale": "hr-HR",
+    "engine": "edge-tts",
+    "description": "SreckoNeural Neural hr-HR"
+  },
+  {
+    "name": "cs-CZ-AntoninNeural",
+    "gender": "male",
+    "locale": "cs-CZ",
+    "engine": "edge-tts",
+    "description": "AntoninNeural Neural cs-CZ"
+  },
+  {
+    "name": "cs-CZ-VlastaNeural",
+    "gender": "female",
+    "locale": "cs-CZ",
+    "engine": "edge-tts",
+    "description": "VlastaNeural Neural cs-CZ"
+  },
+  {
+    "name": "da-DK-ChristelNeural",
+    "gender": "female",
+    "locale": "da-DK",
+    "engine": "edge-tts",
+    "description": "ChristelNeural Neural da-DK"
+  },
+  {
+    "name": "da-DK-JeppeNeural",
+    "gender": "male",
+    "locale": "da-DK",
+    "engine": "edge-tts",
+    "description": "JeppeNeural Neural da-DK"
+  },
+  {
+    "name": "nl-BE-ArnaudNeural",
+    "gender": "male",
+    "locale": "nl-BE",
+    "engine": "edge-tts",
+    "description": "ArnaudNeural Neural nl-BE"
+  },
+  {
+    "name": "nl-BE-DenaNeural",
+    "gender": "female",
+    "locale": "nl-BE",
+    "engine": "edge-tts",
+    "description": "DenaNeural Neural nl-BE"
+  },
+  {
+    "name": "nl-NL-ColetteNeural",
+    "gender": "female",
+    "locale": "nl-NL",
+    "engine": "edge-tts",
+    "description": "ColetteNeural Neural nl-NL"
+  },
+  {
+    "name": "nl-NL-FennaNeural",
+    "gender": "female",
+    "locale": "nl-NL",
+    "engine": "edge-tts",
+    "description": "FennaNeural Neural nl-NL"
+  },
+  {
+    "name": "nl-NL-MaartenNeural",
+    "gender": "male",
+    "locale": "nl-NL",
+    "engine": "edge-tts",
+    "description": "MaartenNeural Neural nl-NL"
+  },
+  {
+    "name": "en-AU-NatashaNeural",
+    "gender": "female",
+    "locale": "en-AU",
+    "engine": "edge-tts",
+    "description": "NatashaNeural Neural en-AU"
+  },
+  {
+    "name": "en-AU-WilliamNeural",
+    "gender": "male",
+    "locale": "en-AU",
+    "engine": "edge-tts",
+    "description": "WilliamNeural Neural en-AU"
+  },
+  {
+    "name": "en-CA-ClaraNeural",
+    "gender": "female",
+    "locale": "en-CA",
+    "engine": "edge-tts",
+    "description": "ClaraNeural Neural en-CA"
+  },
+  {
+    "name": "en-CA-LiamNeural",
+    "gender": "male",
+    "locale": "en-CA",
+    "engine": "edge-tts",
+    "description": "LiamNeural Neural en-CA"
+  },
+  {
+    "name": "en-HK-SamNeural",
+    "gender": "male",
+    "locale": "en-HK",
+    "engine": "edge-tts",
+    "description": "SamNeural Neural en-HK"
+  },
+  {
+    "name": "en-HK-YanNeural",
+    "gender": "female",
+    "locale": "en-HK",
+    "engine": "edge-tts",
+    "description": "YanNeural Neural en-HK"
+  },
+  {
+    "name": "en-IN-NeerjaNeural",
+    "gender": "female",
+    "locale": "en-IN",
+    "engine": "edge-tts",
+    "description": "NeerjaNeural Neural en-IN"
+  },
+  {
+    "name": "en-IN-PrabhatNeural",
+    "gender": "male",
+    "locale": "en-IN",
+    "engine": "edge-tts",
+    "description": "PrabhatNeural Neural en-IN"
+  },
+  {
+    "name": "en-IE-ConnorNeural",
+    "gender": "male",
+    "locale": "en-IE",
+    "engine": "edge-tts",
+    "description": "ConnorNeural Neural en-IE"
+  },
+  {
+    "name": "en-IE-EmilyNeural",
+    "gender": "female",
+    "locale": "en-IE",
+    "engine": "edge-tts",
+    "description": "EmilyNeural Neural en-IE"
+  },
+  {
+    "name": "en-KE-AsiliaNeural",
+    "gender": "female",
+    "locale": "en-KE",
+    "engine": "edge-tts",
+    "description": "AsiliaNeural Neural en-KE"
+  },
+  {
+    "name": "en-KE-ChilembaNeural",
+    "gender": "male",
+    "locale": "en-KE",
+    "engine": "edge-tts",
+    "description": "ChilembaNeural Neural en-KE"
+  },
+  {
+    "name": "en-NZ-MitchellNeural",
+    "gender": "male",
+    "locale": "en-NZ",
+    "engine": "edge-tts",
+    "description": "MitchellNeural Neural en-NZ"
+  },
+  {
+    "name": "en-NZ-MollyNeural",
+    "gender": "female",
+    "locale": "en-NZ",
+    "engine": "edge-tts",
+    "description": "MollyNeural Neural en-NZ"
+  },
+  {
+    "name": "en-NG-AbeoNeural",
+    "gender": "male",
+    "locale": "en-NG",
+    "engine": "edge-tts",
+    "description": "AbeoNeural Neural en-NG"
+  },
+  {
+    "name": "en-NG-EzinneNeural",
+    "gender": "female",
+    "locale": "en-NG",
+    "engine": "edge-tts",
+    "description": "EzinneNeural Neural en-NG"
+  },
+  {
+    "name": "en-PH-JamesNeural",
+    "gender": "male",
+    "locale": "en-PH",
+    "engine": "edge-tts",
+    "description": "JamesNeural Neural en-PH"
+  },
+  {
+    "name": "en-PH-RosaNeural",
+    "gender": "female",
+    "locale": "en-PH",
+    "engine": "edge-tts",
+    "description": "RosaNeural Neural en-PH"
+  },
+  {
+    "name": "en-SG-LunaNeural",
+    "gender": "female",
+    "locale": "en-SG",
+    "engine": "edge-tts",
+    "description": "LunaNeural Neural en-SG"
+  },
+  {
+    "name": "en-SG-WayneNeural",
+    "gender": "male",
+    "locale": "en-SG",
+    "engine": "edge-tts",
+    "description": "WayneNeural Neural en-SG"
+  },
+  {
+    "name": "en-ZA-LeahNeural",
+    "gender": "female",
+    "locale": "en-ZA",
+    "engine": "edge-tts",
+    "description": "LeahNeural Neural en-ZA"
+  },
+  {
+    "name": "en-ZA-LukeNeural",
+    "gender": "male",
+    "locale": "en-ZA",
+    "engine": "edge-tts",
+    "description": "LukeNeural Neural en-ZA"
+  },
+  {
+    "name": "en-TZ-ElimuNeural",
+    "gender": "male",
+    "locale": "en-TZ",
+    "engine": "edge-tts",
+    "description": "ElimuNeural Neural en-TZ"
+  },
+  {
+    "name": "en-TZ-ImaniNeural",
+    "gender": "female",
+    "locale": "en-TZ",
+    "engine": "edge-tts",
+    "description": "ImaniNeural Neural en-TZ"
+  },
+  {
+    "name": "en-GB-LibbyNeural",
+    "gender": "female",
+    "locale": "en-GB",
+    "engine": "edge-tts",
+    "description": "LibbyNeural Neural en-GB"
+  },
+  {
+    "name": "en-GB-MaisieNeural",
+    "gender": "female",
+    "locale": "en-GB",
+    "engine": "edge-tts",
+    "description": "MaisieNeural Neural en-GB"
+  },
+  {
+    "name": "en-GB-RyanNeural",
+    "gender": "male",
+    "locale": "en-GB",
+    "engine": "edge-tts",
+    "description": "RyanNeural Neural en-GB"
+  },
+  {
+    "name": "en-GB-SoniaNeural",
+    "gender": "female",
+    "locale": "en-GB",
+    "engine": "edge-tts",
+    "description": "SoniaNeural Neural en-GB"
+  },
+  {
+    "name": "en-GB-ThomasNeural",
+    "gender": "male",
+    "locale": "en-GB",
+    "engine": "edge-tts",
+    "description": "ThomasNeural Neural en-GB"
+  },
+  {
+    "name": "en-US-AriaNeural",
+    "gender": "female",
+    "locale": "en-US",
+    "engine": "edge-tts",
+    "description": "AriaNeural Neural en-US"
+  },
+  {
+    "name": "en-US-AnaNeural",
+    "gender": "female",
+    "locale": "en-US",
+    "engine": "edge-tts",
+    "description": "AnaNeural Neural en-US"
+  },
+  {
+    "name": "en-US-ChristopherNeural",
+    "gender": "male",
+    "locale": "en-US",
+    "engine": "edge-tts",
+    "description": "ChristopherNeural Neural en-US"
+  },
+  {
+    "name": "en-US-EricNeural",
+    "gender": "male",
+    "locale": "en-US",
+    "engine": "edge-tts",
+    "description": "EricNeural Neural en-US"
+  },
+  {
+    "name": "en-US-GuyNeural",
+    "gender": "male",
+    "locale": "en-US",
+    "engine": "edge-tts",
+    "description": "GuyNeural Neural en-US"
+  },
+  {
+    "name": "en-US-JennyNeural",
+    "gender": "female",
+    "locale": "en-US",
+    "engine": "edge-tts",
+    "description": "JennyNeural Neural en-US"
+  },
+  {
+    "name": "en-US-MichelleNeural",
+    "gender": "female",
+    "locale": "en-US",
+    "engine": "edge-tts",
+    "description": "MichelleNeural Neural en-US"
+  },
+  {
+    "name": "en-US-RogerNeural",
+    "gender": "male",
+    "locale": "en-US",
+    "engine": "edge-tts",
+    "description": "RogerNeural Neural en-US"
+  },
+  {
+    "name": "en-US-SteffanNeural",
+    "gender": "male",
+    "locale": "en-US",
+    "engine": "edge-tts",
+    "description": "SteffanNeural Neural en-US"
+  },
+  {
+    "name": "et-EE-AnuNeural",
+    "gender": "female",
+    "locale": "et-EE",
+    "engine": "edge-tts",
+    "description": "AnuNeural Neural et-EE"
+  },
+  {
+    "name": "et-EE-KertNeural",
+    "gender": "male",
+    "locale": "et-EE",
+    "engine": "edge-tts",
+    "description": "KertNeural Neural et-EE"
+  },
+  {
+    "name": "fil-PH-AngeloNeural",
+    "gender": "male",
+    "locale": "fil-PH",
+    "engine": "edge-tts",
+    "description": "AngeloNeural Neural fil-PH"
+  },
+  {
+    "name": "fil-PH-BlessicaNeural",
+    "gender": "female",
+    "locale": "fil-PH",
+    "engine": "edge-tts",
+    "description": "BlessicaNeural Neural fil-PH"
+  },
+  {
+    "name": "fi-FI-HarriNeural",
+    "gender": "male",
+    "locale": "fi-FI",
+    "engine": "edge-tts",
+    "description": "HarriNeural Neural fi-FI"
+  },
+  {
+    "name": "fi-FI-NooraNeural",
+    "gender": "female",
+    "locale": "fi-FI",
+    "engine": "edge-tts",
+    "description": "NooraNeural Neural fi-FI"
+  },
+  {
+    "name": "fr-BE-CharlineNeural",
+    "gender": "female",
+    "locale": "fr-BE",
+    "engine": "edge-tts",
+    "description": "CharlineNeural Neural fr-BE"
+  },
+  {
+    "name": "fr-BE-GerardNeural",
+    "gender": "male",
+    "locale": "fr-BE",
+    "engine": "edge-tts",
+    "description": "GerardNeural Neural fr-BE"
+  },
+  {
+    "name": "fr-CA-AntoineNeural",
+    "gender": "male",
+    "locale": "fr-CA",
+    "engine": "edge-tts",
+    "description": "AntoineNeural Neural fr-CA"
+  },
+  {
+    "name": "fr-CA-JeanNeural",
+    "gender": "male",
+    "locale": "fr-CA",
+    "engine": "edge-tts",
+    "description": "JeanNeural Neural fr-CA"
+  },
+  {
+    "name": "fr-CA-SylvieNeural",
+    "gender": "female",
+    "locale": "fr-CA",
+    "engine": "edge-tts",
+    "description": "SylvieNeural Neural fr-CA"
+  },
+  {
+    "name": "fr-FR-DeniseNeural",
+    "gender": "female",
+    "locale": "fr-FR",
+    "engine": "edge-tts",
+    "description": "DeniseNeural Neural fr-FR"
+  },
+  {
+    "name": "fr-FR-EloiseNeural",
+    "gender": "female",
+    "locale": "fr-FR",
+    "engine": "edge-tts",
+    "description": "EloiseNeural Neural fr-FR"
+  },
+  {
+    "name": "fr-FR-HenriNeural",
+    "gender": "male",
+    "locale": "fr-FR",
+    "engine": "edge-tts",
+    "description": "HenriNeural Neural fr-FR"
+  },
+  {
+    "name": "fr-CH-ArianeNeural",
+    "gender": "female",
+    "locale": "fr-CH",
+    "engine": "edge-tts",
+    "description": "ArianeNeural Neural fr-CH"
+  },
+  {
+    "name": "fr-CH-FabriceNeural",
+    "gender": "male",
+    "locale": "fr-CH",
+    "engine": "edge-tts",
+    "description": "FabriceNeural Neural fr-CH"
+  },
+  {
+    "name": "gl-ES-RoiNeural",
+    "gender": "male",
+    "locale": "gl-ES",
+    "engine": "edge-tts",
+    "description": "RoiNeural Neural gl-ES"
+  },
+  {
+    "name": "gl-ES-SabelaNeural",
+    "gender": "female",
+    "locale": "gl-ES",
+    "engine": "edge-tts",
+    "description": "SabelaNeural Neural gl-ES"
+  },
+  {
+    "name": "ka-GE-EkaNeural",
+    "gender": "female",
+    "locale": "ka-GE",
+    "engine": "edge-tts",
+    "description": "EkaNeural Neural ka-GE"
+  },
+  {
+    "name": "ka-GE-GiorgiNeural",
+    "gender": "male",
+    "locale": "ka-GE",
+    "engine": "edge-tts",
+    "description": "GiorgiNeural Neural ka-GE"
+  },
+  {
+    "name": "de-AT-IngridNeural",
+    "gender": "female",
+    "locale": "de-AT",
+    "engine": "edge-tts",
+    "description": "IngridNeural Neural de-AT"
+  },
+  {
+    "name": "de-AT-JonasNeural",
+    "gender": "male",
+    "locale": "de-AT",
+    "engine": "edge-tts",
+    "description": "JonasNeural Neural de-AT"
+  },
+  {
+    "name": "de-DE-AmalaNeural",
+    "gender": "female",
+    "locale": "de-DE",
+    "engine": "edge-tts",
+    "description": "AmalaNeural Neural de-DE"
+  },
+  {
+    "name": "de-DE-ConradNeural",
+    "gender": "male",
+    "locale": "de-DE",
+    "engine": "edge-tts",
+    "description": "ConradNeural Neural de-DE"
+  },
+  {
+    "name": "de-DE-KatjaNeural",
+    "gender": "female",
+    "locale": "de-DE",
+    "engine": "edge-tts",
+    "description": "KatjaNeural Neural de-DE"
+  },
+  {
+    "name": "de-DE-KillianNeural",
+    "gender": "male",
+    "locale": "de-DE",
+    "engine": "edge-tts",
+    "description": "KillianNeural Neural de-DE"
+  },
+  {
+    "name": "de-CH-JanNeural",
+    "gender": "male",
+    "locale": "de-CH",
+    "engine": "edge-tts",
+    "description": "JanNeural Neural de-CH"
+  },
+  {
+    "name": "de-CH-LeniNeural",
+    "gender": "female",
+    "locale": "de-CH",
+    "engine": "edge-tts",
+    "description": "LeniNeural Neural de-CH"
+  },
+  {
+    "name": "el-GR-AthinaNeural",
+    "gender": "female",
+    "locale": "el-GR",
+    "engine": "edge-tts",
+    "description": "AthinaNeural Neural el-GR"
+  },
+  {
+    "name": "el-GR-NestorasNeural",
+    "gender": "male",
+    "locale": "el-GR",
+    "engine": "edge-tts",
+    "description": "NestorasNeural Neural el-GR"
+  },
+  {
+    "name": "gu-IN-DhwaniNeural",
+    "gender": "female",
+    "locale": "gu-IN",
+    "engine": "edge-tts",
+    "description": "DhwaniNeural Neural gu-IN"
+  },
+  {
+    "name": "gu-IN-NiranjanNeural",
+    "gender": "male",
+    "locale": "gu-IN",
+    "engine": "edge-tts",
+    "description": "NiranjanNeural Neural gu-IN"
+  },
+  {
+    "name": "he-IL-AvriNeural",
+    "gender": "male",
+    "locale": "he-IL",
+    "engine": "edge-tts",
+    "description": "AvriNeural Neural he-IL"
+  },
+  {
+    "name": "he-IL-HilaNeural",
+    "gender": "female",
+    "locale": "he-IL",
+    "engine": "edge-tts",
+    "description": "HilaNeural Neural he-IL"
+  },
+  {
+    "name": "hi-IN-MadhurNeural",
+    "gender": "male",
+    "locale": "hi-IN",
+    "engine": "edge-tts",
+    "description": "MadhurNeural Neural hi-IN"
+  },
+  {
+    "name": "hi-IN-SwaraNeural",
+    "gender": "female",
+    "locale": "hi-IN",
+    "engine": "edge-tts",
+    "description": "SwaraNeural Neural hi-IN"
+  },
+  {
+    "name": "hu-HU-NoemiNeural",
+    "gender": "female",
+    "locale": "hu-HU",
+    "engine": "edge-tts",
+    "description": "NoemiNeural Neural hu-HU"
+  },
+  {
+    "name": "hu-HU-TamasNeural",
+    "gender": "male",
+    "locale": "hu-HU",
+    "engine": "edge-tts",
+    "description": "TamasNeural Neural hu-HU"
+  },
+  {
+    "name": "is-IS-GudrunNeural",
+    "gender": "female",
+    "locale": "is-IS",
+    "engine": "edge-tts",
+    "description": "GudrunNeural Neural is-IS"
+  },
+  {
+    "name": "is-IS-GunnarNeural",
+    "gender": "male",
+    "locale": "is-IS",
+    "engine": "edge-tts",
+    "description": "GunnarNeural Neural is-IS"
+  },
+  {
+    "name": "id-ID-ArdiNeural",
+    "gender": "male",
+    "locale": "id-ID",
+    "engine": "edge-tts",
+    "description": "ArdiNeural Neural id-ID"
+  },
+  {
+    "name": "id-ID-GadisNeural",
+    "gender": "female",
+    "locale": "id-ID",
+    "engine": "edge-tts",
+    "description": "GadisNeural Neural id-ID"
+  },
+  {
+    "name": "ga-IE-ColmNeural",
+    "gender": "male",
+    "locale": "ga-IE",
+    "engine": "edge-tts",
+    "description": "ColmNeural Neural ga-IE"
+  },
+  {
+    "name": "ga-IE-OrlaNeural",
+    "gender": "female",
+    "locale": "ga-IE",
+    "engine": "edge-tts",
+    "description": "OrlaNeural Neural ga-IE"
+  },
+  {
+    "name": "it-IT-DiegoNeural",
+    "gender": "male",
+    "locale": "it-IT",
+    "engine": "edge-tts",
+    "description": "DiegoNeural Neural it-IT"
+  },
+  {
+    "name": "it-IT-ElsaNeural",
+    "gender": "female",
+    "locale": "it-IT",
+    "engine": "edge-tts",
+    "description": "ElsaNeural Neural it-IT"
+  },
+  {
+    "name": "it-IT-IsabellaNeural",
+    "gender": "female",
+    "locale": "it-IT",
+    "engine": "edge-tts",
+    "description": "IsabellaNeural Neural it-IT"
+  },
+  {
+    "name": "ja-JP-KeitaNeural",
+    "gender": "male",
+    "locale": "ja-JP",
+    "engine": "edge-tts",
+    "description": "KeitaNeural Neural ja-JP"
+  },
+  {
+    "name": "ja-JP-NanamiNeural",
+    "gender": "female",
+    "locale": "ja-JP",
+    "engine": "edge-tts",
+    "description": "NanamiNeural Neural ja-JP"
+  },
+  {
+    "name": "jv-ID-DimasNeural",
+    "gender": "male",
+    "locale": "jv-ID",
+    "engine": "edge-tts",
+    "description": "DimasNeural Neural jv-ID"
+  },
+  {
+    "name": "jv-ID-SitiNeural",
+    "gender": "female",
+    "locale": "jv-ID",
+    "engine": "edge-tts",
+    "description": "SitiNeural Neural jv-ID"
+  },
+  {
+    "name": "kn-IN-GaganNeural",
+    "gender": "male",
+    "locale": "kn-IN",
+    "engine": "edge-tts",
+    "description": "GaganNeural Neural kn-IN"
+  },
+  {
+    "name": "kn-IN-SapnaNeural",
+    "gender": "female",
+    "locale": "kn-IN",
+    "engine": "edge-tts",
+    "description": "SapnaNeural Neural kn-IN"
+  },
+  {
+    "name": "kk-KZ-AigulNeural",
+    "gender": "female",
+    "locale": "kk-KZ",
+    "engine": "edge-tts",
+    "description": "AigulNeural Neural kk-KZ"
+  },
+  {
+    "name": "kk-KZ-DauletNeural",
+    "gender": "male",
+    "locale": "kk-KZ",
+    "engine": "edge-tts",
+    "description": "DauletNeural Neural kk-KZ"
+  },
+  {
+    "name": "km-KH-PisethNeural",
+    "gender": "male",
+    "locale": "km-KH",
+    "engine": "edge-tts",
+    "description": "PisethNeural Neural km-KH"
+  },
+  {
+    "name": "km-KH-SreymomNeural",
+    "gender": "female",
+    "locale": "km-KH",
+    "engine": "edge-tts",
+    "description": "SreymomNeural Neural km-KH"
+  },
+  {
+    "name": "ko-KR-InJoonNeural",
+    "gender": "male",
+    "locale": "ko-KR",
+    "engine": "edge-tts",
+    "description": "InJoonNeural Neural ko-KR"
+  },
+  {
+    "name": "ko-KR-SunHiNeural",
+    "gender": "female",
+    "locale": "ko-KR",
+    "engine": "edge-tts",
+    "description": "SunHiNeural Neural ko-KR"
+  },
+  {
+    "name": "lo-LA-ChanthavongNeural",
+    "gender": "male",
+    "locale": "lo-LA",
+    "engine": "edge-tts",
+    "description": "ChanthavongNeural Neural lo-LA"
+  },
+  {
+    "name": "lo-LA-KeomanyNeural",
+    "gender": "female",
+    "locale": "lo-LA",
+    "engine": "edge-tts",
+    "description": "KeomanyNeural Neural lo-LA"
+  },
+  {
+    "name": "lv-LV-EveritaNeural",
+    "gender": "female",
+    "locale": "lv-LV",
+    "engine": "edge-tts",
+    "description": "EveritaNeural Neural lv-LV"
+  },
+  {
+    "name": "lv-LV-NilsNeural",
+    "gender": "male",
+    "locale": "lv-LV",
+    "engine": "edge-tts",
+    "description": "NilsNeural Neural lv-LV"
+  },
+  {
+    "name": "lt-LT-LeonasNeural",
+    "gender": "male",
+    "locale": "lt-LT",
+    "engine": "edge-tts",
+    "description": "LeonasNeural Neural lt-LT"
+  },
+  {
+    "name": "lt-LT-OnaNeural",
+    "gender": "female",
+    "locale": "lt-LT",
+    "engine": "edge-tts",
+    "description": "OnaNeural Neural lt-LT"
+  },
+  {
+    "name": "mk-MK-AleksandarNeural",
+    "gender": "male",
+    "locale": "mk-MK",
+    "engine": "edge-tts",
+    "description": "AleksandarNeural Neural mk-MK"
+  },
+  {
+    "name": "mk-MK-MarijaNeural",
+    "gender": "female",
+    "locale": "mk-MK",
+    "engine": "edge-tts",
+    "description": "MarijaNeural Neural mk-MK"
+  },
+  {
+    "name": "ms-MY-OsmanNeural",
+    "gender": "male",
+    "locale": "ms-MY",
+    "engine": "edge-tts",
+    "description": "OsmanNeural Neural ms-MY"
+  },
+  {
+    "name": "ms-MY-YasminNeural",
+    "gender": "female",
+    "locale": "ms-MY",
+    "engine": "edge-tts",
+    "description": "YasminNeural Neural ms-MY"
+  },
+  {
+    "name": "ml-IN-MidhunNeural",
+    "gender": "male",
+    "locale": "ml-IN",
+    "engine": "edge-tts",
+    "description": "MidhunNeural Neural ml-IN"
+  },
+  {
+    "name": "ml-IN-SobhanaNeural",
+    "gender": "female",
+    "locale": "ml-IN",
+    "engine": "edge-tts",
+    "description": "SobhanaNeural Neural ml-IN"
+  },
+  {
+    "name": "mt-MT-GraceNeural",
+    "gender": "female",
+    "locale": "mt-MT",
+    "engine": "edge-tts",
+    "description": "GraceNeural Neural mt-MT"
+  },
+  {
+    "name": "mt-MT-JosephNeural",
+    "gender": "male",
+    "locale": "mt-MT",
+    "engine": "edge-tts",
+    "description": "JosephNeural Neural mt-MT"
+  },
+  {
+    "name": "mr-IN-AarohiNeural",
+    "gender": "female",
+    "locale": "mr-IN",
+    "engine": "edge-tts",
+    "description": "AarohiNeural Neural mr-IN"
+  },
+  {
+    "name": "mr-IN-ManoharNeural",
+    "gender": "male",
+    "locale": "mr-IN",
+    "engine": "edge-tts",
+    "description": "ManoharNeural Neural mr-IN"
+  },
+  {
+    "name": "mn-MN-BataaNeural",
+    "gender": "male",
+    "locale": "mn-MN",
+    "engine": "edge-tts",
+    "description": "BataaNeural Neural mn-MN"
+  },
+  {
+    "name": "mn-MN-YesuiNeural",
+    "gender": "female",
+    "locale": "mn-MN",
+    "engine": "edge-tts",
+    "description": "YesuiNeural Neural mn-MN"
+  },
+  {
+    "name": "ne-NP-HemkalaNeural",
+    "gender": "female",
+    "locale": "ne-NP",
+    "engine": "edge-tts",
+    "description": "HemkalaNeural Neural ne-NP"
+  },
+  {
+    "name": "ne-NP-SagarNeural",
+    "gender": "male",
+    "locale": "ne-NP",
+    "engine": "edge-tts",
+    "description": "SagarNeural Neural ne-NP"
+  },
+  {
+    "name": "nb-NO-FinnNeural",
+    "gender": "male",
+    "locale": "nb-NO",
+    "engine": "edge-tts",
+    "description": "FinnNeural Neural nb-NO"
+  },
+  {
+    "name": "nb-NO-PernilleNeural",
+    "gender": "female",
+    "locale": "nb-NO",
+    "engine": "edge-tts",
+    "description": "PernilleNeural Neural nb-NO"
+  },
+  {
+    "name": "ps-AF-GulNawazNeural",
+    "gender": "male",
+    "locale": "ps-AF",
+    "engine": "edge-tts",
+    "description": "GulNawazNeural Neural ps-AF"
+  },
+  {
+    "name": "ps-AF-LatifaNeural",
+    "gender": "female",
+    "locale": "ps-AF",
+    "engine": "edge-tts",
+    "description": "LatifaNeural Neural ps-AF"
+  },
+  {
+    "name": "fa-IR-DilaraNeural",
+    "gender": "female",
+    "locale": "fa-IR",
+    "engine": "edge-tts",
+    "description": "DilaraNeural Neural fa-IR"
+  },
+  {
+    "name": "fa-IR-FaridNeural",
+    "gender": "male",
+    "locale": "fa-IR",
+    "engine": "edge-tts",
+    "description": "FaridNeural Neural fa-IR"
+  },
+  {
+    "name": "pl-PL-MarekNeural",
+    "gender": "male",
+    "locale": "pl-PL",
+    "engine": "edge-tts",
+    "description": "MarekNeural Neural pl-PL"
+  },
+  {
+    "name": "pl-PL-ZofiaNeural",
+    "gender": "female",
+    "locale": "pl-PL",
+    "engine": "edge-tts",
+    "description": "ZofiaNeural Neural pl-PL"
+  },
+  {
+    "name": "pt-BR-AntonioNeural",
+    "gender": "male",
+    "locale": "pt-BR",
+    "engine": "edge-tts",
+    "description": "AntonioNeural Neural pt-BR"
+  },
+  {
+    "name": "pt-BR-FranciscaNeural",
+    "gender": "female",
+    "locale": "pt-BR",
+    "engine": "edge-tts",
+    "description": "FranciscaNeural Neural pt-BR"
+  },
+  {
+    "name": "pt-PT-DuarteNeural",
+    "gender": "male",
+    "locale": "pt-PT",
+    "engine": "edge-tts",
+    "description": "DuarteNeural Neural pt-PT"
+  },
+  {
+    "name": "pt-PT-RaquelNeural",
+    "gender": "female",
+    "locale": "pt-PT",
+    "engine": "edge-tts",
+    "description": "RaquelNeural Neural pt-PT"
+  },
+  {
+    "name": "ro-RO-AlinaNeural",
+    "gender": "female",
+    "locale": "ro-RO",
+    "engine": "edge-tts",
+    "description": "AlinaNeural Neural ro-RO"
+  },
+  {
+    "name": "ro-RO-EmilNeural",
+    "gender": "male",
+    "locale": "ro-RO",
+    "engine": "edge-tts",
+    "description": "EmilNeural Neural ro-RO"
+  },
+  {
+    "name": "ru-RU-DmitryNeural",
+    "gender": "male",
+    "locale": "ru-RU",
+    "engine": "edge-tts",
+    "description": "DmitryNeural Neural ru-RU"
+  },
+  {
+    "name": "ru-RU-SvetlanaNeural",
+    "gender": "female",
+    "locale": "ru-RU",
+    "engine": "edge-tts",
+    "description": "SvetlanaNeural Neural ru-RU"
+  },
+  {
+    "name": "sr-RS-NicholasNeural",
+    "gender": "male",
+    "locale": "sr-RS",
+    "engine": "edge-tts",
+    "description": "NicholasNeural Neural sr-RS"
+  },
+  {
+    "name": "sr-RS-SophieNeural",
+    "gender": "female",
+    "locale": "sr-RS",
+    "engine": "edge-tts",
+    "description": "SophieNeural Neural sr-RS"
+  },
+  {
+    "name": "si-LK-SameeraNeural",
+    "gender": "male",
+    "locale": "si-LK",
+    "engine": "edge-tts",
+    "description": "SameeraNeural Neural si-LK"
+  },
+  {
+    "name": "si-LK-ThiliniNeural",
+    "gender": "female",
+    "locale": "si-LK",
+    "engine": "edge-tts",
+    "description": "ThiliniNeural Neural si-LK"
+  },
+  {
+    "name": "sk-SK-LukasNeural",
+    "gender": "male",
+    "locale": "sk-SK",
+    "engine": "edge-tts",
+    "description": "LukasNeural Neural sk-SK"
+  },
+  {
+    "name": "sk-SK-ViktoriaNeural",
+    "gender": "female",
+    "locale": "sk-SK",
+    "engine": "edge-tts",
+    "description": "ViktoriaNeural Neural sk-SK"
+  },
+  {
+    "name": "sl-SI-PetraNeural",
+    "gender": "female",
+    "locale": "sl-SI",
+    "engine": "edge-tts",
+    "description": "PetraNeural Neural sl-SI"
+  },
+  {
+    "name": "sl-SI-RokNeural",
+    "gender": "male",
+    "locale": "sl-SI",
+    "engine": "edge-tts",
+    "description": "RokNeural Neural sl-SI"
+  },
+  {
+    "name": "so-SO-MuuseNeural",
+    "gender": "male",
+    "locale": "so-SO",
+    "engine": "edge-tts",
+    "description": "MuuseNeural Neural so-SO"
+  },
+  {
+    "name": "so-SO-UbaxNeural",
+    "gender": "female",
+    "locale": "so-SO",
+    "engine": "edge-tts",
+    "description": "UbaxNeural Neural so-SO"
+  },
+  {
+    "name": "es-AR-ElenaNeural",
+    "gender": "female",
+    "locale": "es-AR",
+    "engine": "edge-tts",
+    "description": "ElenaNeural Neural es-AR"
+  },
+  {
+    "name": "es-AR-TomasNeural",
+    "gender": "male",
+    "locale": "es-AR",
+    "engine": "edge-tts",
+    "description": "TomasNeural Neural es-AR"
+  },
+  {
+    "name": "es-BO-MarceloNeural",
+    "gender": "male",
+    "locale": "es-BO",
+    "engine": "edge-tts",
+    "description": "MarceloNeural Neural es-BO"
+  },
+  {
+    "name": "es-BO-SofiaNeural",
+    "gender": "female",
+    "locale": "es-BO",
+    "engine": "edge-tts",
+    "description": "SofiaNeural Neural es-BO"
+  },
+  {
+    "name": "es-CL-CatalinaNeural",
+    "gender": "female",
+    "locale": "es-CL",
+    "engine": "edge-tts",
+    "description": "CatalinaNeural Neural es-CL"
+  },
+  {
+    "name": "es-CL-LorenzoNeural",
+    "gender": "male",
+    "locale": "es-CL",
+    "engine": "edge-tts",
+    "description": "LorenzoNeural Neural es-CL"
+  },
+  {
+    "name": "es-CO-GonzaloNeural",
+    "gender": "male",
+    "locale": "es-CO",
+    "engine": "edge-tts",
+    "description": "GonzaloNeural Neural es-CO"
+  },
+  {
+    "name": "es-CO-SalomeNeural",
+    "gender": "female",
+    "locale": "es-CO",
+    "engine": "edge-tts",
+    "description": "SalomeNeural Neural es-CO"
+  },
+  {
+    "name": "es-CR-JuanNeural",
+    "gender": "male",
+    "locale": "es-CR",
+    "engine": "edge-tts",
+    "description": "JuanNeural Neural es-CR"
+  },
+  {
+    "name": "es-CR-MariaNeural",
+    "gender": "female",
+    "locale": "es-CR",
+    "engine": "edge-tts",
+    "description": "MariaNeural Neural es-CR"
+  },
+  {
+    "name": "es-CU-BelkysNeural",
+    "gender": "female",
+    "locale": "es-CU",
+    "engine": "edge-tts",
+    "description": "BelkysNeural Neural es-CU"
+  },
+  {
+    "name": "es-CU-ManuelNeural",
+    "gender": "male",
+    "locale": "es-CU",
+    "engine": "edge-tts",
+    "description": "ManuelNeural Neural es-CU"
+  },
+  {
+    "name": "es-DO-EmilioNeural",
+    "gender": "male",
+    "locale": "es-DO",
+    "engine": "edge-tts",
+    "description": "EmilioNeural Neural es-DO"
+  },
+  {
+    "name": "es-DO-RamonaNeural",
+    "gender": "female",
+    "locale": "es-DO",
+    "engine": "edge-tts",
+    "description": "RamonaNeural Neural es-DO"
+  },
+  {
+    "name": "es-EC-AndreaNeural",
+    "gender": "female",
+    "locale": "es-EC",
+    "engine": "edge-tts",
+    "description": "AndreaNeural Neural es-EC"
+  },
+  {
+    "name": "es-EC-LuisNeural",
+    "gender": "male",
+    "locale": "es-EC",
+    "engine": "edge-tts",
+    "description": "LuisNeural Neural es-EC"
+  },
+  {
+    "name": "es-SV-LorenaNeural",
+    "gender": "female",
+    "locale": "es-SV",
+    "engine": "edge-tts",
+    "description": "LorenaNeural Neural es-SV"
+  },
+  {
+    "name": "es-SV-RodrigoNeural",
+    "gender": "male",
+    "locale": "es-SV",
+    "engine": "edge-tts",
+    "description": "RodrigoNeural Neural es-SV"
+  },
+  {
+    "name": "es-GQ-JavierNeural",
+    "gender": "male",
+    "locale": "es-GQ",
+    "engine": "edge-tts",
+    "description": "JavierNeural Neural es-GQ"
+  },
+  {
+    "name": "es-GQ-TeresaNeural",
+    "gender": "female",
+    "locale": "es-GQ",
+    "engine": "edge-tts",
+    "description": "TeresaNeural Neural es-GQ"
+  },
+  {
+    "name": "es-GT-AndresNeural",
+    "gender": "male",
+    "locale": "es-GT",
+    "engine": "edge-tts",
+    "description": "AndresNeural Neural es-GT"
+  },
+  {
+    "name": "es-GT-MartaNeural",
+    "gender": "female",
+    "locale": "es-GT",
+    "engine": "edge-tts",
+    "description": "MartaNeural Neural es-GT"
+  },
+  {
+    "name": "es-HN-CarlosNeural",
+    "gender": "male",
+    "locale": "es-HN",
+    "engine": "edge-tts",
+    "description": "CarlosNeural Neural es-HN"
+  },
+  {
+    "name": "es-HN-KarlaNeural",
+    "gender": "female",
+    "locale": "es-HN",
+    "engine": "edge-tts",
+    "description": "KarlaNeural Neural es-HN"
+  },
+  {
+    "name": "es-MX-DaliaNeural",
+    "gender": "female",
+    "locale": "es-MX",
+    "engine": "edge-tts",
+    "description": "DaliaNeural Neural es-MX"
+  },
+  {
+    "name": "es-MX-JorgeNeural",
+    "gender": "male",
+    "locale": "es-MX",
+    "engine": "edge-tts",
+    "description": "JorgeNeural Neural es-MX"
+  },
+  {
+    "name": "es-MX-LorenzoEsCLNeural",
+    "gender": "male",
+    "locale": "es-MX",
+    "engine": "edge-tts",
+    "description": "LorenzoEsCLNeural Neural es-MX"
+  },
+  {
+    "name": "es-NI-FedericoNeural",
+    "gender": "male",
+    "locale": "es-NI",
+    "engine": "edge-tts",
+    "description": "FedericoNeural Neural es-NI"
+  },
+  {
+    "name": "es-NI-YolandaNeural",
+    "gender": "female",
+    "locale": "es-NI",
+    "engine": "edge-tts",
+    "description": "YolandaNeural Neural es-NI"
+  },
+  {
+    "name": "es-PA-MargaritaNeural",
+    "gender": "female",
+    "locale": "es-PA",
+    "engine": "edge-tts",
+    "description": "MargaritaNeural Neural es-PA"
+  },
+  {
+    "name": "es-PA-RobertoNeural",
+    "gender": "male",
+    "locale": "es-PA",
+    "engine": "edge-tts",
+    "description": "RobertoNeural Neural es-PA"
+  },
+  {
+    "name": "es-PY-MarioNeural",
+    "gender": "male",
+    "locale": "es-PY",
+    "engine": "edge-tts",
+    "description": "MarioNeural Neural es-PY"
+  },
+  {
+    "name": "es-PY-TaniaNeural",
+    "gender": "female",
+    "locale": "es-PY",
+    "engine": "edge-tts",
+    "description": "TaniaNeural Neural es-PY"
+  },
+  {
+    "name": "es-PE-AlexNeural",
+    "gender": "male",
+    "locale": "es-PE",
+    "engine": "edge-tts",
+    "description": "AlexNeural Neural es-PE"
+  },
+  {
+    "name": "es-PE-CamilaNeural",
+    "gender": "female",
+    "locale": "es-PE",
+    "engine": "edge-tts",
+    "description": "CamilaNeural Neural es-PE"
+  },
+  {
+    "name": "es-PR-KarinaNeural",
+    "gender": "female",
+    "locale": "es-PR",
+    "engine": "edge-tts",
+    "description": "KarinaNeural Neural es-PR"
+  },
+  {
+    "name": "es-PR-VictorNeural",
+    "gender": "male",
+    "locale": "es-PR",
+    "engine": "edge-tts",
+    "description": "VictorNeural Neural es-PR"
+  },
+  {
+    "name": "es-ES-AlvaroNeural",
+    "gender": "male",
+    "locale": "es-ES",
+    "engine": "edge-tts",
+    "description": "AlvaroNeural Neural es-ES"
+  },
+  {
+    "name": "es-ES-ElviraNeural",
+    "gender": "female",
+    "locale": "es-ES",
+    "engine": "edge-tts",
+    "description": "ElviraNeural Neural es-ES"
+  },
+  {
+    "name": "es-ES-ManuelEsCUNeural",
+    "gender": "male",
+    "locale": "es-ES",
+    "engine": "edge-tts",
+    "description": "ManuelEsCUNeural Neural es-ES"
+  },
+  {
+    "name": "es-US-AlonsoNeural",
+    "gender": "male",
+    "locale": "es-US",
+    "engine": "edge-tts",
+    "description": "AlonsoNeural Neural es-US"
+  },
+  {
+    "name": "es-US-PalomaNeural",
+    "gender": "female",
+    "locale": "es-US",
+    "engine": "edge-tts",
+    "description": "PalomaNeural Neural es-US"
+  },
+  {
+    "name": "es-UY-MateoNeural",
+    "gender": "male",
+    "locale": "es-UY",
+    "engine": "edge-tts",
+    "description": "MateoNeural Neural es-UY"
+  },
+  {
+    "name": "es-UY-ValentinaNeural",
+    "gender": "female",
+    "locale": "es-UY",
+    "engine": "edge-tts",
+    "description": "ValentinaNeural Neural es-UY"
+  },
+  {
+    "name": "es-VE-PaolaNeural",
+    "gender": "female",
+    "locale": "es-VE",
+    "engine": "edge-tts",
+    "description": "PaolaNeural Neural es-VE"
+  },
+  {
+    "name": "es-VE-SebastianNeural",
+    "gender": "male",
+    "locale": "es-VE",
+    "engine": "edge-tts",
+    "description": "SebastianNeural Neural es-VE"
+  },
+  {
+    "name": "su-ID-JajangNeural",
+    "gender": "male",
+    "locale": "su-ID",
+    "engine": "edge-tts",
+    "description": "JajangNeural Neural su-ID"
+  },
+  {
+    "name": "su-ID-TutiNeural",
+    "gender": "female",
+    "locale": "su-ID",
+    "engine": "edge-tts",
+    "description": "TutiNeural Neural su-ID"
+  },
+  {
+    "name": "sw-KE-RafikiNeural",
+    "gender": "male",
+    "locale": "sw-KE",
+    "engine": "edge-tts",
+    "description": "RafikiNeural Neural sw-KE"
+  },
+  {
+    "name": "sw-KE-ZuriNeural",
+    "gender": "female",
+    "locale": "sw-KE",
+    "engine": "edge-tts",
+    "description": "ZuriNeural Neural sw-KE"
+  },
+  {
+    "name": "sw-TZ-DaudiNeural",
+    "gender": "male",
+    "locale": "sw-TZ",
+    "engine": "edge-tts",
+    "description": "DaudiNeural Neural sw-TZ"
+  },
+  {
+    "name": "sw-TZ-RehemaNeural",
+    "gender": "female",
+    "locale": "sw-TZ",
+    "engine": "edge-tts",
+    "description": "RehemaNeural Neural sw-TZ"
+  },
+  {
+    "name": "sv-SE-MattiasNeural",
+    "gender": "male",
+    "locale": "sv-SE",
+    "engine": "edge-tts",
+    "description": "MattiasNeural Neural sv-SE"
+  },
+  {
+    "name": "sv-SE-SofieNeural",
+    "gender": "female",
+    "locale": "sv-SE",
+    "engine": "edge-tts",
+    "description": "SofieNeural Neural sv-SE"
+  },
+  {
+    "name": "ta-IN-PallaviNeural",
+    "gender": "female",
+    "locale": "ta-IN",
+    "engine": "edge-tts",
+    "description": "PallaviNeural Neural ta-IN"
+  },
+  {
+    "name": "ta-IN-ValluvarNeural",
+    "gender": "male",
+    "locale": "ta-IN",
+    "engine": "edge-tts",
+    "description": "ValluvarNeural Neural ta-IN"
+  },
+  {
+    "name": "ta-MY-KaniNeural",
+    "gender": "female",
+    "locale": "ta-MY",
+    "engine": "edge-tts",
+    "description": "KaniNeural Neural ta-MY"
+  },
+  {
+    "name": "ta-MY-SuryaNeural",
+    "gender": "male",
+    "locale": "ta-MY",
+    "engine": "edge-tts",
+    "description": "SuryaNeural Neural ta-MY"
+  },
+  {
+    "name": "ta-SG-AnbuNeural",
+    "gender": "male",
+    "locale": "ta-SG",
+    "engine": "edge-tts",
+    "description": "AnbuNeural Neural ta-SG"
+  },
+  {
+    "name": "ta-SG-VenbaNeural",
+    "gender": "female",
+    "locale": "ta-SG",
+    "engine": "edge-tts",
+    "description": "VenbaNeural Neural ta-SG"
+  },
+  {
+    "name": "ta-LK-KumarNeural",
+    "gender": "male",
+    "locale": "ta-LK",
+    "engine": "edge-tts",
+    "description": "KumarNeural Neural ta-LK"
+  },
+  {
+    "name": "ta-LK-SaranyaNeural",
+    "gender": "female",
+    "locale": "ta-LK",
+    "engine": "edge-tts",
+    "description": "SaranyaNeural Neural ta-LK"
+  },
+  {
+    "name": "te-IN-MohanNeural",
+    "gender": "male",
+    "locale": "te-IN",
+    "engine": "edge-tts",
+    "description": "MohanNeural Neural te-IN"
+  },
+  {
+    "name": "te-IN-ShrutiNeural",
+    "gender": "female",
+    "locale": "te-IN",
+    "engine": "edge-tts",
+    "description": "ShrutiNeural Neural te-IN"
+  },
+  {
+    "name": "th-TH-NiwatNeural",
+    "gender": "male",
+    "locale": "th-TH",
+    "engine": "edge-tts",
+    "description": "NiwatNeural Neural th-TH"
+  },
+  {
+    "name": "th-TH-PremwadeeNeural",
+    "gender": "female",
+    "locale": "th-TH",
+    "engine": "edge-tts",
+    "description": "PremwadeeNeural Neural th-TH"
+  },
+  {
+    "name": "tr-TR-AhmetNeural",
+    "gender": "male",
+    "locale": "tr-TR",
+    "engine": "edge-tts",
+    "description": "AhmetNeural Neural tr-TR"
+  },
+  {
+    "name": "tr-TR-EmelNeural",
+    "gender": "female",
+    "locale": "tr-TR",
+    "engine": "edge-tts",
+    "description": "EmelNeural Neural tr-TR"
+  },
+  {
+    "name": "uk-UA-OstapNeural",
+    "gender": "male",
+    "locale": "uk-UA",
+    "engine": "edge-tts",
+    "description": "OstapNeural Neural uk-UA"
+  },
+  {
+    "name": "uk-UA-PolinaNeural",
+    "gender": "female",
+    "locale": "uk-UA",
+    "engine": "edge-tts",
+    "description": "PolinaNeural Neural uk-UA"
+  },
+  {
+    "name": "ur-IN-GulNeural",
+    "gender": "female",
+    "locale": "ur-IN",
+    "engine": "edge-tts",
+    "description": "GulNeural Neural ur-IN"
+  },
+  {
+    "name": "ur-IN-SalmanNeural",
+    "gender": "male",
+    "locale": "ur-IN",
+    "engine": "edge-tts",
+    "description": "SalmanNeural Neural ur-IN"
+  },
+  {
+    "name": "ur-PK-AsadNeural",
+    "gender": "male",
+    "locale": "ur-PK",
+    "engine": "edge-tts",
+    "description": "AsadNeural Neural ur-PK"
+  },
+  {
+    "name": "ur-PK-UzmaNeural",
+    "gender": "female",
+    "locale": "ur-PK",
+    "engine": "edge-tts",
+    "description": "UzmaNeural Neural ur-PK"
+  },
+  {
+    "name": "uz-UZ-MadinaNeural",
+    "gender": "female",
+    "locale": "uz-UZ",
+    "engine": "edge-tts",
+    "description": "MadinaNeural Neural uz-UZ"
+  },
+  {
+    "name": "uz-UZ-SardorNeural",
+    "gender": "male",
+    "locale": "uz-UZ",
+    "engine": "edge-tts",
+    "description": "SardorNeural Neural uz-UZ"
+  },
+  {
+    "name": "vi-VN-HoaiMyNeural",
+    "gender": "female",
+    "locale": "vi-VN",
+    "engine": "edge-tts",
+    "description": "HoaiMyNeural Neural vi-VN"
+  },
+  {
+    "name": "vi-VN-NamMinhNeural",
+    "gender": "male",
+    "locale": "vi-VN",
+    "engine": "edge-tts",
+    "description": "NamMinhNeural Neural vi-VN"
+  },
+  {
+    "name": "cy-GB-AledNeural",
+    "gender": "male",
+    "locale": "cy-GB",
+    "engine": "edge-tts",
+    "description": "AledNeural Neural cy-GB"
+  },
+  {
+    "name": "cy-GB-NiaNeural",
+    "gender": "female",
+    "locale": "cy-GB",
+    "engine": "edge-tts",
+    "description": "NiaNeural Neural cy-GB"
+  },
+  {
+    "name": "zu-ZA-ThandoNeural",
+    "gender": "female",
+    "locale": "zu-ZA",
+    "engine": "edge-tts",
+    "description": "ThandoNeural Neural zu-ZA"
+  },
+  {
+    "name": "zu-ZA-ThembaNeural",
+    "gender": "male",
+    "locale": "zu-ZA",
+    "engine": "edge-tts",
+    "description": "ThembaNeural Neural zu-ZA"
+  }
+]

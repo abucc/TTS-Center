@@ -1,0 +1,434 @@
+[
+  {
+    "name": "af_heart",
+    "gender": "female",
+    "locale": "en-US",
+    "engine": "kokoro",
+    "description": "American Female - Heart (Grade A)",
+    "grade": "A"
+  },
+  {
+    "name": "af_alloy",
+    "gender": "female",
+    "locale": "en-US",
+    "engine": "kokoro",
+    "description": "American Female - Alloy (Grade C)",
+    "grade": "C"
+  },
+  {
+    "name": "af_aoede",
+    "gender": "female",
+    "locale": "en-US",
+    "engine": "kokoro",
+    "description": "American Female - Aoede (Grade C+)",
+    "grade": "C+"
+  },
+  {
+    "name": "af_bella",
+    "gender": "female",
+    "locale": "en-US",
+    "engine": "kokoro",
+    "description": "American Female - Bella (Grade A-)",
+    "grade": "A-"
+  },
+  {
+    "name": "af_jessica",
+    "gender": "female",
+    "locale": "en-US",
+    "engine": "kokoro",
+    "description": "American Female - Jessica (Grade D)",
+    "grade": "D"
+  },
+  {
+    "name": "af_kore",
+    "gender": "female",
+    "locale": "en-US",
+    "engine": "kokoro",
+    "description": "American Female - Kore (Grade C+)",
+    "grade": "C+"
+  },
+  {
+    "name": "af_nicole",
+    "gender": "female",
+    "locale": "en-US",
+    "engine": "kokoro",
+    "description": "American Female - Nicole (Grade B-)",
+    "grade": "B-"
+  },
+  {
+    "name": "af_nova",
+    "gender": "female",
+    "locale": "en-US",
+    "engine": "kokoro",
+    "description": "American Female - Nova (Grade C)",
+    "grade": "C"
+  },
+  {
+    "name": "af_river",
+    "gender": "female",
+    "locale": "en-US",
+    "engine": "kokoro",
+    "description": "American Female - River (Grade D)",
+    "grade": "D"
+  },
+  {
+    "name": "af_sarah",
+    "gender": "female",
+    "locale": "en-US",
+    "engine": "kokoro",
+    "description": "American Female - Sarah (Grade C+)",
+    "grade": "C+"
+  },
+  {
+    "name": "af_sky",
+    "gender": "female",
+    "locale": "en-US",
+    "engine": "kokoro",
+    "description": "American Female - Sky (Grade C-)",
+    "grade": "C-"
+  },
+  {
+    "name": "am_adam",
+    "gender": "male",
+    "locale": "en-US",
+    "engine": "kokoro",
+    "description": "American Male - Adam (Grade F+)",
+    "grade": "F+"
+  },
+  {
+    "name": "am_echo",
+    "gender": "male",
+    "locale": "en-US",
+    "engine": "kokoro",
+    "description": "American Male - Echo (Grade D)",
+    "grade": "D"
+  },
+  {
+    "name": "am_eric",
+    "gender": "male",
+    "locale": "en-US",
+    "engine": "kokoro",
+    "description": "American Male - Eric (Grade D)",
+    "grade": "D"
+  },
+  {
+    "name": "am_fenrir",
+    "gender": "male",
+    "locale": "en-US",
+    "engine": "kokoro",
+    "description": "American Male - Fenrir (Grade C+)",
+    "grade": "C+"
+  },
+  {
+    "name": "am_liam",
+    "gender": "male",
+    "locale": "en-US",
+    "engine": "kokoro",
+    "description": "American Male - Liam (Grade D)",
+    "grade": "D"
+  },
+  {
+    "name": "am_michael",
+    "gender": "male",
+    "locale": "en-US",
+    "engine": "kokoro",
+    "description": "American Male - Michael (Grade C+)",
+    "grade": "C+"
+  },
+  {
+    "name": "am_onyx",
+    "gender": "male",
+    "locale": "en-US",
+    "engine": "kokoro",
+    "description": "American Male - Onyx (Grade D)",
+    "grade": "D"
+  },
+  {
+    "name": "am_puck",
+    "gender": "male",
+    "locale": "en-US",
+    "engine": "kokoro",
+    "description": "American Male - Puck (Grade C+)",
+    "grade": "C+"
+  },
+  {
+    "name": "am_santa",
+    "gender": "male",
+    "locale": "en-US",
+    "engine": "kokoro",
+    "description": "American Male - Santa (Grade D-)",
+    "grade": "D-"
+  },
+  {
+    "name": "bf_alice",
+    "gender": "female",
+    "locale": "en-GB",
+    "engine": "kokoro",
+    "description": "British Female - Alice (Grade D)",
+    "grade": "D"
+  },
+  {
+    "name": "bf_emma",
+    "gender": "female",
+    "locale": "en-GB",
+    "engine": "kokoro",
+    "description": "British Female - Emma (Grade B-)",
+    "grade": "B-"
+  },
+  {
+    "name": "bf_isabella",
+    "gender": "female",
+    "locale": "en-GB",
+    "engine": "kokoro",
+    "description": "British Female - Isabella (Grade C)",
+    "grade": "C"
+  },
+  {
+    "name": "bf_lily",
+    "gender": "female",
+    "locale": "en-GB",
+    "engine": "kokoro",
+    "description": "British Female - Lily (Grade D)",
+    "grade": "D"
+  },
+  {
+    "name": "bm_daniel",
+    "gender": "male",
+    "locale": "en-GB",
+    "engine": "kokoro",
+    "description": "British Male - Daniel (Grade D)",
+    "grade": "D"
+  },
+  {
+    "name": "bm_fable",
+    "gender": "male",
+    "locale": "en-GB",
+    "engine": "kokoro",
+    "description": "British Male - Fable (Grade C)",
+    "grade": "C"
+  },
+  {
+    "name": "bm_george",
+    "gender": "male",
+    "locale": "en-GB",
+    "engine": "kokoro",
+    "description": "British Male - George (Grade C)",
+    "grade": "C"
+  },
+  {
+    "name": "bm_lewis",
+    "gender": "male",
+    "locale": "en-GB",
+    "engine": "kokoro",
+    "description": "British Male - Lewis (Grade D+)",
+    "grade": "D+"
+  },
+  {
+    "name": "jf_alpha",
+    "gender": "female",
+    "locale": "ja-JP",
+    "engine": "kokoro",
+    "description": "Japanese Female - Alpha (Grade C+)",
+    "grade": "C+"
+  },
+  {
+    "name": "jf_gongitsune",
+    "gender": "female",
+    "locale": "ja-JP",
+    "engine": "kokoro",
+    "description": "Japanese Female - Gongitsune (Grade C)",
+    "grade": "C"
+  },
+  {
+    "name": "jf_nezumi",
+    "gender": "female",
+    "locale": "ja-JP",
+    "engine": "kokoro",
+    "description": "Japanese Female - Nezumi (Grade C-)",
+    "grade": "C-"
+  },
+  {
+    "name": "jf_tebukuro",
+    "gender": "female",
+    "locale": "ja-JP",
+    "engine": "kokoro",
+    "description": "Japanese Female - Tebukuro (Grade C)",
+    "grade": "C"
+  },
+  {
+    "name": "jm_kumo",
+    "gender": "male",
+    "locale": "ja-JP",
+    "engine": "kokoro",
+    "description": "Japanese Male - Kumo (Grade C-)",
+    "grade": "C-"
+  },
+  {
+    "name": "zf_xiaobei",
+    "gender": "female",
+    "locale": "zh-CN",
+    "engine": "kokoro",
+    "description": "Mandarin Chinese Female - Xiaobei (Grade D)",
+    "grade": "D"
+  },
+  {
+    "name": "zf_xiaoni",
+    "gender": "female",
+    "locale": "zh-CN",
+    "engine": "kokoro",
+    "description": "Mandarin Chinese Female - Xiaoni (Grade D)",
+    "grade": "D"
+  },
+  {
+    "name": "zf_xiaoxiao",
+    "gender": "female",
+    "locale": "zh-CN",
+    "engine": "kokoro",
+    "description": "Mandarin Chinese Female - Xiaoxiao (Grade D)",
+    "grade": "D"
+  },
+  {
+    "name": "zf_xiaoyi",
+    "gender": "female",
+    "locale": "zh-CN",
+    "engine": "kokoro",
+    "description": "Mandarin Chinese Female - Xiaoyi (Grade D)",
+    "grade": "D"
+  },
+  {
+    "name": "zm_yunjian",
+    "gender": "male",
+    "locale": "zh-CN",
+    "engine": "kokoro",
+    "description": "Mandarin Chinese Male - Yunjian (Grade D)",
+    "grade": "D"
+  },
+  {
+    "name": "zm_yunxi",
+    "gender": "male",
+    "locale": "zh-CN",
+    "engine": "kokoro",
+    "description": "Mandarin Chinese Male - Yunxi (Grade D)",
+    "grade": "D"
+  },
+  {
+    "name": "zm_yunxia",
+    "gender": "male",
+    "locale": "zh-CN",
+    "engine": "kokoro",
+    "description": "Mandarin Chinese Male - Yunxia (Grade D)",
+    "grade": "D"
+  },
+  {
+    "name": "zm_yunyang",
+    "gender": "male",
+    "locale": "zh-CN",
+    "engine": "kokoro",
+    "description": "Mandarin Chinese Male - Yunyang (Grade D)",
+    "grade": "D"
+  },
+  {
+    "name": "ef_dora",
+    "gender": "female",
+    "locale": "es-ES",
+    "engine": "kokoro",
+    "description": "Spanish Female - Dora (Grade unknown)",
+    "grade": ""
+  },
+  {
+    "name": "em_alex",
+    "gender": "male",
+    "locale": "es-ES",
+    "engine": "kokoro",
+    "description": "Spanish Male - Alex (Grade unknown)",
+    "grade": ""
+  },
+  {
+    "name": "em_santa",
+    "gender": "male",
+    "locale": "es-ES",
+    "engine": "kokoro",
+    "description": "Spanish Male - Santa (Grade unknown)",
+    "grade": ""
+  },
+  {
+    "name": "ff_siwis",
+    "gender": "female",
+    "locale": "fr-FR",
+    "engine": "kokoro",
+    "description": "French Female - Siwis (Grade B-)",
+    "grade": "B-"
+  },
+  {
+    "name": "hf_alpha",
+    "gender": "female",
+    "locale": "hi-IN",
+    "engine": "kokoro",
+    "description": "Hindi Female - Alpha (Grade C)",
+    "grade": "C"
+  },
+  {
+    "name": "hf_beta",
+    "gender": "female",
+    "locale": "hi-IN",
+    "engine": "kokoro",
+    "description": "Hindi Female - Beta (Grade C)",
+    "grade": "C"
+  },
+  {
+    "name": "hm_omega",
+    "gender": "male",
+    "locale": "hi-IN",
+    "engine": "kokoro",
+    "description": "Hindi Male - Omega (Grade C)",
+    "grade": "C"
+  },
+  {
+    "name": "hm_psi",
+    "gender": "male",
+    "locale": "hi-IN",
+    "engine": "kokoro",
+    "description": "Hindi Male - Psi (Grade C)",
+    "grade": "C"
+  },
+  {
+    "name": "if_sara",
+    "gender": "female",
+    "locale": "it-IT",
+    "engine": "kokoro",
+    "description": "Italian Female - Sara (Grade C)",
+    "grade": "C"
+  },
+  {
+    "name": "im_nicola",
+    "gender": "male",
+    "locale": "it-IT",
+    "engine": "kokoro",
+    "description": "Italian Male - Nicola (Grade C)",
+    "grade": "C"
+  },
+  {
+    "name": "pf_dora",
+    "gender": "female",
+    "locale": "pt-BR",
+    "engine": "kokoro",
+    "description": "Brazilian Portuguese Female - Dora (Grade unknown)",
+    "grade": ""
+  },
+  {
+    "name": "pm_alex",
+    "gender": "male",
+    "locale": "pt-BR",
+    "engine": "kokoro",
+    "description": "Brazilian Portuguese Male - Alex (Grade unknown)",
+    "grade": ""
+  },
+  {
+    "name": "pm_santa",
+    "gender": "male",
+    "locale": "pt-BR",
+    "engine": "kokoro",
+    "description": "Brazilian Portuguese Male - Santa (Grade unknown)",
+    "grade": ""
+  }
+]

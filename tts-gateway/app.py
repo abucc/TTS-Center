@@ -1,0 +1,450 @@
+from fastapi import FastAPI, HTTPException, BackgroundTasks, UploadFile, File
+from fastapi.responses import StreamingResponse, HTMLResponse
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+from typing import Optional, Dict, Any, List
+import httpx
+import asyncio
+import os
+import json
+import logging
+from datetime import datetime
+import redis
+import hashlib
+import io
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+app = FastAPI(
+    title="Unified TTS Gateway",
+    description="Multi-provider TTS API Gateway",
+    version="1.0.0"
+)
+
+# CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Redis client for caching (optional)
+try:
+    redis_client = redis.Redis(host='redis', port=6379, decode_responses=True)
+    redis_client.ping()
+    REDIS_AVAILABLE = True
+    logger.info("Redis connection established")
+except:
+    REDIS_AVAILABLE = False
+    logger.warning("Redis not available, caching disabled")
+
+# Service URLs
+SERVICES = {
+    "kokoro": os.getenv("KOKORO_URL", "http://kokoro-onnx:8000"),
+    "chatterbox": os.getenv("CHATTERBOX_URL", "http://chatterbox-tts:8000"),
+    "edge": os.getenv("EDGE_TTS_URL", "http://openai-edge-tts:8000"),
+    "streamlabs": os.getenv("STREAMLABS_URL", "http://streamlabs-tts:8000")
+}
+
+# Pydantic models
+class TTSRequest(BaseModel):
+    text: str
+    voice: Optional[str] = None
+    provider: str = "kokoro"  # kokoro, chatterbox, edge, streamlabs
+    speed: Optional[float] = 1.0
+    pitch: Optional[float] = 1.0
+    format: Optional[str] = "wav"
+    cache: Optional[bool] = True
+
+class ServiceStatus(BaseModel):
+    service: str
+    status: str
+    latency: Optional[float] = None
+    error: Optional[str] = None
+
+class TTSResponse(BaseModel):
+    success: bool
+    provider: str
+    duration: Optional[float] = None
+    cached: Optional[bool] = False
+    audio_url: Optional[str] = None
+    error: Optional[str] = None
+
+# Health check endpoint
+@app.get("/health")
+async def health_check():
+    return {"status": "healthy", "timestamp": datetime.now().isoformat()}
+
+# Service status check
+@app.get("/status", response_model=List[ServiceStatus])
+async def check_services_status():
+    statuses = []
+    
+    async with httpx.AsyncClient(timeout=5.0) as client:
+        for service_name, service_url in SERVICES.items():
+            try:
+                start_time = asyncio.get_event_loop().time()
+                response = await client.get(f"{service_url}/health")
+                latency = (asyncio.get_event_loop().time() - start_time) * 1000
+                
+                if response.status_code == 200:
+                    statuses.append(ServiceStatus(
+                        service=service_name,
+                        status="healthy",
+                        latency=round(latency, 2)
+                    ))
+                else:
+                    statuses.append(ServiceStatus(
+                        service=service_name,
+                        status="unhealthy",
+                        error=f"HTTP {response.status_code}"
+                    ))
+            except Exception as e:
+                statuses.append(ServiceStatus(
+                    service=service_name,
+                    status="error",
+                    error=str(e)
+                ))
+    
+    return statuses
+
+# Get available voices for a provider
+@app.get("/voices/{provider}")
+async def get_voices(provider: str):
+    if provider not in SERVICES:
+        raise HTTPException(status_code=400, detail="Invalid provider")
+    
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            response = await client.get(f"{SERVICES[provider]}/voices")
+            return response.json()
+    except Exception as e:
+        raise HTTPException(status_code=503, detail=f"Service unavailable: {str(e)}")
+
+# Generate cache key
+def generate_cache_key(request: TTSRequest) -> str:
+    content = f"{request.provider}:{request.text}:{request.voice}:{request.speed}:{request.pitch}:{request.format}"
+    return hashlib.md5(content.encode()).hexdigest()
+
+# Main TTS endpoint
+@app.post("/tts", response_model=TTSResponse)
+async def text_to_speech(request: TTSRequest):
+    if request.provider not in SERVICES:
+        return TTSResponse(
+            success=False,
+            provider=request.provider,
+            error="Invalid provider"
+        )
+    
+    # Check cache first
+    cache_key = None
+    if request.cache and REDIS_AVAILABLE:
+        cache_key = generate_cache_key(request)
+        cached_result = redis_client.get(f"tts:{cache_key}")
+        if cached_result:
+            logger.info(f"Cache hit for key: {cache_key}")
+            return TTSResponse(
+                success=True,
+                provider=request.provider,
+                cached=True,
+                audio_url=f"/audio/{cache_key}"
+            )
+    
+    start_time = asyncio.get_event_loop().time()
+    
+    try:
+        # Prepare request for specific provider
+        provider_request = await prepare_provider_request(request)
+        
+        # Make request to provider
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            response = await client.post(
+                f"{SERVICES[request.provider]}/tts",
+                json=provider_request
+            )
+            
+            if response.status_code != 200:
+                return TTSResponse(
+                    success=False,
+                    provider=request.provider,
+                    error=f"Provider error: HTTP {response.status_code}"
+                )
+            
+            # Handle response based on content type
+            if response.headers.get("content-type", "").startswith("audio/"):
+                # Direct audio response
+                audio_data = response.content
+                
+                # Cache the audio data
+                if cache_key and REDIS_AVAILABLE:
+                    redis_client.setex(f"audio:{cache_key}", 3600, audio_data)  # 1 hour cache
+                
+                duration = (asyncio.get_event_loop().time() - start_time) * 1000
+                
+                return TTSResponse(
+                    success=True,
+                    provider=request.provider,
+                    duration=round(duration, 2),
+                    audio_url=f"/audio/{cache_key}" if cache_key else None
+                )
+            else:
+                # JSON response with audio URL or data
+                result = response.json()
+                duration = (asyncio.get_event_loop().time() - start_time) * 1000
+                
+                return TTSResponse(
+                    success=True,
+                    provider=request.provider,
+                    duration=round(duration, 2),
+                    **result
+                )
+                
+    except Exception as e:
+        logger.error(f"TTS request failed: {str(e)}")
+        return TTSResponse(
+            success=False,
+            provider=request.provider,
+            error=str(e)
+        )
+
+# Prepare provider-specific request
+async def prepare_provider_request(request: TTSRequest) -> dict:
+    base_request = {
+        "text": request.text,
+        "speed": request.speed,
+        "format": request.format
+    }
+    
+    if request.provider == "kokoro":
+        if request.voice:
+            base_request["voice"] = request.voice
+        return base_request
+    
+    elif request.provider == "chatterbox":
+        if request.voice:
+            base_request["voice"] = request.voice
+        base_request["pitch"] = request.pitch
+        return base_request
+    
+    elif request.provider == "edge":
+        if request.voice:
+            base_request["voice"] = request.voice
+        base_request["rate"] = request.speed
+        base_request["pitch"] = request.pitch
+        return base_request
+    
+    elif request.provider == "streamlabs":
+        if request.voice:
+            base_request["voice"] = request.voice
+        return base_request
+    
+    return base_request
+
+# Serve cached audio files
+@app.get("/audio/{audio_id}")
+async def get_audio(audio_id: str):
+    if not REDIS_AVAILABLE:
+        raise HTTPException(status_code=404, detail="Audio not found")
+    
+    audio_data = redis_client.get(f"audio:{audio_id}")
+    if not audio_data:
+        raise HTTPException(status_code=404, detail="Audio not found or expired")
+    
+    # Convert string back to bytes if needed
+    if isinstance(audio_data, str):
+        audio_data = audio_data.encode('latin-1')
+    
+    return StreamingResponse(
+        io.BytesIO(audio_data),
+        media_type="audio/wav",
+        headers={"Content-Disposition": f"attachment; filename={audio_id}.wav"}
+    )
+
+# Web interface
+@app.get("/", response_class=HTMLResponse)
+async def web_interface():
+    return """
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>TTS Gateway</title>
+        <style>
+            body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+            .container { background: #f5f5f5; padding: 20px; border-radius: 10px; margin: 20px 0; }
+            .form-group { margin: 15px 0; }
+            label { display: inline-block; width: 100px; font-weight: bold; }
+            input, select, textarea { width: 300px; padding: 8px; }
+            textarea { height: 100px; }
+            button { padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
+            button:hover { background: #0056b3; }
+            .status { margin: 10px 0; padding: 10px; border-radius: 5px; }
+            .success { background: #d4edda; color: #155724; }
+            .error { background: #f8d7da; color: #721c24; }
+            .audio { margin: 20px 0; }
+        </style>
+    </head>
+    <body>
+        <h1>🎤 Unified TTS Gateway</h1>
+        
+        <div class="container">
+            <h2>Text-to-Speech</h2>
+            <form id="ttsForm">
+                <div class="form-group">
+                    <label>Provider:</label>
+                    <select id="provider" onchange="updateVoices()">
+                        <option value="kokoro">Kokoro ONNX</option>
+                        <option value="chatterbox">Chatterbox TTS</option>
+                        <option value="edge">Edge TTS</option>
+                        <option value="streamlabs">Streamlabs TTS</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Voice:</label>
+                    <select id="voice">
+                        <option value="">Default</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Text:</label>
+                    <textarea id="text" placeholder="Enter text to synthesize...">Hello, this is a test of the unified TTS gateway!</textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label>Speed:</label>
+                    <input type="range" id="speed" min="0.5" max="2.0" step="0.1" value="1.0">
+                    <span id="speedValue">1.0</span>
+                </div>
+                
+                <div class="form-group">
+                    <label>Pitch:</label>
+                    <input type="range" id="pitch" min="0.5" max="2.0" step="0.1" value="1.0">
+                    <span id="pitchValue">1.0</span>
+                </div>
+                
+                <button type="submit">Generate Speech</button>
+            </form>
+            
+            <div id="status"></div>
+            <div id="audioResult"></div>
+        </div>
+        
+        <div class="container">
+            <h2>Service Status</h2>
+            <button onclick="checkStatus()">Check Status</button>
+            <div id="serviceStatus"></div>
+        </div>
+
+        <script>
+            // Update speed/pitch display
+            document.getElementById('speed').oninput = function() {
+                document.getElementById('speedValue').textContent = this.value;
+            };
+            document.getElementById('pitch').oninput = function() {
+                document.getElementById('pitchValue').textContent = this.value;
+            };
+
+            // Update voices when provider changes
+            async function updateVoices() {
+                const provider = document.getElementById('provider').value;
+                const voiceSelect = document.getElementById('voice');
+                
+                try {
+                    const response = await fetch(`/voices/${provider}`);
+                    const voices = await response.json();
+                    
+                    voiceSelect.innerHTML = '<option value="">Default</option>';
+                    voices.forEach(voice => {
+                        const option = document.createElement('option');
+                        option.value = voice.name || voice;
+                        option.textContent = voice.display_name || voice;
+                        voiceSelect.appendChild(option);
+                    });
+                } catch (error) {
+                    console.error('Error loading voices:', error);
+                }
+            }
+
+            // Handle form submission
+            document.getElementById('ttsForm').onsubmit = async function(e) {
+                e.preventDefault();
+                
+                const button = document.querySelector('button[type="submit"]');
+                button.disabled = true;
+                button.textContent = 'Generating...';
+                
+                const formData = {
+                    text: document.getElementById('text').value,
+                    provider: document.getElementById('provider').value,
+                    voice: document.getElementById('voice').value,
+                    speed: parseFloat(document.getElementById('speed').value),
+                    pitch: parseFloat(document.getElementById('pitch').value),
+                    format: 'wav'
+                };
+                
+                try {
+                    const response = await fetch('/tts', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify(formData)
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        document.getElementById('status').innerHTML = 
+                            `<div class="status success">✅ Generated in ${result.duration}ms ${result.cached ? '(cached)' : ''}</div>`;
+                        
+                        if (result.audio_url) {
+                            document.getElementById('audioResult').innerHTML = 
+                                `<div class="audio"><audio controls src="${result.audio_url}"></audio></div>`;
+                        }
+                    } else {
+                        document.getElementById('status').innerHTML = 
+                            `<div class="status error">❌ Error: ${result.error}</div>`;
+                    }
+                } catch (error) {
+                    document.getElementById('status').innerHTML = 
+                        `<div class="status error">❌ Request failed: ${error.message}</div>`;
+                }
+                
+                button.disabled = false;
+                button.textContent = 'Generate Speech';
+            };
+
+            // Check service status
+            async function checkStatus() {
+                try {
+                    const response = await fetch('/status');
+                    const statuses = await response.json();
+                    
+                    let html = '<div style="margin-top: 15px;">';
+                    statuses.forEach(status => {
+                        const emoji = status.status === 'healthy' ? '✅' : '❌';
+                        const latency = status.latency ? ` (${status.latency}ms)` : '';
+                        html += `<div>${emoji} ${status.service}: ${status.status}${latency}</div>`;
+                    });
+                    html += '</div>';
+                    
+                    document.getElementById('serviceStatus').innerHTML = html;
+                } catch (error) {
+                    document.getElementById('serviceStatus').innerHTML = 
+                        `<div class="status error">Failed to check status: ${error.message}</div>`;
+                }
+            }
+
+            // Load voices on page load
+            updateVoices();
+        </script>
+    </body>
+    </html>
+    """
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
