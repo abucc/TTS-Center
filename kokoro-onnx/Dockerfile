@@ -6,10 +6,10 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y \
     curl \
     wget \
-    espeak \
-    espeak-data \
-    libespeak1 \
-    libespeak-dev \
+    espeak-ng \
+    espeak-ng-data \
+    libespeak-ng1 \
+    libespeak-ng-dev \
     festival \
     festvox-kallpc16k \
     && rm -rf /var/lib/apt/lists/*
