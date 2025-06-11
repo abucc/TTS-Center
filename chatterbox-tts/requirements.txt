@@ -1,68 +1,20 @@
 # ============================================================================
-# CHATTERBOX TTS SERVER - REQUIREMENTS (CPU-ONLY INSTALLATION)
+# CHATTERBOX TTS SERVER - REQUIREMENTS (SIMPLIFIED)
 # ============================================================================
-# Simplified requirements with pinned versions to avoid dependency resolution issues
+# Let chatterbox-tts handle its own dependencies to avoid conflicts
 
 # --- PyTorch CPU-Only Installation Index ---
 --extra-index-url https://download.pytorch.org/whl/cpu
 
-# --- Deep Learning Framework (CPU-Only) ---
-torch==2.6.0+cpu
-torchvision==0.21.0+cpu
-torchaudio==2.6.0+cpu
-
-# --- Core TTS Application ---
+# --- Core TTS Application (handles its own dependencies) ---
 git+https://github.com/resemble-ai/chatterbox.git
 
-# --- Web Framework & Server (Pinned versions) ---
-fastapi==0.115.0
-uvicorn==0.32.0
-starlette==0.41.0
-pydantic==2.10.0
-pydantic-core==2.27.0
+# --- Web Framework & Server (only if not provided by chatterbox) ---
+fastapi
+uvicorn[standard]
 
-# --- Scientific Computing & ML Libraries ---
-numpy==1.26.4
-librosa==0.11.0
-safetensors==0.4.5
-soundfile==0.12.1
-
-# --- ONNX Runtime (ensure precompiled wheel is used) ---
-onnx==1.16.2
-onnxruntime==1.19.2
-
-# --- Audio I/O & Processing ---
-pydub==0.25.1
-audiotsm==0.1.2
-praat-parselmouth==0.4.3
-
-# --- Web & API Utilities ---
-python-multipart==0.0.12
-requests==2.32.3
-Jinja2==3.1.4
-aiofiles==24.1.0
-
-# --- Configuration & Data Processing ---
-PyYAML==6.0.2
-watchdog==6.0.0
-unidecode==1.3.8
-inflect==7.4.0
-tqdm==4.66.6
-
-# --- Additional Dependencies ---
-typing-extensions==4.12.2
-annotated-types==0.7.0
-anyio==4.6.2
-sniffio==1.3.1
-idna==3.10
-certifi==2024.8.30
-charset-normalizer==3.4.0
-urllib3==2.2.3
-click==8.1.7
-h11==0.14.0
-
-# --- Audio codec dependency ---
-descript-audio-codec
-
-# --- HuggingFace transfer speedup ---
-hf_transfer
+# --- Additional utilities not included in chatterbox ---
+python-multipart
+aiofiles
+PyYAML
+watchdog
