@@ -28,6 +28,10 @@ librosa                         # Advanced audio/music analysis
 safetensors                     # Safe tensor serialization format
 descript-audio-codec            # Audio codec for ML applications
 
+# --- ONNX Runtime (ensure precompiled wheel is used) ---
+onnx>=1.15.0,<2.0.0            # Pin to version with precompiled wheels
+onnxruntime>=1.16.0,<2.0.0     # ONNX Runtime for inference
+
 # --- Audio I/O & Processing ---
 soundfile                       # Audio file I/O (requires libsndfile system library)
 pydub                          # Simple audio manipulation
