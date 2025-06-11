@@ -2,16 +2,10 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# Install system dependencies
+# Install system dependencies including curl for health checks
 RUN apt-get update && apt-get install -y \
     curl \
-    wget \
-    espeak-ng \
-    espeak-ng-data \
-    libespeak-ng1 \
-    libespeak-ng-dev \
-    festival \
-    festvox-kallpc16k \
+    git \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python dependencies
@@ -21,11 +15,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy application code
 COPY . .
 
-# Create directories for models and cache
-RUN mkdir -p /app/models /app/cache
-
-# Download models if they don't exist
-RUN python download_models.py
+# Create models directory
+RUN mkdir -p /app/models
 
 EXPOSE 8000
 

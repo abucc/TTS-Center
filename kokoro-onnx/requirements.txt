@@ -1,9 +1,7 @@
-fastapi==0.104.1
-uvicorn[standard]==0.24.0
-kokoro-onnx==0.4.9
-soundfile==0.12.1
-numpy>=1.21.0
-pydantic>=2.0.0
-httpx>=0.24.0
-python-multipart>=0.0.6
-phonemizer-fork>=0.3.3
+# Kokoro ONNX TTS Requirements (from isaacgounton/kokoro-onnx)
+kokoro-onnx
+fastapi
+uvicorn[standard]
+soundfile
+pydantic
+requests

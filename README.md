@@ -8,7 +8,7 @@ A unified Text-to-Speech gateway that combines multiple TTS providers into a sin
 
 ## 🌟 Features
 
-- **5 TTS Providers** in one unified interface
+- **3 High-Quality TTS Providers** in one unified interface
 - **Web Interface** for easy testing and demos
 - **REST API** with consistent endpoints
 - **Redis Caching** for improved performance
@@ -21,10 +21,8 @@ A unified Text-to-Speech gateway that combines multiple TTS providers into a sin
 | Provider | Type | Features | Quality |
 |----------|------|----------|---------|
 | **Kokoro ONNX** | Neural TTS | Multi-language, High Quality | ⭐⭐⭐⭐⭐ |
-| **ChatterboxTTS** | Cloud API | Streamlabs/Polly Backend | ⭐⭐⭐⭐ |
-| **OpenAI Edge TTS** | Hybrid | OpenAI-compatible API | ⭐⭐⭐⭐ |
-| **Edge TTS** | Microsoft | Built-in Windows voices | ⭐⭐⭐ |
-| **Streamlabs TTS** | Cloud API | Popular streaming voices | ⭐⭐⭐ |
+| **ChatterboxTTS** | Neural TTS | CPU-optimized, Fast Generation | ⭐⭐⭐⭐ |
+| **OpenAI Edge TTS** | Edge TTS | OpenAI API Compatible, Free | ⭐⭐⭐⭐ |
 
 ## 🚀 Quick Start
 
@@ -67,8 +65,8 @@ curl -X POST http://localhost/tts \
   -H "Content-Type: application/json" \
   -d '{
     "text": "Hello, this is Awesome-TTS!",
-    "provider": "kokoro",
-    "voice": "af_heart",
+    "provider": "openai-edge-tts",
+    "voice": "en-US-AvaNeural",
     "speed": 1.0,
     "format": "wav"
   }' \
@@ -81,8 +79,8 @@ import requests
 
 response = requests.post('http://localhost/tts', json={
     "text": "Hello world!",
-    "provider": "edge",
-    "voice": "alloy",
+    "provider": "openai-edge-tts",
+    "voice": "en-US-EmmaNeural",
     "speed": 1.2
 })
 
@@ -101,7 +99,7 @@ if result['success']:
 ## 🎛️ Web Interface
 
 The web interface provides:
-- **Provider Selection** - Switch between all 5 TTS services
+- **Provider Selection** - Switch between both TTS services
 - **Voice Selection** - Dynamic voice loading per provider
 - **Speed/Pitch Controls** - Adjust voice parameters
 - **Real-time Status** - Monitor service health
@@ -111,10 +109,9 @@ The web interface provides:
 
 ```
 Internet → Nginx (SSL) → TTS Gateway → Individual TTS Services
-                                     ├── Kokoro ONNX (8001)
-                                     ├── ChatterboxTTS (8002)  
-                                     ├── OpenAI Edge TTS (8003)
-                                     ├── Streamlabs TTS (8004)
+                                     ├── Kokoro ONNX (8000)
+                                     ├── ChatterboxTTS (8000)
+                                     ├── OpenAI Edge TTS (5050)
                                      └── Redis (Cache)
 ```
 
@@ -127,22 +124,10 @@ Internet → Nginx (SSL) → TTS Gateway → Individual TTS Services
 - Automatic model downloading
 
 ### ChatterboxTTS  
-- **Streamlabs/Polly** backend
-- Popular **streaming voices**
+- **CPU-optimized** neural TTS
 - Fast generation times
-- Cloud-based processing
-
-### OpenAI Edge TTS
-- **OpenAI-compatible** API endpoints
-- Edge TTS backend for reliability
-- Supports `/v1/audio/speech` endpoint
+- Lightweight and efficient
 - Multiple voice options
-
-### Streamlabs TTS
-- Direct **Streamlabs API** integration  
-- **AWS Polly** voices
-- Streaming-optimized
-- High reliability
 
 ## 🔧 Configuration
 
@@ -151,17 +136,13 @@ Internet → Nginx (SSL) → TTS Gateway → Individual TTS Services
 environment:
   - KOKORO_URL=http://kokoro-onnx:8000
   - CHATTERBOX_URL=http://chatterbox-tts:8000
-  - EDGE_TTS_URL=http://openai-edge-tts:8000
-  - STREAMLABS_URL=http://streamlabs-tts:8000
+  - OPENAI_EDGE_TTS_URL=http://openai-edge-tts:5050
   - CORS_ORIGINS=*
 ```
 
 ### Custom Voices
 Edit voice configurations in the `voices/` directory:
 - `kokoro_voices.json` - Kokoro voice definitions
-- `edge_tts_voices.json` - Edge TTS voices  
-- `openai_edge_tts_voices.json` - OpenAI-style voices
-- `streamlabs_voices.json` - Streamlabs voices
 
 ## 🔒 Production Deployment
 
@@ -194,10 +175,9 @@ curl http://localhost/health
 curl http://localhost/status
 
 # Individual service health
-curl http://localhost:8001/health  # Kokoro
-curl http://localhost:8002/health  # Chatterbox
-curl http://localhost:8003/health  # OpenAI Edge
-curl http://localhost:8004/health  # Streamlabs
+curl http://localhost:8000/health  # Kokoro  
+curl http://localhost:8000/health  # Chatterbox
+curl http://localhost:5050/v1/models  # OpenAI Edge TTS
 ```
 
 ### Resource Monitoring
@@ -243,10 +223,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🙏 Acknowledgments
 
-- [Kokoro ONNX](https://github.com/thewh1teagle/kokoro-onnx) - High-quality neural TTS
-- [ChatterboxTTS](https://github.com/devnen/Chatterbox-TTS-Server) - Streamlabs TTS server
+- [Kokoro ONNX](https://github.com/isaacgounton/kokoro-onnx) - High-quality neural TTS
+- [ChatterboxTTS](https://github.com/isaacgounton/Chatterbox-TTS-Server) - Efficient CPU-based TTS  
 - [OpenAI Edge TTS](https://github.com/isaacgounton/openai-edge-tts) - OpenAI-compatible Edge TTS
-- [Edge TTS](https://github.com/rany2/edge-tts) - Microsoft Edge TTS
 - [FastAPI](https://fastapi.tiangolo.com/) - Modern web framework
 - [Docker](https://www.docker.com/) - Containerization platform
 

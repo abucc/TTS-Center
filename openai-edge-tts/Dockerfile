@@ -1,28 +1,19 @@
-FROM python:3.11-slim
+FROM python:3.12-slim
 
+ARG INSTALL_FFMPEG=false
 WORKDIR /app
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    curl \
-    wget \
-    ffmpeg \
-    && rm -rf /var/lib/apt/lists/*
+# Install ffmpeg conditionally
+RUN if [ "$INSTALL_FFMPEG" = "true" ]; then \
+    apt-get update && apt-get install -y ffmpeg && rm -rf /var/lib/apt/lists/*; \
+    fi
 
-# Install Python dependencies
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# Copy requirements and install them
+COPY requirements.txt /app
+RUN pip install -r requirements.txt
 
-# Copy application code
-COPY . .
+# Copy the app directory
+COPY app/ /app
 
-# Create directories for cache
-RUN mkdir -p /app/cache
-
-EXPOSE 8000
-
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:8000/health || exit 1
-
-CMD ["python", "app.py"]
+# Command to run the server
+CMD ["python", "/app/server.py"]

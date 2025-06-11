@@ -1,10 +1,50 @@
-fastapi==0.104.1
-uvicorn[standard]==0.24.0
-pydantic>=2.0.0
-httpx>=0.24.0
-python-multipart>=0.0.6
-torch>=2.0.0
-torchaudio>=2.0.0
-numpy>=1.21.0
-soundfile>=0.12.1
-requests>=2.28.0
+# ============================================================================
+# CHATTERBOX TTS SERVER - REQUIREMENTS (CPU-ONLY INSTALLATION)
+# ============================================================================
+# Based on isaacgounton/Chatterbox-TTS-Server CPU-only installation
+
+# --- PyTorch CPU-Only Installation Index ---
+--extra-index-url https://download.pytorch.org/whl/cpu
+
+# --- Deep Learning Framework (CPU-Only) ---
+torch==2.6.0+cpu
+torchvision==0.21.0+cpu
+torchaudio==2.6.0+cpu
+
+# --- Core TTS Application ---
+# Chatterbox TTS engine - installed directly from GitHub
+git+https://github.com/resemble-ai/chatterbox.git
+
+# --- Web Framework & Server ---
+fastapi
+uvicorn[standard]
+
+# --- Scientific Computing & ML Libraries ---
+numpy==1.26.4
+librosa
+safetensors
+descript-audio-codec
+
+# --- Audio I/O & Processing ---
+soundfile
+pydub
+audiotsm
+praat-parselmouth
+
+# --- Web & API Utilities ---
+python-multipart
+requests
+Jinja2
+aiofiles
+hf_transfer
+
+# --- Configuration & Data Processing ---
+PyYAML
+watchdog
+unidecode
+inflect
+tqdm
+
+# --- Core Dependencies ---
+pydantic
+typing-extensions

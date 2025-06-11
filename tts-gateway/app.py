@@ -46,15 +46,14 @@ except:
 SERVICES = {
     "kokoro": os.getenv("KOKORO_URL", "http://kokoro-onnx:8000"),
     "chatterbox": os.getenv("CHATTERBOX_URL", "http://chatterbox-tts:8000"),
-    "edge": os.getenv("EDGE_TTS_URL", "http://openai-edge-tts:8000"),
-    "streamlabs": os.getenv("STREAMLABS_URL", "http://streamlabs-tts:8000")
+    "openai-edge-tts": os.getenv("OPENAI_EDGE_TTS_URL", "http://openai-edge-tts:5050")
 }
 
 # Pydantic models
 class TTSRequest(BaseModel):
     text: str
     voice: Optional[str] = None
-    provider: str = "kokoro"  # kokoro, chatterbox, edge, streamlabs
+    provider: str = "kokoro"  # kokoro, chatterbox, openai-edge-tts
     speed: Optional[float] = 1.0
     pitch: Optional[float] = 1.0
     format: Optional[str] = "wav"
@@ -162,10 +161,20 @@ async def text_to_speech(request: TTSRequest):
         
         # Make request to provider
         async with httpx.AsyncClient(timeout=30.0) as client:
-            response = await client.post(
-                f"{SERVICES[request.provider]}/tts",
-                json=provider_request
-            )
+            # Different endpoints for different providers
+            if request.provider == "openai-edge-tts":
+                endpoint = f"{SERVICES[request.provider]}/v1/audio/speech"
+                headers = {"Authorization": "Bearer your_api_key_here"}
+                response = await client.post(
+                    endpoint,
+                    json=provider_request,
+                    headers=headers
+                )
+            else:
+                response = await client.post(
+                    f"{SERVICES[request.provider]}/tts",
+                    json=provider_request
+                )
             
             if response.status_code != 200:
                 return TTSResponse(
@@ -230,17 +239,15 @@ async def prepare_provider_request(request: TTSRequest) -> dict:
         base_request["pitch"] = request.pitch
         return base_request
     
-    elif request.provider == "edge":
-        if request.voice:
-            base_request["voice"] = request.voice
-        base_request["rate"] = request.speed
-        base_request["pitch"] = request.pitch
-        return base_request
-    
-    elif request.provider == "streamlabs":
-        if request.voice:
-            base_request["voice"] = request.voice
-        return base_request
+    elif request.provider == "openai-edge-tts":
+        # OpenAI Edge TTS expects different format
+        openai_request = {
+            "input": request.text,
+            "voice": request.voice or "en-US-AvaNeural",
+            "response_format": "mp3" if request.format == "mp3" else "wav",
+            "speed": request.speed
+        }
+        return openai_request
     
     return base_request
 
@@ -298,8 +305,7 @@ async def web_interface():
                     <select id="provider" onchange="updateVoices()">
                         <option value="kokoro">Kokoro ONNX</option>
                         <option value="chatterbox">Chatterbox TTS</option>
-                        <option value="edge">Edge TTS</option>
-                        <option value="streamlabs">Streamlabs TTS</option>
+                        <option value="openai-edge-tts">OpenAI Edge TTS</option>
                     </select>
                 </div>
                 

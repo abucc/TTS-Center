@@ -1,46 +1,57 @@
+#!/usr/bin/env python3
+"""
+Model downloader for Kokoro ONNX TTS
+Downloads the required model files if they don't exist
+"""
+
 import os
 import urllib.request
 import logging
+from pathlib import Path
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-def download_file(url, filepath):
+MODEL_URLS = {
+    "kokoro-v1.0.onnx": "https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/kokoro-v1.0.onnx",
+    "voices-v1.0.bin": "https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/voices-v1.0.bin"
+}
+
+def download_file(url: str, filepath: Path) -> bool:
     """Download a file from URL to filepath"""
     try:
         logger.info(f"Downloading {url} to {filepath}")
         urllib.request.urlretrieve(url, filepath)
         logger.info(f"Successfully downloaded {filepath}")
+        return True
     except Exception as e:
         logger.error(f"Failed to download {url}: {e}")
-        raise
+        return False
 
-def main():
-    model_dir = "/app/models"
-    os.makedirs(model_dir, exist_ok=True)
+def download_models(model_path: str = "/app/models") -> bool:
+    """Download all required model files"""
+    model_dir = Path(model_path)
+    model_dir.mkdir(parents=True, exist_ok=True)
     
-    # Model URLs from Kokoro ONNX releases
-    model_urls = {
-        "kokoro-v1.0.onnx": "https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/kokoro-v1.0.onnx",
-        "voices-v1.0.bin": "https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/voices-v1.0.bin"
-    }
-    
-    for filename, url in model_urls.items():
-        filepath = os.path.join(model_dir, filename)
+    success = True
+    for filename, url in MODEL_URLS.items():
+        filepath = model_dir / filename
         
-        # Skip if file already exists and is not empty
-        if os.path.exists(filepath) and os.path.getsize(filepath) > 0:
-            logger.info(f"Model file {filename} already exists, skipping download")
+        if filepath.exists():
+            logger.info(f"Model file {filepath} already exists, skipping download")
             continue
             
-        try:
-            download_file(url, filepath)
-        except Exception as e:
-            logger.error(f"Failed to download {filename}: {e}")
-            # Continue with other downloads
-            continue
+        if not download_file(url, filepath):
+            success = False
     
-    logger.info("Model download process completed")
+    return success
 
 if __name__ == "__main__":
-    main()
+    model_path = os.getenv("MODEL_PATH", "/app/models")
+    success = download_models(model_path)
+    
+    if success:
+        logger.info("All models downloaded successfully")
+    else:
+        logger.error("Some models failed to download")
+        exit(1)

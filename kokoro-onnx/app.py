@@ -1,8 +1,8 @@
-from fastapi import FastAPI, HTTPException, BackgroundTasks
+from fastapi import FastAPI, HTTPException
 from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from typing import Optional, List, Dict, Any
+from typing import Optional, List
 import io
 import json
 import logging
@@ -10,6 +10,7 @@ import os
 import soundfile as sf
 import numpy as np
 from kokoro_onnx import Kokoro
+from kokoro_onnx.tokenizer import Tokenizer
 import asyncio
 
 # Configure logging
@@ -31,8 +32,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Global TTS model
+# Global TTS model and tokenizer
 tts_model = None
+tokenizer = None
 
 # Pydantic models
 class TTSRequest(BaseModel):
@@ -41,6 +43,7 @@ class TTSRequest(BaseModel):
     speed: Optional[float] = 1.0
     pitch: Optional[float] = 1.0
     format: Optional[str] = "wav"
+    language: Optional[str] = "en-us"
 
 class VoiceInfo(BaseModel):
     name: str
@@ -55,41 +58,9 @@ class TTSResponse(BaseModel):
     message: Optional[str] = None
     audio_length: Optional[float] = None
 
-# Load voices configuration
-def load_voices() -> List[VoiceInfo]:
-    voices_path = "/app/voices/kokoro_voices.json"
-    if not os.path.exists(voices_path):
-        # Fallback to a basic voice list
-        return [
-            VoiceInfo(
-                name="af_heart",
-                gender="female",
-                locale="en-US",
-                engine="kokoro",
-                description="American Female - Heart (Grade A)",
-                grade="A"
-            ),
-            VoiceInfo(
-                name="am_michael",
-                gender="male",
-                locale="en-US",
-                engine="kokoro",
-                description="American Male - Michael (Grade C+)",
-                grade="C+"
-            )
-        ]
-    
-    try:
-        with open(voices_path, 'r') as f:
-            voices_data = json.load(f)
-        return [VoiceInfo(**voice) for voice in voices_data]
-    except Exception as e:
-        logger.error(f"Error loading voices: {e}")
-        return []
-
 # Initialize TTS model
 async def initialize_model():
-    global tts_model
+    global tts_model, tokenizer
     try:
         model_path = os.getenv("MODEL_PATH", "/app/models")
         
@@ -98,17 +69,17 @@ async def initialize_model():
         voices_file = os.path.join(model_path, "voices-v1.0.bin")
         
         if not os.path.exists(model_file) or not os.path.exists(voices_file):
-            logger.warning("Model files not found, downloading...")
-            # Download will be handled by download_models.py
+            logger.warning("Model files not found, using default paths...")
+            model_file = "kokoro-v1.0.onnx"
+            voices_file = "voices-v1.0.bin"
             
-        tts_model = Kokoro(
-            model_path=model_file,
-            voices_path=voices_file
-        )
-        logger.info("Kokoro TTS model initialized successfully")
+        tts_model = Kokoro(model_file, voices_file)
+        tokenizer = Tokenizer()
+        logger.info("Kokoro TTS model and tokenizer initialized successfully")
     except Exception as e:
         logger.error(f"Failed to initialize TTS model: {e}")
         tts_model = None
+        tokenizer = None
 
 @app.on_event("startup")
 async def startup_event():
@@ -125,28 +96,55 @@ async def health_check():
 
 @app.get("/voices", response_model=List[VoiceInfo])
 async def get_voices():
-    return load_voices()
-
-@app.post("/tts")
-async def text_to_speech(request: TTSRequest):
     if tts_model is None:
         raise HTTPException(status_code=503, detail="TTS model not initialized")
     
     try:
+        voice_names = tts_model.get_voices()
+        voices = []
+        for voice in voice_names:
+            # Extract basic info from voice name
+            gender = "female" if "f_" in voice or voice.startswith("af_") else "male"
+            locale = "en-US"  # Default locale for Kokoro voices
+            
+            voices.append(VoiceInfo(
+                name=voice,
+                gender=gender,
+                locale=locale,
+                engine="kokoro",
+                description=f"Kokoro voice: {voice}",
+                grade="A"
+            ))
+        
+        return voices
+    except Exception as e:
+        logger.error(f"Error getting voices: {e}")
+        raise HTTPException(status_code=500, detail="Failed to get available voices")
+
+@app.post("/tts")
+async def text_to_speech(request: TTSRequest):
+    if tts_model is None or tokenizer is None:
+        raise HTTPException(status_code=503, detail="TTS model not initialized")
+    
+    try:
+        # Phonemize the text
+        phonemes = tokenizer.phonemize(request.text, lang=request.language)
+        
         # Generate speech
-        audio = tts_model.create(
-            text=request.text,
+        samples, sample_rate = tts_model.create(
+            phonemes,
             voice=request.voice,
-            speed=request.speed
+            speed=request.speed,
+            is_phonemes=True
         )
         
         # Convert to wav format
         buffer = io.BytesIO()
-        sf.write(buffer, audio, 22050, format='WAV')
+        sf.write(buffer, samples, sample_rate, format='WAV')
         buffer.seek(0)
         
         # Calculate audio length
-        audio_length = len(audio) / 22050  # Sample rate is 22050
+        audio_length = len(samples) / sample_rate
         
         return StreamingResponse(
             io.BytesIO(buffer.getvalue()),
