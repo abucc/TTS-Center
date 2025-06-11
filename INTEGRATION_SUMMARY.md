@@ -16,14 +16,18 @@
 
 ### 3. Chatterbox TTS Server (isaacgounton/Chatterbox-TTS-Server)
 - **Repository**: https://github.com/isaacgounton/Chatterbox-TTS-Server.git
-- **Installation**: CPU-only installation as specified
-- **Features**: Advanced TTS with voice cloning and large text handling
-- **Implementation**: 
-  ```bash
-  pip install --upgrade pip
-  pip install -r requirements.txt
-  ```
-- **Status**: ✅ Updated and integrated
+- **Installation**: CPU-only installation (GPU components removed)
+- **Features**: 
+  - Complete Web UI with modern interface
+  - Voice cloning with reference audio upload
+  - Predefined voices management
+  - Large text processing with intelligent chunking
+  - Audiobook generation capabilities
+  - Advanced generation parameters (temperature, CFG weight, seed)
+  - Configuration management via YAML
+  - Audio post-processing options
+- **Implementation**: Full server with all advanced features
+- **Status**: ✅ Full implementation integrated (CPU-only)
 
 ## Service Architecture
 

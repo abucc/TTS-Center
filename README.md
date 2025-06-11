@@ -21,7 +21,7 @@ A unified Text-to-Speech gateway that combines multiple TTS providers into a sin
 | Provider | Type | Features | Quality |
 |----------|------|----------|---------|
 | **Kokoro ONNX** | Neural TTS | Multi-language, High Quality | ⭐⭐⭐⭐⭐ |
-| **ChatterboxTTS** | Neural TTS | CPU-optimized, Fast Generation | ⭐⭐⭐⭐ |
+| **Chatterbox TTS** | Neural TTS | Voice Cloning, Web UI, Advanced Features | ⭐⭐⭐⭐⭐ |
 | **OpenAI Edge TTS** | Edge TTS | OpenAI API Compatible, Free | ⭐⭐⭐⭐ |
 
 ## 🚀 Quick Start

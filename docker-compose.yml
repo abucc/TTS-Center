@@ -32,11 +32,17 @@ services:
       dockerfile: Dockerfile
     restart: unless-stopped
     environment:
-      - MODELS_DIR=/app/models
-      - CACHE_DIR=/app/cache
+      - HF_HOME=/app/hf_cache
+      - TRANSFORMERS_CACHE=/app/hf_cache
+      - HF_HUB_CACHE=/app/hf_cache
     volumes:
-      - ./models/chatterbox:/app/models
+      - ./models/chatterbox:/app/model_cache
       - ./cache:/app/cache
+      - chatterbox_hf_cache:/app/hf_cache
+      - ./chatterbox-tts/voices:/app/voices
+      - ./chatterbox-tts/reference_audio:/app/reference_audio
+      - ./chatterbox-tts/outputs:/app/outputs
+      - ./chatterbox-tts/logs:/app/logs
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s
@@ -110,6 +116,9 @@ services:
           memory: 1G
         reservations:
           memory: 512M
+
+volumes:
+  chatterbox_hf_cache:
 
 networks:
   default:
