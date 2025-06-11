@@ -19,8 +19,8 @@ torchaudio==2.6.0               # Audio processing utilities for PyTorch
 git+https://github.com/resemble-ai/chatterbox.git
 
 # --- Web Framework & Server ---
-fastapi                         # Modern async web framework
-uvicorn[standard]               # ASGI server with performance extras
+fastapi>=0.104.0                # Modern async web framework
+uvicorn>=0.24.0                 # ASGI server with performance extras
 
 # --- Scientific Computing & ML Libraries ---
 numpy==1.26.4                   # Fundamental numerical computing
