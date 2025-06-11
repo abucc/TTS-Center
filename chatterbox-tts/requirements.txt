@@ -11,6 +11,10 @@ torch==2.6.0                    # PyTorch deep learning framework (CPU)
 torchvision==0.21.0             # Computer vision utilities for PyTorch
 torchaudio==2.6.0               # Audio processing utilities for PyTorch
 
+# --- ONNX Runtime (ensure precompiled wheel is used) ---
+onnx>=1.15.0,<2.0.0            # Pin to version with precompiled wheels
+onnxruntime>=1.16.0,<2.0.0     # ONNX Runtime for inference
+
 # --- Core TTS Application ---
 # Chatterbox TTS engine - installed directly from GitHub
 git+https://github.com/resemble-ai/chatterbox.git

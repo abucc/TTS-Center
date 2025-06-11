@@ -8,9 +8,10 @@ ENV HF_HOME=/app/hf_cache
 
 WORKDIR /app
 
-# Install system dependencies
+# Install system dependencies including CMake for ONNX compilation
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
+    cmake \
     libsndfile1 \
     ffmpeg \
     python3-dev \
@@ -22,8 +23,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Copy requirements first to leverage Docker cache
 COPY requirements.txt .
 
-# Upgrade pip and install Python dependencies
+# Upgrade pip and install ONNX first to ensure precompiled wheels are used
 RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir "onnx>=1.15.0,<2.0.0" "onnxruntime>=1.16.0,<2.0.0" && \
     pip install --no-cache-dir -r requirements.txt
 
 # Copy the rest of the application code
