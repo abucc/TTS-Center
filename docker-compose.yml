@@ -99,7 +99,7 @@ services:
       dockerfile: Dockerfile
     restart: unless-stopped
     ports:
-      - "8000:8000"
+      - "9000:8000"
     environment:
       - KOKORO_URL=http://kokoro-onnx:8000
       - CHATTERBOX_URL=http://chatterbox-tts:8000
