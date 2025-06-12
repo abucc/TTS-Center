@@ -18,8 +18,8 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 app = FastAPI(
-    title="Unified TTS Gateway",
-    description="Multi-provider TTS API Gateway",
+    title="Awesome TTS",
+    description="Multi-provider TTS API Gateway with Advanced Features",
     version="1.0.0"
 )
 
@@ -295,7 +295,7 @@ async def web_interface():
         </style>
     </head>
     <body>
-        <h1>🎤 Unified TTS Gateway</h1>
+        <h1>🎤 Awesome TTS</h1>
         
         <div class="container">
             <h2>Text-to-Speech</h2>
@@ -408,7 +408,18 @@ async def web_interface():
                         
                         if (result.audio_url) {
                             document.getElementById('audioResult').innerHTML = 
-                                `<div class="audio"><audio controls src="${result.audio_url}"></audio></div>`;
+                                `<div class="audio">
+                                    <audio controls src="${result.audio_url}"></audio>
+                                    <br><br>
+                                    <a href="${result.audio_url}" download="speech.wav" style="background: #28a745; color: white; padding: 8px 16px; text-decoration: none; border-radius: 5px;">📥 Download Audio</a>
+                                </div>`;
+                        } else {
+                            // Handle direct audio response
+                            document.getElementById('audioResult').innerHTML = 
+                                `<div class="audio">
+                                    <p>✅ Audio generated successfully!</p>
+                                    <button onclick="downloadLatestAudio()" style="background: #28a745; color: white; padding: 8px 16px; border: none; border-radius: 5px;">📥 Download Audio</button>
+                                </div>`;
                         }
                     } else {
                         document.getElementById('status').innerHTML = 

@@ -27,8 +27,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy application code
 COPY . .
 
-# Create models directory
-RUN mkdir -p /app/models
+# Create models directory and download required voices file
+RUN mkdir -p /app/models && \
+    curl -L -o /app/voices-v1.0.bin https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/voices-v1.0.bin
 
 EXPOSE 8000
 

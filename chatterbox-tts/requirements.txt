@@ -18,3 +18,10 @@ python-multipart
 aiofiles
 PyYAML
 watchdog
+pydub
+soundfile
+tqdm
+inflect
+unidecode
+Jinja2
+requests

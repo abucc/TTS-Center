@@ -7,6 +7,8 @@ services:
       context: ./kokoro-onnx
       dockerfile: Dockerfile
     restart: unless-stopped
+    ports:
+      - "8001:8000"
     environment:
       - MODEL_PATH=/app/models
       - MAX_WORKERS=4
@@ -31,6 +33,8 @@ services:
       context: ./chatterbox-tts
       dockerfile: Dockerfile
     restart: unless-stopped
+    ports:
+      - "8002:8000"
     environment:
       - HF_HOME=/app/hf_cache
       - TRANSFORMERS_CACHE=/app/hf_cache
@@ -63,6 +67,8 @@ services:
       context: ./openai-edge-tts
       dockerfile: Dockerfile
     restart: unless-stopped
+    ports:
+      - "5050:5050"
     environment:
       - API_KEY=your_api_key_here
       - PORT=5050
