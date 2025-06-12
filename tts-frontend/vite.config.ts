@@ -6,12 +6,27 @@ export default defineConfig({
   plugins: [react()],
   server: {
     host: true,
-    port: 3000,
+    port: 3003,
     proxy: {
-      '/api': {
-        target: 'http://tts-gateway:8000',
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, '')
+      '/voices': {
+        target: 'http://tts-gateway:9000',
+        changeOrigin: true
+      },
+      '/tts': {
+        target: 'http://tts-gateway:9000',
+        changeOrigin: true
+      },
+      '/status': {
+        target: 'http://tts-gateway:9000',
+        changeOrigin: true
+      },
+      '/audio': {
+        target: 'http://tts-gateway:9000',
+        changeOrigin: true
+      },
+      '/play': {
+        target: 'http://tts-gateway:9000',
+        changeOrigin: true
       }
     }
   },

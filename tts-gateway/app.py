@@ -68,10 +68,10 @@ else:
     REDIS_AVAILABLE = False
     logger.info("Redis caching disabled via environment variable")
 
-# Service URLs
+# Service URLs with correct default ports
 SERVICES = {
-    "kokoro": os.getenv("KOKORO_URL", "http://kokoro-onnx:8000"),
-    "chatterbox": os.getenv("CHATTERBOX_URL", "http://chatterbox-tts:8000"),
+    "kokoro": os.getenv("KOKORO_URL", "http://kokoro-onnx:9002"),
+    "chatterbox": os.getenv("CHATTERBOX_URL", "http://chatterbox-tts:9001"),
     "openai-edge-tts": os.getenv("OPENAI_EDGE_TTS_URL", "http://openai-edge-tts:5050")
 }
 
@@ -182,6 +182,7 @@ async def debug_info():
 # Service status check
 @app.get("/status", response_model=List[ServiceStatus])
 async def check_services_status():
+    logger.info("Received request to check services status")
     statuses = []
     
     async with httpx.AsyncClient(timeout=5.0) as client:
@@ -192,12 +193,14 @@ async def check_services_status():
                 latency = (asyncio.get_event_loop().time() - start_time) * 1000
                 
                 if response.status_code == 200:
+                    logger.info(f"Service {service_name} is healthy with latency {round(latency, 2)}ms")
                     statuses.append(ServiceStatus(
                         service=service_name,
                         status="healthy",
                         latency=round(latency, 2)
                     ))
                 else:
+                    logger.warning(f"Service {service_name} is unhealthy - status code: {response.status_code}")
                     statuses.append(ServiceStatus(
                         service=service_name,
                         status="unhealthy",
@@ -215,8 +218,12 @@ async def check_services_status():
 # Get available voices for a provider
 @app.get("/voices/{provider}")
 async def get_voices(provider: str):
+    logger.info(f"Received voice request for provider: {provider}")
     if provider not in SERVICES:
+        logger.error(f"Invalid provider requested: {provider}")
         raise HTTPException(status_code=400, detail="Invalid provider")
+    
+    logger.info(f"Using service URL: {SERVICES[provider]}")
     
     headers = {}
     if provider == "openai-edge-tts":
@@ -227,6 +234,7 @@ async def get_voices(provider: str):
             
     try:
         async with httpx.AsyncClient(timeout=10.0) as client:
+            logger.info(f"Making request to {SERVICES[provider]}/voices")
             if provider == "openai-edge-tts":
                 # Fetch voices from the openai-edge-tts service
                 response = await client.get(f"{SERVICES[provider]}/voices", headers=headers) # Pass headers
@@ -239,9 +247,13 @@ async def get_voices(provider: str):
                 response = await client.get(f"{SERVICES[provider]}/voices")
                 response.raise_for_status() # Raise an exception for bad status codes
                 result = response.json()
+                # Add debug logging
+                logger.info(f"Raw response from chatterbox: {result}")
                 # Chatterbox now returns: List[Dict{"name": "filename.wav", "display_name": "Filename"}]
                 if isinstance(result, list):
-                    return [{"name": voice.get("name"), "display_name": voice.get("display_name", voice.get("name", "").split('.')[0])} for voice in result if voice.get("name")]
+                    voice_list = [{"name": voice.get("name"), "display_name": voice.get("display_name", voice.get("name", "").split('.')[0])} for voice in result if voice.get("name")]
+                    logger.info(f"Processed voice list for chatterbox: {voice_list}")
+                    return voice_list
                 logger.warning(f"Unexpected voice format from chatterbox: {result}")
                 return []
             

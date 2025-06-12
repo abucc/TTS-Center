@@ -109,15 +109,36 @@ const App: React.FC = () => {
 
   const checkServiceStatus = async () => {
     try {
+      console.log('Checking service status...');
       const response = await fetch('/status');
+      console.log('Status response:', response.status);
+      
       if (response.ok) {
         const statuses: ServiceStatus[] = await response.json();
+        console.log('Received statuses:', statuses);
         setServiceStatuses(statuses);
+      } else {
+        console.error('Status check failed:', await response.text());
+        setServiceStatuses([{
+          service: 'gateway',
+          status: 'error',
+          error: `HTTP ${response.status}`
+        }]);
       }
     } catch (error) {
       console.error('Error checking service status:', error);
+      setServiceStatuses([{
+        service: 'gateway',
+        status: 'error',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      }]);
     }
   };
+
+  // Check status on component mount
+  useEffect(() => {
+    checkServiceStatus();
+  }, []);
 
   const downloadAudio = () => {
     if (audioUrl) {
