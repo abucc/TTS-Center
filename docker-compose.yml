@@ -107,6 +107,7 @@ services:
       - KOKORO_URL=${KOKORO_URL}
       - CHATTERBOX_URL=${CHATTERBOX_URL}
       - OPENAI_EDGE_TTS_URL=${OPENAI_EDGE_TTS_URL}
+      - OPENAI_API_KEY=${OPENAI_API_KEY} # Added for gateway to authenticate with openai-edge-tts
       - CORS_ORIGINS=${CORS_ORIGINS}
       - REDIS_ENABLED=${REDIS_ENABLED}
       - REDIS_URL=${REDIS_URL}
