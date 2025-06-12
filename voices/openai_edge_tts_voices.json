@@ -1,0 +1,1970 @@
+[
+  {
+    "name": "alloy",
+    "engine": "openai-edge-tts",
+    "locale": "en-US",
+    "gender": "female"
+  },
+  {
+    "name": "echo",
+    "engine": "openai-edge-tts",
+    "locale": "en-US",
+    "gender": "male"
+  },
+  {
+    "name": "fable",
+    "engine": "openai-edge-tts",
+    "locale": "en-GB",
+    "gender": "female"
+  },
+  {
+    "name": "onyx",
+    "engine": "openai-edge-tts",
+    "locale": "en-US",
+    "gender": "male"
+  },
+  {
+    "name": "nova",
+    "engine": "openai-edge-tts",
+    "locale": "en-US",
+    "gender": "male"
+  },
+  {
+    "name": "shimmer",
+    "engine": "openai-edge-tts",
+    "locale": "en-US",
+    "gender": "female"
+  },
+  {
+    "name": "af-ZA-AdriNeural",
+    "engine": "openai-edge-tts",
+    "locale": "af-ZA",
+    "gender": "female"
+  },
+  {
+    "name": "af-ZA-WillemNeural",
+    "engine": "openai-edge-tts",
+    "locale": "af-ZA",
+    "gender": "male"
+  },
+  {
+    "name": "sq-AL-AnilaNeural",
+    "engine": "openai-edge-tts",
+    "locale": "sq-AL",
+    "gender": "female"
+  },
+  {
+    "name": "sq-AL-IlirNeural",
+    "engine": "openai-edge-tts",
+    "locale": "sq-AL",
+    "gender": "male"
+  },
+  {
+    "name": "am-ET-AmehaNeural",
+    "engine": "openai-edge-tts",
+    "locale": "am-ET",
+    "gender": "male"
+  },
+  {
+    "name": "am-ET-MekdesNeural",
+    "engine": "openai-edge-tts",
+    "locale": "am-ET",
+    "gender": "female"
+  },
+  {
+    "name": "ar-DZ-AminaNeural",
+    "engine": "openai-edge-tts",
+    "locale": "ar-DZ",
+    "gender": "female"
+  },
+  {
+    "name": "ar-DZ-IsmaelNeural",
+    "engine": "openai-edge-tts",
+    "locale": "ar-DZ",
+    "gender": "male"
+  },
+  {
+    "name": "ar-BH-AliNeural",
+    "engine": "openai-edge-tts",
+    "locale": "ar-BH",
+    "gender": "male"
+  },
+  {
+    "name": "ar-BH-LailaNeural",
+    "engine": "openai-edge-tts",
+    "locale": "ar-BH",
+    "gender": "female"
+  },
+  {
+    "name": "ar-EG-SalmaNeural",
+    "engine": "openai-edge-tts",
+    "locale": "ar-EG",
+    "gender": "female"
+  },
+  {
+    "name": "ar-EG-ShakirNeural",
+    "engine": "openai-edge-tts",
+    "locale": "ar-EG",
+    "gender": "male"
+  },
+  {
+    "name": "ar-IQ-BasselNeural",
+    "engine": "openai-edge-tts",
+    "locale": "ar-IQ",
+    "gender": "male"
+  },
+  {
+    "name": "ar-IQ-RanaNeural",
+    "engine": "openai-edge-tts",
+    "locale": "ar-IQ",
+    "gender": "female"
+  },
+  {
+    "name": "ar-JO-SanaNeural",
+    "engine": "openai-edge-tts",
+    "locale": "ar-JO",
+    "gender": "female"
+  },
+  {
+    "name": "ar-JO-TaimNeural",
+    "engine": "openai-edge-tts",
+    "locale": "ar-JO",
+    "gender": "male"
+  },
+  {
+    "name": "ar-KW-FahedNeural",
+    "engine": "openai-edge-tts",
+    "locale": "ar-KW",
+    "gender": "male"
+  },
+  {
+    "name": "ar-KW-NouraNeural",
+    "engine": "openai-edge-tts",
+    "locale": "ar-KW",
+    "gender": "female"
+  },
+  {
+    "name": "ar-LB-LaylaNeural",
+    "engine": "openai-edge-tts",
+    "locale": "ar-LB",
+    "gender": "female"
+  },
+  {
+    "name": "ar-LB-RamiNeural",
+    "engine": "openai-edge-tts",
+    "locale": "ar-LB",
+    "gender": "male"
+  },
+  {
+    "name": "ar-LY-ImanNeural",
+    "engine": "openai-edge-tts",
+    "locale": "ar-LY",
+    "gender": "female"
+  },
+  {
+    "name": "ar-LY-OmarNeural",
+    "engine": "openai-edge-tts",
+    "locale": "ar-LY",
+    "gender": "male"
+  },
+  {
+    "name": "ar-MA-JamalNeural",
+    "engine": "openai-edge-tts",
+    "locale": "ar-MA",
+    "gender": "male"
+  },
+  {
+    "name": "ar-MA-MounaNeural",
+    "engine": "openai-edge-tts",
+    "locale": "ar-MA",
+    "gender": "female"
+  },
+  {
+    "name": "ar-OM-AbdullahNeural",
+    "engine": "openai-edge-tts",
+    "locale": "ar-OM",
+    "gender": "male"
+  },
+  {
+    "name": "ar-OM-AyshaNeural",
+    "engine": "openai-edge-tts",
+    "locale": "ar-OM",
+    "gender": "female"
+  },
+  {
+    "name": "ar-QA-AmalNeural",
+    "engine": "openai-edge-tts",
+    "locale": "ar-QA",
+    "gender": "female"
+  },
+  {
+    "name": "ar-QA-MoazNeural",
+    "engine": "openai-edge-tts",
+    "locale": "ar-QA",
+    "gender": "male"
+  },
+  {
+    "name": "ar-SA-HamedNeural",
+    "engine": "openai-edge-tts",
+    "locale": "ar-SA",
+    "gender": "male"
+  },
+  {
+    "name": "ar-SA-ZariyahNeural",
+    "engine": "openai-edge-tts",
+    "locale": "ar-SA",
+    "gender": "female"
+  },
+  {
+    "name": "ar-SY-AmanyNeural",
+    "engine": "openai-edge-tts",
+    "locale": "ar-SY",
+    "gender": "female"
+  },
+  {
+    "name": "ar-SY-LaithNeural",
+    "engine": "openai-edge-tts",
+    "locale": "ar-SY",
+    "gender": "male"
+  },
+  {
+    "name": "ar-TN-HediNeural",
+    "engine": "openai-edge-tts",
+    "locale": "ar-TN",
+    "gender": "male"
+  },
+  {
+    "name": "ar-TN-ReemNeural",
+    "engine": "openai-edge-tts",
+    "locale": "ar-TN",
+    "gender": "female"
+  },
+  {
+    "name": "ar-AE-FatimaNeural",
+    "engine": "openai-edge-tts",
+    "locale": "ar-AE",
+    "gender": "female"
+  },
+  {
+    "name": "ar-AE-HamdanNeural",
+    "engine": "openai-edge-tts",
+    "locale": "ar-AE",
+    "gender": "male"
+  },
+  {
+    "name": "ar-YE-MaryamNeural",
+    "engine": "openai-edge-tts",
+    "locale": "ar-YE",
+    "gender": "female"
+  },
+  {
+    "name": "ar-YE-SalehNeural",
+    "engine": "openai-edge-tts",
+    "locale": "ar-YE",
+    "gender": "male"
+  },
+  {
+    "name": "az-AZ-BabekNeural",
+    "engine": "openai-edge-tts",
+    "locale": "az-AZ",
+    "gender": "male"
+  },
+  {
+    "name": "az-AZ-BanuNeural",
+    "engine": "openai-edge-tts",
+    "locale": "az-AZ",
+    "gender": "female"
+  },
+  {
+    "name": "bn-BD-NabanitaNeural",
+    "engine": "openai-edge-tts",
+    "locale": "bn-BD",
+    "gender": "female"
+  },
+  {
+    "name": "bn-BD-PradeepNeural",
+    "engine": "openai-edge-tts",
+    "locale": "bn-BD",
+    "gender": "male"
+  },
+  {
+    "name": "bn-IN-BashkarNeural",
+    "engine": "openai-edge-tts",
+    "locale": "bn-IN",
+    "gender": "male"
+  },
+  {
+    "name": "bn-IN-TanishaaNeural",
+    "engine": "openai-edge-tts",
+    "locale": "bn-IN",
+    "gender": "female"
+  },
+  {
+    "name": "bs-BA-VesnaNeural",
+    "engine": "openai-edge-tts",
+    "locale": "bs-BA",
+    "gender": "female"
+  },
+  {
+    "name": "bs-BA-GoranNeural",
+    "engine": "openai-edge-tts",
+    "locale": "bs-BA",
+    "gender": "male"
+  },
+  {
+    "name": "bg-BG-BorislavNeural",
+    "engine": "openai-edge-tts",
+    "locale": "bg-BG",
+    "gender": "male"
+  },
+  {
+    "name": "bg-BG-KalinaNeural",
+    "engine": "openai-edge-tts",
+    "locale": "bg-BG",
+    "gender": "female"
+  },
+  {
+    "name": "my-MM-NilarNeural",
+    "engine": "openai-edge-tts",
+    "locale": "my-MM",
+    "gender": "female"
+  },
+  {
+    "name": "my-MM-ThihaNeural",
+    "engine": "openai-edge-tts",
+    "locale": "my-MM",
+    "gender": "male"
+  },
+  {
+    "name": "ca-ES-EnricNeural",
+    "engine": "openai-edge-tts",
+    "locale": "ca-ES",
+    "gender": "male"
+  },
+  {
+    "name": "ca-ES-JoanaNeural",
+    "engine": "openai-edge-tts",
+    "locale": "ca-ES",
+    "gender": "female"
+  },
+  {
+    "name": "zh-HK-HiuGaaiNeural",
+    "engine": "openai-edge-tts",
+    "locale": "zh-HK",
+    "gender": "female"
+  },
+  {
+    "name": "zh-HK-HiuMaanNeural",
+    "engine": "openai-edge-tts",
+    "locale": "zh-HK",
+    "gender": "female"
+  },
+  {
+    "name": "zh-HK-WanLungNeural",
+    "engine": "openai-edge-tts",
+    "locale": "zh-HK",
+    "gender": "male"
+  },
+  {
+    "name": "zh-CN-XiaoxiaoNeural",
+    "engine": "openai-edge-tts",
+    "locale": "zh-CN",
+    "gender": "female"
+  },
+  {
+    "name": "zh-CN-XiaoyiNeural",
+    "engine": "openai-edge-tts",
+    "locale": "zh-CN",
+    "gender": "female"
+  },
+  {
+    "name": "zh-CN-YunjianNeural",
+    "engine": "openai-edge-tts",
+    "locale": "zh-CN",
+    "gender": "male"
+  },
+  {
+    "name": "zh-CN-YunxiNeural",
+    "engine": "openai-edge-tts",
+    "locale": "zh-CN",
+    "gender": "male"
+  },
+  {
+    "name": "zh-CN-YunxiaNeural",
+    "engine": "openai-edge-tts",
+    "locale": "zh-CN",
+    "gender": "male"
+  },
+  {
+    "name": "zh-CN-YunyangNeural",
+    "engine": "openai-edge-tts",
+    "locale": "zh-CN",
+    "gender": "male"
+  },
+  {
+    "name": "zh-CN-liaoning-XiaobeiNeural",
+    "engine": "openai-edge-tts",
+    "locale": "zh-CN-liaoning",
+    "gender": "female"
+  },
+  {
+    "name": "zh-TW-HsiaoChenNeural",
+    "engine": "openai-edge-tts",
+    "locale": "zh-TW",
+    "gender": "female"
+  },
+  {
+    "name": "zh-TW-YunJheNeural",
+    "engine": "openai-edge-tts",
+    "locale": "zh-TW",
+    "gender": "male"
+  },
+  {
+    "name": "zh-TW-HsiaoYuNeural",
+    "engine": "openai-edge-tts",
+    "locale": "zh-TW",
+    "gender": "female"
+  },
+  {
+    "name": "zh-CN-shaanxi-XiaoniNeural",
+    "engine": "openai-edge-tts",
+    "locale": "zh-CN-shaanxi",
+    "gender": "female"
+  },
+  {
+    "name": "hr-HR-GabrijelaNeural",
+    "engine": "openai-edge-tts",
+    "locale": "hr-HR",
+    "gender": "female"
+  },
+  {
+    "name": "hr-HR-SreckoNeural",
+    "engine": "openai-edge-tts",
+    "locale": "hr-HR",
+    "gender": "male"
+  },
+  {
+    "name": "cs-CZ-AntoninNeural",
+    "engine": "openai-edge-tts",
+    "locale": "cs-CZ",
+    "gender": "male"
+  },
+  {
+    "name": "cs-CZ-VlastaNeural",
+    "engine": "openai-edge-tts",
+    "locale": "cs-CZ",
+    "gender": "female"
+  },
+  {
+    "name": "da-DK-ChristelNeural",
+    "engine": "openai-edge-tts",
+    "locale": "da-DK",
+    "gender": "female"
+  },
+  {
+    "name": "da-DK-JeppeNeural",
+    "engine": "openai-edge-tts",
+    "locale": "da-DK",
+    "gender": "male"
+  },
+  {
+    "name": "nl-BE-ArnaudNeural",
+    "engine": "openai-edge-tts",
+    "locale": "nl-BE",
+    "gender": "male"
+  },
+  {
+    "name": "nl-BE-DenaNeural",
+    "engine": "openai-edge-tts",
+    "locale": "nl-BE",
+    "gender": "female"
+  },
+  {
+    "name": "nl-NL-ColetteNeural",
+    "engine": "openai-edge-tts",
+    "locale": "nl-NL",
+    "gender": "female"
+  },
+  {
+    "name": "nl-NL-FennaNeural",
+    "engine": "openai-edge-tts",
+    "locale": "nl-NL",
+    "gender": "female"
+  },
+  {
+    "name": "nl-NL-MaartenNeural",
+    "engine": "openai-edge-tts",
+    "locale": "nl-NL",
+    "gender": "male"
+  },
+  {
+    "name": "en-AU-NatashaNeural",
+    "engine": "openai-edge-tts",
+    "locale": "en-AU",
+    "gender": "female"
+  },
+  {
+    "name": "en-AU-WilliamNeural",
+    "engine": "openai-edge-tts",
+    "locale": "en-AU",
+    "gender": "male"
+  },
+  {
+    "name": "en-CA-ClaraNeural",
+    "engine": "openai-edge-tts",
+    "locale": "en-CA",
+    "gender": "female"
+  },
+  {
+    "name": "en-CA-LiamNeural",
+    "engine": "openai-edge-tts",
+    "locale": "en-CA",
+    "gender": "male"
+  },
+  {
+    "name": "en-HK-YanNeural",
+    "engine": "openai-edge-tts",
+    "locale": "en-HK",
+    "gender": "female"
+  },
+  {
+    "name": "en-HK-SamNeural",
+    "engine": "openai-edge-tts",
+    "locale": "en-HK",
+    "gender": "male"
+  },
+  {
+    "name": "en-IN-NeerjaExpressiveNeural",
+    "engine": "openai-edge-tts",
+    "locale": "en-IN",
+    "gender": "female"
+  },
+  {
+    "name": "en-IN-NeerjaNeural",
+    "engine": "openai-edge-tts",
+    "locale": "en-IN",
+    "gender": "female"
+  },
+  {
+    "name": "en-IN-PrabhatNeural",
+    "engine": "openai-edge-tts",
+    "locale": "en-IN",
+    "gender": "male"
+  },
+  {
+    "name": "en-IE-ConnorNeural",
+    "engine": "openai-edge-tts",
+    "locale": "en-IE",
+    "gender": "male"
+  },
+  {
+    "name": "en-IE-EmilyNeural",
+    "engine": "openai-edge-tts",
+    "locale": "en-IE",
+    "gender": "female"
+  },
+  {
+    "name": "en-KE-AsiliaNeural",
+    "engine": "openai-edge-tts",
+    "locale": "en-KE",
+    "gender": "female"
+  },
+  {
+    "name": "en-KE-ChilembaNeural",
+    "engine": "openai-edge-tts",
+    "locale": "en-KE",
+    "gender": "male"
+  },
+  {
+    "name": "en-NZ-MitchellNeural",
+    "engine": "openai-edge-tts",
+    "locale": "en-NZ",
+    "gender": "male"
+  },
+  {
+    "name": "en-NZ-MollyNeural",
+    "engine": "openai-edge-tts",
+    "locale": "en-NZ",
+    "gender": "female"
+  },
+  {
+    "name": "en-NG-AbeoNeural",
+    "engine": "openai-edge-tts",
+    "locale": "en-NG",
+    "gender": "male"
+  },
+  {
+    "name": "en-NG-EzinneNeural",
+    "engine": "openai-edge-tts",
+    "locale": "en-NG",
+    "gender": "female"
+  },
+  {
+    "name": "en-PH-JamesNeural",
+    "engine": "openai-edge-tts",
+    "locale": "en-PH",
+    "gender": "male"
+  },
+  {
+    "name": "en-PH-RosaNeural",
+    "engine": "openai-edge-tts",
+    "locale": "en-PH",
+    "gender": "female"
+  },
+  {
+    "name": "en-US-AvaNeural",
+    "engine": "openai-edge-tts",
+    "locale": "en-US",
+    "gender": "female"
+  },
+  {
+    "name": "en-US-AndrewNeural",
+    "engine": "openai-edge-tts",
+    "locale": "en-US",
+    "gender": "male"
+  },
+  {
+    "name": "en-US-EmmaNeural",
+    "engine": "openai-edge-tts",
+    "locale": "en-US",
+    "gender": "female"
+  },
+  {
+    "name": "en-US-BrianNeural",
+    "engine": "openai-edge-tts",
+    "locale": "en-US",
+    "gender": "male"
+  },
+  {
+    "name": "en-SG-LunaNeural",
+    "engine": "openai-edge-tts",
+    "locale": "en-SG",
+    "gender": "female"
+  },
+  {
+    "name": "en-SG-WayneNeural",
+    "engine": "openai-edge-tts",
+    "locale": "en-SG",
+    "gender": "male"
+  },
+  {
+    "name": "en-ZA-LeahNeural",
+    "engine": "openai-edge-tts",
+    "locale": "en-ZA",
+    "gender": "female"
+  },
+  {
+    "name": "en-ZA-LukeNeural",
+    "engine": "openai-edge-tts",
+    "locale": "en-ZA",
+    "gender": "male"
+  },
+  {
+    "name": "en-TZ-ElimuNeural",
+    "engine": "openai-edge-tts",
+    "locale": "en-TZ",
+    "gender": "male"
+  },
+  {
+    "name": "en-TZ-ImaniNeural",
+    "engine": "openai-edge-tts",
+    "locale": "en-TZ",
+    "gender": "female"
+  },
+  {
+    "name": "en-GB-LibbyNeural",
+    "engine": "openai-edge-tts",
+    "locale": "en-GB",
+    "gender": "female"
+  },
+  {
+    "name": "en-GB-MaisieNeural",
+    "engine": "openai-edge-tts",
+    "locale": "en-GB",
+    "gender": "female"
+  },
+  {
+    "name": "en-GB-RyanNeural",
+    "engine": "openai-edge-tts",
+    "locale": "en-GB",
+    "gender": "male"
+  },
+  {
+    "name": "en-GB-SoniaNeural",
+    "engine": "openai-edge-tts",
+    "locale": "en-GB",
+    "gender": "female"
+  },
+  {
+    "name": "en-GB-ThomasNeural",
+    "engine": "openai-edge-tts",
+    "locale": "en-GB",
+    "gender": "male"
+  },
+  {
+    "name": "en-US-AnaNeural",
+    "engine": "openai-edge-tts",
+    "locale": "en-US",
+    "gender": "female"
+  },
+  {
+    "name": "en-US-AndrewMultilingualNeural",
+    "engine": "openai-edge-tts",
+    "locale": "en-US",
+    "gender": "male"
+  },
+  {
+    "name": "en-US-AriaNeural",
+    "engine": "openai-edge-tts",
+    "locale": "en-US",
+    "gender": "female"
+  },
+  {
+    "name": "en-US-AvaMultilingualNeural",
+    "engine": "openai-edge-tts",
+    "locale": "en-US",
+    "gender": "female"
+  },
+  {
+    "name": "en-US-BrianMultilingualNeural",
+    "engine": "openai-edge-tts",
+    "locale": "en-US",
+    "gender": "male"
+  },
+  {
+    "name": "en-US-ChristopherNeural",
+    "engine": "openai-edge-tts",
+    "locale": "en-US",
+    "gender": "male"
+  },
+  {
+    "name": "en-US-EmmaMultilingualNeural",
+    "engine": "openai-edge-tts",
+    "locale": "en-US",
+    "gender": "female"
+  },
+  {
+    "name": "en-US-EricNeural",
+    "engine": "openai-edge-tts",
+    "locale": "en-US",
+    "gender": "male"
+  },
+  {
+    "name": "en-US-GuyNeural",
+    "engine": "openai-edge-tts",
+    "locale": "en-US",
+    "gender": "male"
+  },
+  {
+    "name": "en-US-JennyNeural",
+    "engine": "openai-edge-tts",
+    "locale": "en-US",
+    "gender": "female"
+  },
+  {
+    "name": "en-US-MichelleNeural",
+    "engine": "openai-edge-tts",
+    "locale": "en-US",
+    "gender": "female"
+  },
+  {
+    "name": "en-US-RogerNeural",
+    "engine": "openai-edge-tts",
+    "locale": "en-US",
+    "gender": "male"
+  },
+  {
+    "name": "en-US-SteffanNeural",
+    "engine": "openai-edge-tts",
+    "locale": "en-US",
+    "gender": "male"
+  },
+  {
+    "name": "et-EE-AnuNeural",
+    "engine": "openai-edge-tts",
+    "locale": "et-EE",
+    "gender": "female"
+  },
+  {
+    "name": "et-EE-KertNeural",
+    "engine": "openai-edge-tts",
+    "locale": "et-EE",
+    "gender": "male"
+  },
+  {
+    "name": "fil-PH-AngeloNeural",
+    "engine": "openai-edge-tts",
+    "locale": "fil-PH",
+    "gender": "male"
+  },
+  {
+    "name": "fil-PH-BlessicaNeural",
+    "engine": "openai-edge-tts",
+    "locale": "fil-PH",
+    "gender": "female"
+  },
+  {
+    "name": "fi-FI-HarriNeural",
+    "engine": "openai-edge-tts",
+    "locale": "fi-FI",
+    "gender": "male"
+  },
+  {
+    "name": "fi-FI-NooraNeural",
+    "engine": "openai-edge-tts",
+    "locale": "fi-FI",
+    "gender": "female"
+  },
+  {
+    "name": "fr-BE-CharlineNeural",
+    "engine": "openai-edge-tts",
+    "locale": "fr-BE",
+    "gender": "female"
+  },
+  {
+    "name": "fr-BE-GerardNeural",
+    "engine": "openai-edge-tts",
+    "locale": "fr-BE",
+    "gender": "male"
+  },
+  {
+    "name": "fr-CA-ThierryNeural",
+    "engine": "openai-edge-tts",
+    "locale": "fr-CA",
+    "gender": "male"
+  },
+  {
+    "name": "fr-CA-AntoineNeural",
+    "engine": "openai-edge-tts",
+    "locale": "fr-CA",
+    "gender": "male"
+  },
+  {
+    "name": "fr-CA-JeanNeural",
+    "engine": "openai-edge-tts",
+    "locale": "fr-CA",
+    "gender": "male"
+  },
+  {
+    "name": "fr-CA-SylvieNeural",
+    "engine": "openai-edge-tts",
+    "locale": "fr-CA",
+    "gender": "female"
+  },
+  {
+    "name": "fr-FR-VivienneMultilingualNeural",
+    "engine": "openai-edge-tts",
+    "locale": "fr-FR",
+    "gender": "female"
+  },
+  {
+    "name": "fr-FR-RemyMultilingualNeural",
+    "engine": "openai-edge-tts",
+    "locale": "fr-FR",
+    "gender": "male"
+  },
+  {
+    "name": "fr-FR-DeniseNeural",
+    "engine": "openai-edge-tts",
+    "locale": "fr-FR",
+    "gender": "female"
+  },
+  {
+    "name": "fr-FR-EloiseNeural",
+    "engine": "openai-edge-tts",
+    "locale": "fr-FR",
+    "gender": "female"
+  },
+  {
+    "name": "fr-FR-HenriNeural",
+    "engine": "openai-edge-tts",
+    "locale": "fr-FR",
+    "gender": "male"
+  },
+  {
+    "name": "fr-CH-ArianeNeural",
+    "engine": "openai-edge-tts",
+    "locale": "fr-CH",
+    "gender": "female"
+  },
+  {
+    "name": "fr-CH-FabriceNeural",
+    "engine": "openai-edge-tts",
+    "locale": "fr-CH",
+    "gender": "male"
+  },
+  {
+    "name": "gl-ES-RoiNeural",
+    "engine": "openai-edge-tts",
+    "locale": "gl-ES",
+    "gender": "male"
+  },
+  {
+    "name": "gl-ES-SabelaNeural",
+    "engine": "openai-edge-tts",
+    "locale": "gl-ES",
+    "gender": "female"
+  },
+  {
+    "name": "ka-GE-EkaNeural",
+    "engine": "openai-edge-tts",
+    "locale": "ka-GE",
+    "gender": "female"
+  },
+  {
+    "name": "ka-GE-GiorgiNeural",
+    "engine": "openai-edge-tts",
+    "locale": "ka-GE",
+    "gender": "male"
+  },
+  {
+    "name": "de-AT-IngridNeural",
+    "engine": "openai-edge-tts",
+    "locale": "de-AT",
+    "gender": "female"
+  },
+  {
+    "name": "de-AT-JonasNeural",
+    "engine": "openai-edge-tts",
+    "locale": "de-AT",
+    "gender": "male"
+  },
+  {
+    "name": "de-DE-SeraphinaMultilingualNeural",
+    "engine": "openai-edge-tts",
+    "locale": "de-DE",
+    "gender": "female"
+  },
+  {
+    "name": "de-DE-FlorianMultilingualNeural",
+    "engine": "openai-edge-tts",
+    "locale": "de-DE",
+    "gender": "male"
+  },
+  {
+    "name": "de-DE-AmalaNeural",
+    "engine": "openai-edge-tts",
+    "locale": "de-DE",
+    "gender": "female"
+  },
+  {
+    "name": "de-DE-ConradNeural",
+    "engine": "openai-edge-tts",
+    "locale": "de-DE",
+    "gender": "male"
+  },
+  {
+    "name": "de-DE-KatjaNeural",
+    "engine": "openai-edge-tts",
+    "locale": "de-DE",
+    "gender": "female"
+  },
+  {
+    "name": "de-DE-KillianNeural",
+    "engine": "openai-edge-tts",
+    "locale": "de-DE",
+    "gender": "male"
+  },
+  {
+    "name": "de-CH-JanNeural",
+    "engine": "openai-edge-tts",
+    "locale": "de-CH",
+    "gender": "male"
+  },
+  {
+    "name": "de-CH-LeniNeural",
+    "engine": "openai-edge-tts",
+    "locale": "de-CH",
+    "gender": "female"
+  },
+  {
+    "name": "el-GR-AthinaNeural",
+    "engine": "openai-edge-tts",
+    "locale": "el-GR",
+    "gender": "female"
+  },
+  {
+    "name": "el-GR-NestorasNeural",
+    "engine": "openai-edge-tts",
+    "locale": "el-GR",
+    "gender": "male"
+  },
+  {
+    "name": "gu-IN-DhwaniNeural",
+    "engine": "openai-edge-tts",
+    "locale": "gu-IN",
+    "gender": "female"
+  },
+  {
+    "name": "gu-IN-NiranjanNeural",
+    "engine": "openai-edge-tts",
+    "locale": "gu-IN",
+    "gender": "male"
+  },
+  {
+    "name": "he-IL-AvriNeural",
+    "engine": "openai-edge-tts",
+    "locale": "he-IL",
+    "gender": "male"
+  },
+  {
+    "name": "he-IL-HilaNeural",
+    "engine": "openai-edge-tts",
+    "locale": "he-IL",
+    "gender": "female"
+  },
+  {
+    "name": "hi-IN-MadhurNeural",
+    "engine": "openai-edge-tts",
+    "locale": "hi-IN",
+    "gender": "male"
+  },
+  {
+    "name": "hi-IN-SwaraNeural",
+    "engine": "openai-edge-tts",
+    "locale": "hi-IN",
+    "gender": "female"
+  },
+  {
+    "name": "hu-HU-NoemiNeural",
+    "engine": "openai-edge-tts",
+    "locale": "hu-HU",
+    "gender": "female"
+  },
+  {
+    "name": "hu-HU-TamasNeural",
+    "engine": "openai-edge-tts",
+    "locale": "hu-HU",
+    "gender": "male"
+  },
+  {
+    "name": "is-IS-GudrunNeural",
+    "engine": "openai-edge-tts",
+    "locale": "is-IS",
+    "gender": "female"
+  },
+  {
+    "name": "is-IS-GunnarNeural",
+    "engine": "openai-edge-tts",
+    "locale": "is-IS",
+    "gender": "male"
+  },
+  {
+    "name": "id-ID-ArdiNeural",
+    "engine": "openai-edge-tts",
+    "locale": "id-ID",
+    "gender": "male"
+  },
+  {
+    "name": "id-ID-GadisNeural",
+    "engine": "openai-edge-tts",
+    "locale": "id-ID",
+    "gender": "female"
+  },
+  {
+    "name": "iu-Latn-CA-SiqiniqNeural",
+    "engine": "openai-edge-tts",
+    "locale": "iu-Latn-CA",
+    "gender": "female"
+  },
+  {
+    "name": "iu-Latn-CA-TaqqiqNeural",
+    "engine": "openai-edge-tts",
+    "locale": "iu-Latn-CA",
+    "gender": "male"
+  },
+  {
+    "name": "iu-Cans-CA-SiqiniqNeural",
+    "engine": "openai-edge-tts",
+    "locale": "iu-Cans-CA",
+    "gender": "female"
+  },
+  {
+    "name": "iu-Cans-CA-TaqqiqNeural",
+    "engine": "openai-edge-tts",
+    "locale": "iu-Cans-CA",
+    "gender": "male"
+  },
+  {
+    "name": "ga-IE-ColmNeural",
+    "engine": "openai-edge-tts",
+    "locale": "ga-IE",
+    "gender": "male"
+  },
+  {
+    "name": "ga-IE-OrlaNeural",
+    "engine": "openai-edge-tts",
+    "locale": "ga-IE",
+    "gender": "female"
+  },
+  {
+    "name": "it-IT-GiuseppeMultilingualNeural",
+    "engine": "openai-edge-tts",
+    "locale": "it-IT",
+    "gender": "male"
+  },
+  {
+    "name": "it-IT-DiegoNeural",
+    "engine": "openai-edge-tts",
+    "locale": "it-IT",
+    "gender": "male"
+  },
+  {
+    "name": "it-IT-ElsaNeural",
+    "engine": "openai-edge-tts",
+    "locale": "it-IT",
+    "gender": "female"
+  },
+  {
+    "name": "it-IT-IsabellaNeural",
+    "engine": "openai-edge-tts",
+    "locale": "it-IT",
+    "gender": "female"
+  },
+  {
+    "name": "ja-JP-KeitaNeural",
+    "engine": "openai-edge-tts",
+    "locale": "ja-JP",
+    "gender": "male"
+  },
+  {
+    "name": "ja-JP-NanamiNeural",
+    "engine": "openai-edge-tts",
+    "locale": "ja-JP",
+    "gender": "female"
+  },
+  {
+    "name": "jv-ID-DimasNeural",
+    "engine": "openai-edge-tts",
+    "locale": "jv-ID",
+    "gender": "male"
+  },
+  {
+    "name": "jv-ID-SitiNeural",
+    "engine": "openai-edge-tts",
+    "locale": "jv-ID",
+    "gender": "female"
+  },
+  {
+    "name": "kn-IN-GaganNeural",
+    "engine": "openai-edge-tts",
+    "locale": "kn-IN",
+    "gender": "male"
+  },
+  {
+    "name": "kn-IN-SapnaNeural",
+    "engine": "openai-edge-tts",
+    "locale": "kn-IN",
+    "gender": "female"
+  },
+  {
+    "name": "kk-KZ-AigulNeural",
+    "engine": "openai-edge-tts",
+    "locale": "kk-KZ",
+    "gender": "female"
+  },
+  {
+    "name": "kk-KZ-DauletNeural",
+    "engine": "openai-edge-tts",
+    "locale": "kk-KZ",
+    "gender": "male"
+  },
+  {
+    "name": "km-KH-PisethNeural",
+    "engine": "openai-edge-tts",
+    "locale": "km-KH",
+    "gender": "male"
+  },
+  {
+    "name": "km-KH-SreymomNeural",
+    "engine": "openai-edge-tts",
+    "locale": "km-KH",
+    "gender": "female"
+  },
+  {
+    "name": "ko-KR-HyunsuMultilingualNeural",
+    "engine": "openai-edge-tts",
+    "locale": "ko-KR",
+    "gender": "male"
+  },
+  {
+    "name": "ko-KR-InJoonNeural",
+    "engine": "openai-edge-tts",
+    "locale": "ko-KR",
+    "gender": "male"
+  },
+  {
+    "name": "ko-KR-SunHiNeural",
+    "engine": "openai-edge-tts",
+    "locale": "ko-KR",
+    "gender": "female"
+  },
+  {
+    "name": "lo-LA-ChanthavongNeural",
+    "engine": "openai-edge-tts",
+    "locale": "lo-LA",
+    "gender": "male"
+  },
+  {
+    "name": "lo-LA-KeomanyNeural",
+    "engine": "openai-edge-tts",
+    "locale": "lo-LA",
+    "gender": "female"
+  },
+  {
+    "name": "lv-LV-EveritaNeural",
+    "engine": "openai-edge-tts",
+    "locale": "lv-LV",
+    "gender": "female"
+  },
+  {
+    "name": "lv-LV-NilsNeural",
+    "engine": "openai-edge-tts",
+    "locale": "lv-LV",
+    "gender": "male"
+  },
+  {
+    "name": "lt-LT-LeonasNeural",
+    "engine": "openai-edge-tts",
+    "locale": "lt-LT",
+    "gender": "male"
+  },
+  {
+    "name": "lt-LT-OnaNeural",
+    "engine": "openai-edge-tts",
+    "locale": "lt-LT",
+    "gender": "female"
+  },
+  {
+    "name": "mk-MK-AleksandarNeural",
+    "engine": "openai-edge-tts",
+    "locale": "mk-MK",
+    "gender": "male"
+  },
+  {
+    "name": "mk-MK-MarijaNeural",
+    "engine": "openai-edge-tts",
+    "locale": "mk-MK",
+    "gender": "female"
+  },
+  {
+    "name": "ms-MY-OsmanNeural",
+    "engine": "openai-edge-tts",
+    "locale": "ms-MY",
+    "gender": "male"
+  },
+  {
+    "name": "ms-MY-YasminNeural",
+    "engine": "openai-edge-tts",
+    "locale": "ms-MY",
+    "gender": "female"
+  },
+  {
+    "name": "ml-IN-MidhunNeural",
+    "engine": "openai-edge-tts",
+    "locale": "ml-IN",
+    "gender": "male"
+  },
+  {
+    "name": "ml-IN-SobhanaNeural",
+    "engine": "openai-edge-tts",
+    "locale": "ml-IN",
+    "gender": "female"
+  },
+  {
+    "name": "mt-MT-GraceNeural",
+    "engine": "openai-edge-tts",
+    "locale": "mt-MT",
+    "gender": "female"
+  },
+  {
+    "name": "mt-MT-JosephNeural",
+    "engine": "openai-edge-tts",
+    "locale": "mt-MT",
+    "gender": "male"
+  },
+  {
+    "name": "mr-IN-AarohiNeural",
+    "engine": "openai-edge-tts",
+    "locale": "mr-IN",
+    "gender": "female"
+  },
+  {
+    "name": "mr-IN-ManoharNeural",
+    "engine": "openai-edge-tts",
+    "locale": "mr-IN",
+    "gender": "male"
+  },
+  {
+    "name": "mn-MN-BataaNeural",
+    "engine": "openai-edge-tts",
+    "locale": "mn-MN",
+    "gender": "male"
+  },
+  {
+    "name": "mn-MN-YesuiNeural",
+    "engine": "openai-edge-tts",
+    "locale": "mn-MN",
+    "gender": "female"
+  },
+  {
+    "name": "ne-NP-HemkalaNeural",
+    "engine": "openai-edge-tts",
+    "locale": "ne-NP",
+    "gender": "female"
+  },
+  {
+    "name": "ne-NP-SagarNeural",
+    "engine": "openai-edge-tts",
+    "locale": "ne-NP",
+    "gender": "male"
+  },
+  {
+    "name": "nb-NO-FinnNeural",
+    "engine": "openai-edge-tts",
+    "locale": "nb-NO",
+    "gender": "male"
+  },
+  {
+    "name": "nb-NO-PernilleNeural",
+    "engine": "openai-edge-tts",
+    "locale": "nb-NO",
+    "gender": "female"
+  },
+  {
+    "name": "ps-AF-GulNawazNeural",
+    "engine": "openai-edge-tts",
+    "locale": "ps-AF",
+    "gender": "male"
+  },
+  {
+    "name": "ps-AF-LatifaNeural",
+    "engine": "openai-edge-tts",
+    "locale": "ps-AF",
+    "gender": "female"
+  },
+  {
+    "name": "fa-IR-DilaraNeural",
+    "engine": "openai-edge-tts",
+    "locale": "fa-IR",
+    "gender": "female"
+  },
+  {
+    "name": "fa-IR-FaridNeural",
+    "engine": "openai-edge-tts",
+    "locale": "fa-IR",
+    "gender": "male"
+  },
+  {
+    "name": "pl-PL-MarekNeural",
+    "engine": "openai-edge-tts",
+    "locale": "pl-PL",
+    "gender": "male"
+  },
+  {
+    "name": "pl-PL-ZofiaNeural",
+    "engine": "openai-edge-tts",
+    "locale": "pl-PL",
+    "gender": "female"
+  },
+  {
+    "name": "pt-BR-ThalitaMultilingualNeural",
+    "engine": "openai-edge-tts",
+    "locale": "pt-BR",
+    "gender": "female"
+  },
+  {
+    "name": "pt-BR-AntonioNeural",
+    "engine": "openai-edge-tts",
+    "locale": "pt-BR",
+    "gender": "male"
+  },
+  {
+    "name": "pt-BR-FranciscaNeural",
+    "engine": "openai-edge-tts",
+    "locale": "pt-BR",
+    "gender": "female"
+  },
+  {
+    "name": "pt-PT-DuarteNeural",
+    "engine": "openai-edge-tts",
+    "locale": "pt-PT",
+    "gender": "male"
+  },
+  {
+    "name": "pt-PT-RaquelNeural",
+    "engine": "openai-edge-tts",
+    "locale": "pt-PT",
+    "gender": "female"
+  },
+  {
+    "name": "ro-RO-AlinaNeural",
+    "engine": "openai-edge-tts",
+    "locale": "ro-RO",
+    "gender": "female"
+  },
+  {
+    "name": "ro-RO-EmilNeural",
+    "engine": "openai-edge-tts",
+    "locale": "ro-RO",
+    "gender": "male"
+  },
+  {
+    "name": "ru-RU-DmitryNeural",
+    "engine": "openai-edge-tts",
+    "locale": "ru-RU",
+    "gender": "male"
+  },
+  {
+    "name": "ru-RU-SvetlanaNeural",
+    "engine": "openai-edge-tts",
+    "locale": "ru-RU",
+    "gender": "female"
+  },
+  {
+    "name": "sr-RS-NicholasNeural",
+    "engine": "openai-edge-tts",
+    "locale": "sr-RS",
+    "gender": "male"
+  },
+  {
+    "name": "sr-RS-SophieNeural",
+    "engine": "openai-edge-tts",
+    "locale": "sr-RS",
+    "gender": "female"
+  },
+  {
+    "name": "si-LK-SameeraNeural",
+    "engine": "openai-edge-tts",
+    "locale": "si-LK",
+    "gender": "male"
+  },
+  {
+    "name": "si-LK-ThiliniNeural",
+    "engine": "openai-edge-tts",
+    "locale": "si-LK",
+    "gender": "female"
+  },
+  {
+    "name": "sk-SK-LukasNeural",
+    "engine": "openai-edge-tts",
+    "locale": "sk-SK",
+    "gender": "male"
+  },
+  {
+    "name": "sk-SK-ViktoriaNeural",
+    "engine": "openai-edge-tts",
+    "locale": "sk-SK",
+    "gender": "female"
+  },
+  {
+    "name": "sl-SI-PetraNeural",
+    "engine": "openai-edge-tts",
+    "locale": "sl-SI",
+    "gender": "female"
+  },
+  {
+    "name": "sl-SI-RokNeural",
+    "engine": "openai-edge-tts",
+    "locale": "sl-SI",
+    "gender": "male"
+  },
+  {
+    "name": "so-SO-MuuseNeural",
+    "engine": "openai-edge-tts",
+    "locale": "so-SO",
+    "gender": "male"
+  },
+  {
+    "name": "so-SO-UbaxNeural",
+    "engine": "openai-edge-tts",
+    "locale": "so-SO",
+    "gender": "female"
+  },
+  {
+    "name": "es-AR-ElenaNeural",
+    "engine": "openai-edge-tts",
+    "locale": "es-AR",
+    "gender": "female"
+  },
+  {
+    "name": "es-AR-TomasNeural",
+    "engine": "openai-edge-tts",
+    "locale": "es-AR",
+    "gender": "male"
+  },
+  {
+    "name": "es-BO-MarceloNeural",
+    "engine": "openai-edge-tts",
+    "locale": "es-BO",
+    "gender": "male"
+  },
+  {
+    "name": "es-BO-SofiaNeural",
+    "engine": "openai-edge-tts",
+    "locale": "es-BO",
+    "gender": "female"
+  },
+  {
+    "name": "es-CL-CatalinaNeural",
+    "engine": "openai-edge-tts",
+    "locale": "es-CL",
+    "gender": "female"
+  },
+  {
+    "name": "es-CL-LorenzoNeural",
+    "engine": "openai-edge-tts",
+    "locale": "es-CL",
+    "gender": "male"
+  },
+  {
+    "name": "es-CO-GonzaloNeural",
+    "engine": "openai-edge-tts",
+    "locale": "es-CO",
+    "gender": "male"
+  },
+  {
+    "name": "es-CO-SalomeNeural",
+    "engine": "openai-edge-tts",
+    "locale": "es-CO",
+    "gender": "female"
+  },
+  {
+    "name": "es-ES-XimenaNeural",
+    "engine": "openai-edge-tts",
+    "locale": "es-ES",
+    "gender": "female"
+  },
+  {
+    "name": "es-CR-JuanNeural",
+    "engine": "openai-edge-tts",
+    "locale": "es-CR",
+    "gender": "male"
+  },
+  {
+    "name": "es-CR-MariaNeural",
+    "engine": "openai-edge-tts",
+    "locale": "es-CR",
+    "gender": "female"
+  },
+  {
+    "name": "es-CU-BelkysNeural",
+    "engine": "openai-edge-tts",
+    "locale": "es-CU",
+    "gender": "female"
+  },
+  {
+    "name": "es-CU-ManuelNeural",
+    "engine": "openai-edge-tts",
+    "locale": "es-CU",
+    "gender": "male"
+  },
+  {
+    "name": "es-DO-EmilioNeural",
+    "engine": "openai-edge-tts",
+    "locale": "es-DO",
+    "gender": "male"
+  },
+  {
+    "name": "es-DO-RamonaNeural",
+    "engine": "openai-edge-tts",
+    "locale": "es-DO",
+    "gender": "female"
+  },
+  {
+    "name": "es-EC-AndreaNeural",
+    "engine": "openai-edge-tts",
+    "locale": "es-EC",
+    "gender": "female"
+  },
+  {
+    "name": "es-EC-LuisNeural",
+    "engine": "openai-edge-tts",
+    "locale": "es-EC",
+    "gender": "male"
+  },
+  {
+    "name": "es-SV-LorenaNeural",
+    "engine": "openai-edge-tts",
+    "locale": "es-SV",
+    "gender": "female"
+  },
+  {
+    "name": "es-SV-RodrigoNeural",
+    "engine": "openai-edge-tts",
+    "locale": "es-SV",
+    "gender": "male"
+  },
+  {
+    "name": "es-GQ-JavierNeural",
+    "engine": "openai-edge-tts",
+    "locale": "es-GQ",
+    "gender": "male"
+  },
+  {
+    "name": "es-GQ-TeresaNeural",
+    "engine": "openai-edge-tts",
+    "locale": "es-GQ",
+    "gender": "female"
+  },
+  {
+    "name": "es-GT-AndresNeural",
+    "engine": "openai-edge-tts",
+    "locale": "es-GT",
+    "gender": "male"
+  },
+  {
+    "name": "es-GT-MartaNeural",
+    "engine": "openai-edge-tts",
+    "locale": "es-GT",
+    "gender": "female"
+  },
+  {
+    "name": "es-HN-CarlosNeural",
+    "engine": "openai-edge-tts",
+    "locale": "es-HN",
+    "gender": "male"
+  },
+  {
+    "name": "es-HN-KarlaNeural",
+    "engine": "openai-edge-tts",
+    "locale": "es-HN",
+    "gender": "female"
+  },
+  {
+    "name": "es-MX-DaliaNeural",
+    "engine": "openai-edge-tts",
+    "locale": "es-MX",
+    "gender": "female"
+  },
+  {
+    "name": "es-MX-JorgeNeural",
+    "engine": "openai-edge-tts",
+    "locale": "es-MX",
+    "gender": "male"
+  },
+  {
+    "name": "es-NI-FedericoNeural",
+    "engine": "openai-edge-tts",
+    "locale": "es-NI",
+    "gender": "male"
+  },
+  {
+    "name": "es-NI-YolandaNeural",
+    "engine": "openai-edge-tts",
+    "locale": "es-NI",
+    "gender": "female"
+  },
+  {
+    "name": "es-PA-MargaritaNeural",
+    "engine": "openai-edge-tts",
+    "locale": "es-PA",
+    "gender": "female"
+  },
+  {
+    "name": "es-PA-RobertoNeural",
+    "engine": "openai-edge-tts",
+    "locale": "es-PA",
+    "gender": "male"
+  },
+  {
+    "name": "es-PY-MarioNeural",
+    "engine": "openai-edge-tts",
+    "locale": "es-PY",
+    "gender": "male"
+  },
+  {
+    "name": "es-PY-TaniaNeural",
+    "engine": "openai-edge-tts",
+    "locale": "es-PY",
+    "gender": "female"
+  },
+  {
+    "name": "es-PE-AlexNeural",
+    "engine": "openai-edge-tts",
+    "locale": "es-PE",
+    "gender": "male"
+  },
+  {
+    "name": "es-PE-CamilaNeural",
+    "engine": "openai-edge-tts",
+    "locale": "es-PE",
+    "gender": "female"
+  },
+  {
+    "name": "es-PR-KarinaNeural",
+    "engine": "openai-edge-tts",
+    "locale": "es-PR",
+    "gender": "female"
+  },
+  {
+    "name": "es-PR-VictorNeural",
+    "engine": "openai-edge-tts",
+    "locale": "es-PR",
+    "gender": "male"
+  },
+  {
+    "name": "es-ES-AlvaroNeural",
+    "engine": "openai-edge-tts",
+    "locale": "es-ES",
+    "gender": "male"
+  },
+  {
+    "name": "es-ES-ElviraNeural",
+    "engine": "openai-edge-tts",
+    "locale": "es-ES",
+    "gender": "female"
+  },
+  {
+    "name": "es-US-AlonsoNeural",
+    "engine": "openai-edge-tts",
+    "locale": "es-US",
+    "gender": "male"
+  },
+  {
+    "name": "es-US-PalomaNeural",
+    "engine": "openai-edge-tts",
+    "locale": "es-US",
+    "gender": "female"
+  },
+  {
+    "name": "es-UY-MateoNeural",
+    "engine": "openai-edge-tts",
+    "locale": "es-UY",
+    "gender": "male"
+  },
+  {
+    "name": "es-UY-ValentinaNeural",
+    "engine": "openai-edge-tts",
+    "locale": "es-UY",
+    "gender": "female"
+  },
+  {
+    "name": "es-VE-PaolaNeural",
+    "engine": "openai-edge-tts",
+    "locale": "es-VE",
+    "gender": "female"
+  },
+  {
+    "name": "es-VE-SebastianNeural",
+    "engine": "openai-edge-tts",
+    "locale": "es-VE",
+    "gender": "male"
+  },
+  {
+    "name": "su-ID-JajangNeural",
+    "engine": "openai-edge-tts",
+    "locale": "su-ID",
+    "gender": "male"
+  },
+  {
+    "name": "su-ID-TutiNeural",
+    "engine": "openai-edge-tts",
+    "locale": "su-ID",
+    "gender": "female"
+  },
+  {
+    "name": "sw-KE-RafikiNeural",
+    "engine": "openai-edge-tts",
+    "locale": "sw-KE",
+    "gender": "male"
+  },
+  {
+    "name": "sw-KE-ZuriNeural",
+    "engine": "openai-edge-tts",
+    "locale": "sw-KE",
+    "gender": "female"
+  },
+  {
+    "name": "sw-TZ-DaudiNeural",
+    "engine": "openai-edge-tts",
+    "locale": "sw-TZ",
+    "gender": "male"
+  },
+  {
+    "name": "sw-TZ-RehemaNeural",
+    "engine": "openai-edge-tts",
+    "locale": "sw-TZ",
+    "gender": "female"
+  },
+  {
+    "name": "sv-SE-MattiasNeural",
+    "engine": "openai-edge-tts",
+    "locale": "sv-SE",
+    "gender": "male"
+  },
+  {
+    "name": "sv-SE-SofieNeural",
+    "engine": "openai-edge-tts",
+    "locale": "sv-SE",
+    "gender": "female"
+  },
+  {
+    "name": "ta-IN-PallaviNeural",
+    "engine": "openai-edge-tts",
+    "locale": "ta-IN",
+    "gender": "female"
+  },
+  {
+    "name": "ta-IN-ValluvarNeural",
+    "engine": "openai-edge-tts",
+    "locale": "ta-IN",
+    "gender": "male"
+  },
+  {
+    "name": "ta-MY-KaniNeural",
+    "engine": "openai-edge-tts",
+    "locale": "ta-MY",
+    "gender": "female"
+  },
+  {
+    "name": "ta-MY-SuryaNeural",
+    "engine": "openai-edge-tts",
+    "locale": "ta-MY",
+    "gender": "male"
+  },
+  {
+    "name": "ta-SG-AnbuNeural",
+    "engine": "openai-edge-tts",
+    "locale": "ta-SG",
+    "gender": "male"
+  },
+  {
+    "name": "ta-SG-VenbaNeural",
+    "engine": "openai-edge-tts",
+    "locale": "ta-SG",
+    "gender": "female"
+  },
+  {
+    "name": "ta-LK-KumarNeural",
+    "engine": "openai-edge-tts",
+    "locale": "ta-LK",
+    "gender": "male"
+  },
+  {
+    "name": "ta-LK-SaranyaNeural",
+    "engine": "openai-edge-tts",
+    "locale": "ta-LK",
+    "gender": "female"
+  },
+  {
+    "name": "te-IN-MohanNeural",
+    "engine": "openai-edge-tts",
+    "locale": "te-IN",
+    "gender": "male"
+  },
+  {
+    "name": "te-IN-ShrutiNeural",
+    "engine": "openai-edge-tts",
+    "locale": "te-IN",
+    "gender": "female"
+  },
+  {
+    "name": "th-TH-NiwatNeural",
+    "engine": "openai-edge-tts",
+    "locale": "th-TH",
+    "gender": "male"
+  },
+  {
+    "name": "th-TH-PremwadeeNeural",
+    "engine": "openai-edge-tts",
+    "locale": "th-TH",
+    "gender": "female"
+  },
+  {
+    "name": "tr-TR-EmelNeural",
+    "engine": "openai-edge-tts",
+    "locale": "tr-TR",
+    "gender": "female"
+  },
+  {
+    "name": "tr-TR-AhmetNeural",
+    "engine": "openai-edge-tts",
+    "locale": "tr-TR",
+    "gender": "male"
+  },
+  {
+    "name": "uk-UA-OstapNeural",
+    "engine": "openai-edge-tts",
+    "locale": "uk-UA",
+    "gender": "male"
+  },
+  {
+    "name": "uk-UA-PolinaNeural",
+    "engine": "openai-edge-tts",
+    "locale": "uk-UA",
+    "gender": "female"
+  },
+  {
+    "name": "ur-IN-GulNeural",
+    "engine": "openai-edge-tts",
+    "locale": "ur-IN",
+    "gender": "female"
+  },
+  {
+    "name": "ur-IN-SalmanNeural",
+    "engine": "openai-edge-tts",
+    "locale": "ur-IN",
+    "gender": "male"
+  },
+  {
+    "name": "ur-PK-AsadNeural",
+    "engine": "openai-edge-tts",
+    "locale": "ur-PK",
+    "gender": "male"
+  },
+  {
+    "name": "ur-PK-UzmaNeural",
+    "engine": "openai-edge-tts",
+    "locale": "ur-PK",
+    "gender": "female"
+  },
+  {
+    "name": "uz-UZ-MadinaNeural",
+    "engine": "openai-edge-tts",
+    "locale": "uz-UZ",
+    "gender": "female"
+  },
+  {
+    "name": "uz-UZ-SardorNeural",
+    "engine": "openai-edge-tts",
+    "locale": "uz-UZ",
+    "gender": "male"
+  },
+  {
+    "name": "vi-VN-HoaiMyNeural",
+    "engine": "openai-edge-tts",
+    "locale": "vi-VN",
+    "gender": "female"
+  },
+  {
+    "name": "vi-VN-NamMinhNeural",
+    "engine": "openai-edge-tts",
+    "locale": "vi-VN",
+    "gender": "male"
+  },
+  {
+    "name": "cy-GB-AledNeural",
+    "engine": "openai-edge-tts",
+    "locale": "cy-GB",
+    "gender": "male"
+  },
+  {
+    "name": "cy-GB-NiaNeural",
+    "engine": "openai-edge-tts",
+    "locale": "cy-GB",
+    "gender": "female"
+  },
+  {
+    "name": "zu-ZA-ThandoNeural",
+    "engine": "openai-edge-tts",
+    "locale": "zu-ZA",
+    "gender": "female"
+  },
+  {
+    "name": "zu-ZA-ThembaNeural",
+    "engine": "openai-edge-tts",
+    "locale": "zu-ZA",
+    "gender": "male"
+  }
+]
