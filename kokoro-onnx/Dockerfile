@@ -31,7 +31,7 @@ COPY . .
 RUN mkdir -p /app/models /app/voices
 
 # Copy voices JSON file
-COPY ../voices/kokoro_voices.json /app/voices/
+COPY kokoro_voices.json /app/voices/
 
 # Download required voices file
 RUN curl -L -o /app/voices-v1.0.bin https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/voices-v1.0.bin
