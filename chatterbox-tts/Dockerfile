@@ -37,6 +37,29 @@ COPY . .
 # Create required directories for the application
 RUN mkdir -p model_cache reference_audio outputs voices logs hf_cache ui static
 
+# Pre-download the model to avoid startup delays (optional)
+# Uncomment the following lines if you want to pre-download the model during build
+# RUN python -c "
+# import sys
+# import signal
+# import os
+# def timeout_handler(signum, frame):
+#     print('Model download timed out after 15 minutes')
+#     sys.exit(1)
+# signal.signal(signal.SIGALRM, timeout_handler)
+# signal.alarm(900)  # 15 minutes
+# try:
+#     from chatterbox.tts import ChatterboxTTS
+#     print('Pre-downloading Chatterbox model...')
+#     model = ChatterboxTTS.from_pretrained(device='cpu')
+#     print('Model pre-download completed successfully!')
+#     signal.alarm(0)
+# except Exception as e:
+#     print(f'Model pre-download failed: {e}')
+#     signal.alarm(0)
+#     sys.exit(0)  # Continue anyway
+# "
+
 # Set proper permissions
 RUN chmod -R 755 /app && \
     chmod -R 777 hf_cache model_cache reference_audio outputs voices logs

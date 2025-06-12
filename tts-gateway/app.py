@@ -281,10 +281,53 @@ async def get_audio(audio_id: str):
     if isinstance(audio_data, str):
         audio_data = audio_data.encode('latin-1')
     
+    # Determine file extension and content type
+    content_type = "audio/wav"
+    file_extension = "wav"
+    
+    # Check if this is an MP3 file based on audio_id or content
+    if audio_id.endswith("_mp3") or (isinstance(audio_data, bytes) and audio_data.startswith(b'ID3')):
+        content_type = "audio/mpeg"
+        file_extension = "mp3"
+    
     return StreamingResponse(
         io.BytesIO(audio_data),
-        media_type="audio/wav",
-        headers={"Content-Disposition": f"attachment; filename={audio_id}.wav"}
+        media_type=content_type,
+        headers={
+            "Content-Disposition": f"attachment; filename={audio_id}.{file_extension}",
+            "Content-Type": content_type,
+            "Cache-Control": "public, max-age=3600"
+        }
+    )
+
+# Play audio directly in browser (inline, not download)
+@app.get("/play/{audio_id}")
+async def play_audio(audio_id: str):
+    if not REDIS_AVAILABLE:
+        raise HTTPException(status_code=404, detail="Audio not found")
+    
+    audio_data = redis_client.get(f"audio:{audio_id}")
+    if not audio_data:
+        raise HTTPException(status_code=404, detail="Audio not found or expired")
+    
+    # Convert string back to bytes if needed
+    if isinstance(audio_data, str):
+        audio_data = audio_data.encode('latin-1')
+    
+    # Determine content type
+    content_type = "audio/wav"
+    if audio_id.endswith("_mp3") or (isinstance(audio_data, bytes) and audio_data.startswith(b'ID3')):
+        content_type = "audio/mpeg"
+    
+    return StreamingResponse(
+        io.BytesIO(audio_data),
+        media_type=content_type,
+        headers={
+            "Content-Disposition": "inline",
+            "Content-Type": content_type,
+            "Cache-Control": "public, max-age=3600",
+            "Accept-Ranges": "bytes"
+        }
     )
 
 # Web interface

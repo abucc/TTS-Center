@@ -27,7 +27,7 @@ services:
         reservations:
           memory: 2G
 
-  # Chatterbox TTS Server
+  # Chatterbox TTS Server (Optional - comment out if causing issues)
   chatterbox-tts:
     build:
       context: ./chatterbox-tts
@@ -49,15 +49,16 @@ services:
       - ./chatterbox-tts/logs:/app/logs
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+      interval: 60s
+      timeout: 30s
+      retries: 5
+      start_period: 900s  # 15 minutes for model download
     deploy:
       resources:
         limits:
-          memory: 3G
+          memory: 6G  # Increased memory for model loading
         reservations:
-          memory: 1G
+          memory: 2G
 
 
 
@@ -123,8 +124,54 @@ services:
         reservations:
           memory: 512M
 
+  # Modern React Frontend
+  tts-frontend:
+    build:
+      context: ./tts-frontend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "3003:80"
+    environment:
+      - NODE_ENV=production
+    depends_on:
+      - tts-gateway
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
+
+  # Redis for caching (optional but recommended)
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 128M
+
 volumes:
   chatterbox_hf_cache:
+  redis_data:
 
 networks:
   default:
