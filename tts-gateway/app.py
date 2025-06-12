@@ -34,16 +34,32 @@ app.add_middleware(
 
 # Redis client for caching (optional)
 REDIS_ENABLED = os.getenv("REDIS_ENABLED", "true").lower() == "true"
+REDIS_URL = os.getenv("REDIS_URL")
 REDIS_HOST = os.getenv("REDIS_HOST", "redis")
 REDIS_PORT = int(os.getenv("REDIS_PORT", "6379"))
+REDIS_DB = int(os.getenv("REDIS_DB", "1"))  # Use DB 1 to avoid conflicts
+REDIS_KEY_PREFIX = os.getenv("REDIS_KEY_PREFIX", "tts_")
 
 if REDIS_ENABLED:
     try:
-        # Don't decode responses to handle binary audio data properly
-        redis_client = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, decode_responses=False)
+        # Support both Redis URL and individual parameters
+        if REDIS_URL:
+            # Use Redis URL (for Coolify)
+            redis_client = redis.from_url(REDIS_URL, decode_responses=False)
+            logger.info(f"Redis connection via URL: {REDIS_URL[:20]}...")
+        else:
+            # Use individual parameters
+            redis_client = redis.Redis(
+                host=REDIS_HOST,
+                port=REDIS_PORT,
+                db=REDIS_DB,
+                decode_responses=False
+            )
+            logger.info(f"Redis connection at {REDIS_HOST}:{REDIS_PORT} DB:{REDIS_DB}")
+        
         redis_client.ping()
         REDIS_AVAILABLE = True
-        logger.info(f"Redis connection established at {REDIS_HOST}:{REDIS_PORT}")
+        logger.info(f"Redis connected successfully with prefix: '{REDIS_KEY_PREFIX}'")
     except Exception as e:
         REDIS_AVAILABLE = False
         logger.warning(f"Redis connection failed: {e}. Caching disabled.")
@@ -274,7 +290,8 @@ async def get_voices(provider: str):
 # Generate cache key
 def generate_cache_key(request: TTSRequest) -> str:
     content = f"{request.provider}:{request.text}:{request.voice}:{request.speed}:{request.pitch}:{request.format}"
-    return hashlib.md5(content.encode()).hexdigest()
+    key = hashlib.md5(content.encode()).hexdigest()
+    return f"{REDIS_KEY_PREFIX}{key}" if REDIS_KEY_PREFIX else key
 
 # Main TTS endpoint
 @app.post("/tts", response_model=TTSResponse)

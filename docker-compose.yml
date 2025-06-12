@@ -108,14 +108,13 @@ services:
       - CHATTERBOX_URL=http://chatterbox-tts:8000
       - OPENAI_EDGE_TTS_URL=http://openai-edge-tts:5050
       - CORS_ORIGINS=*
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
       - REDIS_ENABLED=true
+      - REDIS_URL=  # Set this in Coolify environment variables
+      - REDIS_KEY_PREFIX=tts_
     depends_on:
       - kokoro-onnx
       - chatterbox-tts
       - openai-edge-tts
-      - redis
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s
@@ -152,30 +151,8 @@ services:
         reservations:
           memory: 256M
 
-  # Redis for TTS caching (using different port to avoid conflicts)
-  redis:
-    image: redis:7-alpine
-    restart: unless-stopped
-    ports:
-      - "6380:6379"  # Use different external port to avoid conflicts
-    command: redis-server --port 6379 --appendonly yes --maxmemory 512mb --maxmemory-policy allkeys-lru --save 60 1000
-    volumes:
-      - tts_redis_data:/data
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-    deploy:
-      resources:
-        limits:
-          memory: 768M
-        reservations:
-          memory: 256M
-
 volumes:
   chatterbox_hf_cache:
-  tts_redis_data:
 
 networks:
   default:
