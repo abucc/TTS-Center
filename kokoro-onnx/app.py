@@ -44,21 +44,41 @@ class TTSResponse(BaseModel):
     message: Optional[str] = None
     audio_length: Optional[float] = None
 
+def ensure_kokoro_files():
+    """Download kokoro model files if they don't exist"""
+    import wget
+    
+    model_path = os.getenv("MODEL_PATH", "/app/models")
+    os.makedirs(model_path, exist_ok=True)
+    
+    model_file = os.path.join(model_path, "kokoro-v1.0.onnx")
+    voices_file = os.path.join(model_path, "voices-v1.0.bin")
+    
+    if not os.path.exists(model_file):
+        logger.info("Downloading kokoro-v1.0.onnx...")
+        wget.download(
+            "https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/kokoro-v1.0.onnx",
+            model_file
+        )
+        logger.info("Model file downloaded successfully")
+        
+    if not os.path.exists(voices_file):
+        logger.info("Downloading voices-v1.0.bin...")
+        wget.download(
+            "https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/voices-v1.0.bin",
+            voices_file
+        )
+        logger.info("Voices file downloaded successfully")
+        
+    return model_file, voices_file
+
 # Initialize TTS model
 async def initialize_model():
     global tts_model, tokenizer
     try:
-        model_path = os.getenv("MODEL_PATH", "/app/models")
+        logger.info("Initializing Kokoro TTS model...")
+        model_file, voices_file = ensure_kokoro_files()
         
-        # Check if model files exist
-        model_file = os.path.join(model_path, "kokoro-v1.0.onnx")
-        voices_file = os.path.join(model_path, "voices-v1.0.bin")
-        
-        if not os.path.exists(model_file) or not os.path.exists(voices_file):
-            logger.warning("Model files not found, using default paths...")
-            model_file = "kokoro-v1.0.onnx"
-            voices_file = "voices-v1.0.bin"
-            
         tts_model = Kokoro(model_file, voices_file)
         tokenizer = Tokenizer()
         logger.info("Kokoro TTS model and tokenizer initialized successfully")

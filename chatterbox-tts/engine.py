@@ -124,10 +124,21 @@ def load_model() -> bool:
         logger.info(
             f"Attempting to load model directly using from_pretrained (expected from Hugging Face repository: {model_repo_id_config} or library default)."
         )
+        logger.info("This may take several minutes on first run as the model needs to be downloaded...")
+        logger.info("Model size is approximately 2-4GB. Please be patient during initial download.")
+        
         try:
             # Directly use from_pretrained. This will utilize the standard Hugging Face cache.
             # The ChatterboxTTS.from_pretrained method handles downloading if the model is not in the cache.
+            import time
+            start_time = time.time()
+            logger.info("Starting model download/loading...")
+            
             chatterbox_model = ChatterboxTTS.from_pretrained(device=model_device)
+            
+            elapsed_time = time.time() - start_time
+            logger.info(f"Model loading completed in {elapsed_time:.1f} seconds")
+            
             # The actual repo ID used by from_pretrained is often internal to the library,
             # but logging the configured one provides user context.
             logger.info(
@@ -138,6 +149,11 @@ def load_model() -> bool:
                 f"Failed to load model using from_pretrained (expected from '{model_repo_id_config}' or library default): {e_hf}",
                 exc_info=True,
             )
+            logger.error("This could be due to:")
+            logger.error("1. Network connectivity issues")
+            logger.error("2. Insufficient disk space for model cache")
+            logger.error("3. Hugging Face Hub being temporarily unavailable")
+            logger.error("4. Model repository access restrictions")
             chatterbox_model = None
             MODEL_LOADED = False
             return False
