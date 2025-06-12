@@ -151,7 +151,7 @@ services:
     image: redis:7-alpine
     restart: unless-stopped
     # Port mapping removed to avoid conflicts on host
-    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    command: redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy allkeys-lru --save 60 1000
     volumes:
       - redis_data:/data
     healthcheck:
@@ -162,9 +162,9 @@ services:
     deploy:
       resources:
         limits:
-          memory: 512M
+          memory: 768M
         reservations:
-          memory: 128M
+          memory: 256M
 
 volumes:
   chatterbox_hf_cache:

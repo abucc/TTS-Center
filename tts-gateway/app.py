@@ -123,19 +123,66 @@ async def get_voices(provider: str):
                 # OpenAI Edge TTS requires auth header
                 headers = {"Authorization": "Bearer your_api_key_here"}
                 response = await client.get(f"{SERVICES[provider]}/voices", headers=headers)
+                
+                if response.status_code != 200:
+                    logger.error(f"OpenAI Edge TTS service returned status {response.status_code}")
+                    raise HTTPException(status_code=response.status_code, detail="OpenAI Edge TTS service error")
+                
                 result = response.json()
                 # Transform the response to match expected format
                 if "voices" in result:
-                    return [{"name": v.get("name", v), "display_name": f"{v.get('name', v)} ({v.get('gender', 'unknown')})"} 
+                    return [{"name": v.get("name", v), "display_name": f"{v.get('name', v)} ({v.get('gender', 'unknown')})"}
                            for v in result["voices"]]
-                return result
+                return []
+            
+            elif provider == "chatterbox":
+                response = await client.get(f"{SERVICES[provider]}/voices")
+                
+                if response.status_code != 200:
+                    logger.error(f"Chatterbox service returned status {response.status_code}")
+                    raise HTTPException(status_code=response.status_code, detail="Chatterbox service error")
+                
+                result = response.json()
+                # Chatterbox returns [{"name": "filename", "display_name": "display"}]
+                if isinstance(result, list):
+                    return [{"name": v.get("name", v), "display_name": v.get("display_name", v.get("name", v))}
+                           for v in result]
+                return []
+            
+            elif provider == "kokoro":
+                response = await client.get(f"{SERVICES[provider]}/voices")
+                
+                if response.status_code != 200:
+                    logger.error(f"Kokoro service returned status {response.status_code}")
+                    raise HTTPException(status_code=response.status_code, detail="Kokoro service error")
+                
+                result = response.json()
+                # Kokoro returns list of VoiceInfo objects
+                if isinstance(result, list):
+                    return [{"name": v.get("name", v), "display_name": v.get("name", v)}
+                           for v in result]
+                return []
+            
             else:
                 response = await client.get(f"{SERVICES[provider]}/voices")
+                
+                if response.status_code != 200:
+                    logger.error(f"{provider} service returned status {response.status_code}")
+                    raise HTTPException(status_code=response.status_code, detail=f"{provider} service error")
+                
                 result = response.json()
-                # Ensure consistent format
+                # Generic handling
                 if isinstance(result, list):
-                    return [{"name": v.get("name", v), "display_name": v.get("name", v)} for v in result]
-                return result
+                    return [{"name": v.get("name", v), "display_name": v.get("display_name", v.get("name", v))}
+                           for v in result]
+                return []
+                
+    except httpx.ConnectError as e:
+        logger.error(f"Connection error to {provider} service: {str(e)}")
+        raise HTTPException(status_code=503, detail=f"Cannot connect to {provider} service")
+    except httpx.TimeoutException as e:
+        logger.error(f"Timeout error to {provider} service: {str(e)}")
+        raise HTTPException(status_code=503, detail=f"Timeout connecting to {provider} service")
     except Exception as e:
         logger.error(f"Error getting voices for {provider}: {str(e)}")
         raise HTTPException(status_code=503, detail=f"Service unavailable: {str(e)}")
@@ -155,19 +202,23 @@ async def text_to_speech(request: TTSRequest):
             error="Invalid provider"
         )
     
+    # Generate cache key
+    cache_key = generate_cache_key(request)
+    
     # Check cache first
-    cache_key = None
     if request.cache and REDIS_AVAILABLE:
-        cache_key = generate_cache_key(request)
-        cached_result = redis_client.get(f"tts:{cache_key}")
-        if cached_result:
-            logger.info(f"Cache hit for key: {cache_key}")
-            return TTSResponse(
-                success=True,
-                provider=request.provider,
-                cached=True,
-                audio_url=f"/audio/{cache_key}"
-            )
+        try:
+            cached_audio = redis_client.get(f"audio:{cache_key}")
+            if cached_audio:
+                logger.info(f"Cache hit for key: {cache_key}")
+                return TTSResponse(
+                    success=True,
+                    provider=request.provider,
+                    cached=True,
+                    audio_url=f"/audio/{cache_key}"
+                )
+        except Exception as e:
+            logger.warning(f"Cache check failed: {e}")
     
     start_time = asyncio.get_event_loop().time()
     
@@ -176,11 +227,11 @@ async def text_to_speech(request: TTSRequest):
         provider_request = await prepare_provider_request(request)
         
         # Make request to provider
-        async with httpx.AsyncClient(timeout=30.0) as client:
+        async with httpx.AsyncClient(timeout=60.0) as client:
             # Different endpoints for different providers
             if request.provider == "openai-edge-tts":
                 endpoint = f"{SERVICES[request.provider]}/v1/audio/speech"
-                headers = {"Authorization": "Bearer your_api_key_here"}
+                headers = {"Authorization": "Bearer your_api_key_here", "Content-Type": "application/json"}
                 response = await client.post(
                     endpoint,
                     json=provider_request,
@@ -193,20 +244,41 @@ async def text_to_speech(request: TTSRequest):
                 )
             
             if response.status_code != 200:
+                error_detail = f"Provider error: HTTP {response.status_code}"
+                try:
+                    error_body = response.text
+                    if error_body:
+                        error_detail += f" - {error_body}"
+                except:
+                    pass
+                
                 return TTSResponse(
                     success=False,
                     provider=request.provider,
-                    error=f"Provider error: HTTP {response.status_code}"
+                    error=error_detail
                 )
             
             # Handle response based on content type
-            if response.headers.get("content-type", "").startswith("audio/"):
+            content_type = response.headers.get("content-type", "").lower()
+            
+            if content_type.startswith("audio/") or "audio" in content_type:
                 # Direct audio response
                 audio_data = response.content
                 
+                if len(audio_data) < 100:  # Very small file, likely an error
+                    return TTSResponse(
+                        success=False,
+                        provider=request.provider,
+                        error="Generated audio file is too small, likely corrupted"
+                    )
+                
                 # Cache the audio data
-                if cache_key and REDIS_AVAILABLE:
-                    redis_client.setex(f"audio:{cache_key}", 3600, audio_data)  # 1 hour cache
+                if REDIS_AVAILABLE:
+                    try:
+                        redis_client.setex(f"audio:{cache_key}", 3600, audio_data)  # 1 hour cache
+                        logger.info(f"Cached audio with key: {cache_key}")
+                    except Exception as e:
+                        logger.warning(f"Failed to cache audio: {e}")
                 
                 duration = (asyncio.get_event_loop().time() - start_time) * 1000
                 
@@ -214,20 +286,49 @@ async def text_to_speech(request: TTSRequest):
                     success=True,
                     provider=request.provider,
                     duration=round(duration, 2),
-                    audio_url=f"/audio/{cache_key}" if cache_key else None
+                    audio_url=f"/audio/{cache_key}"
                 )
             else:
-                # JSON response with audio URL or data
-                result = response.json()
-                duration = (asyncio.get_event_loop().time() - start_time) * 1000
+                # JSON response - try to handle it
+                try:
+                    result = response.json()
+                    duration = (asyncio.get_event_loop().time() - start_time) * 1000
+                    
+                    # If the result contains audio_url, use it
+                    if "audio_url" in result:
+                        return TTSResponse(
+                            success=True,
+                            provider=request.provider,
+                            duration=round(duration, 2),
+                            audio_url=result["audio_url"]
+                        )
+                    else:
+                        return TTSResponse(
+                            success=False,
+                            provider=request.provider,
+                            error="Provider returned JSON without audio content"
+                        )
+                except Exception as e:
+                    return TTSResponse(
+                        success=False,
+                        provider=request.provider,
+                        error=f"Failed to parse provider response: {str(e)}"
+                    )
                 
-                return TTSResponse(
-                    success=True,
-                    provider=request.provider,
-                    duration=round(duration, 2),
-                    **result
-                )
-                
+    except httpx.ConnectError as e:
+        logger.error(f"Connection error to {request.provider}: {str(e)}")
+        return TTSResponse(
+            success=False,
+            provider=request.provider,
+            error=f"Cannot connect to {request.provider} service"
+        )
+    except httpx.TimeoutException as e:
+        logger.error(f"Timeout error to {request.provider}: {str(e)}")
+        return TTSResponse(
+            success=False,
+            provider=request.provider,
+            error=f"Timeout connecting to {request.provider} service"
+        )
     except Exception as e:
         logger.error(f"TTS request failed: {str(e)}")
         return TTSResponse(
@@ -271,34 +372,56 @@ async def prepare_provider_request(request: TTSRequest) -> dict:
 @app.get("/audio/{audio_id}")
 async def get_audio(audio_id: str):
     if not REDIS_AVAILABLE:
-        raise HTTPException(status_code=404, detail="Audio not found")
+        raise HTTPException(status_code=404, detail="Audio not found - caching disabled")
     
-    audio_data = redis_client.get(f"audio:{audio_id}")
-    if not audio_data:
-        raise HTTPException(status_code=404, detail="Audio not found or expired")
-    
-    # Convert string back to bytes if needed
-    if isinstance(audio_data, str):
-        audio_data = audio_data.encode('latin-1')
-    
-    # Determine file extension and content type
-    content_type = "audio/wav"
-    file_extension = "wav"
-    
-    # Check if this is an MP3 file based on audio_id or content
-    if audio_id.endswith("_mp3") or (isinstance(audio_data, bytes) and audio_data.startswith(b'ID3')):
-        content_type = "audio/mpeg"
-        file_extension = "mp3"
-    
-    return StreamingResponse(
-        io.BytesIO(audio_data),
-        media_type=content_type,
-        headers={
-            "Content-Disposition": f"attachment; filename={audio_id}.{file_extension}",
-            "Content-Type": content_type,
-            "Cache-Control": "public, max-age=3600"
-        }
-    )
+    try:
+        audio_data = redis_client.get(f"audio:{audio_id}")
+        if not audio_data:
+            raise HTTPException(status_code=404, detail="Audio not found or expired")
+        
+        # Redis returns bytes, but ensure we have proper binary data
+        if isinstance(audio_data, str):
+            # If we get a string, try to decode it back to bytes
+            try:
+                audio_data = audio_data.encode('latin-1')
+            except:
+                raise HTTPException(status_code=500, detail="Invalid audio data encoding")
+        
+        if not isinstance(audio_data, bytes):
+            raise HTTPException(status_code=500, detail="Invalid audio data type")
+        
+        # Determine content type based on audio file magic bytes
+        content_type = "audio/wav"
+        file_extension = "wav"
+        
+        # Check for MP3 magic bytes
+        if audio_data.startswith(b'ID3') or audio_data.startswith(b'\xff\xfb'):
+            content_type = "audio/mpeg"
+            file_extension = "mp3"
+        # Check for WAV magic bytes
+        elif audio_data.startswith(b'RIFF') and b'WAVE' in audio_data[:12]:
+            content_type = "audio/wav"
+            file_extension = "wav"
+        # Check for OGG magic bytes
+        elif audio_data.startswith(b'OggS'):
+            content_type = "audio/ogg"
+            file_extension = "ogg"
+        
+        return StreamingResponse(
+            io.BytesIO(audio_data),
+            media_type=content_type,
+            headers={
+                "Content-Disposition": f"attachment; filename={audio_id}.{file_extension}",
+                "Content-Type": content_type,
+                "Cache-Control": "public, max-age=3600",
+                "Content-Length": str(len(audio_data))
+            }
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error serving audio {audio_id}: {str(e)}")
+        raise HTTPException(status_code=500, detail="Error serving audio file")
 
 # Play audio directly in browser (inline, not download)
 @app.get("/play/{audio_id}")

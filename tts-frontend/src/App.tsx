@@ -52,7 +52,7 @@ const App: React.FC = () => {
 
   const loadVoices = async () => {
     try {
-      const response = await fetch(`/api/voices/${provider}`);
+      const response = await fetch(`/voices/${provider}`);
       if (response.ok) {
         const voicesData = await response.json();
         setVoices(Array.isArray(voicesData) ? voicesData : []);
@@ -82,7 +82,7 @@ const App: React.FC = () => {
     };
 
     try {
-      const response = await fetch('/api/tts', {
+      const response = await fetch('/tts', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -109,7 +109,7 @@ const App: React.FC = () => {
 
   const checkServiceStatus = async () => {
     try {
-      const response = await fetch('/api/status');
+      const response = await fetch('/status');
       if (response.ok) {
         const statuses: ServiceStatus[] = await response.json();
         setServiceStatuses(statuses);
