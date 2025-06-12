@@ -5,6 +5,7 @@ import asyncio
 import tempfile
 import subprocess
 import os
+import json
 from pathlib import Path
 
 from utils import DETAILED_ERROR_LOGGING
@@ -127,14 +128,33 @@ def get_models():
     ]
 
 async def _get_voices(language=None):
-    # List all voices, filter by language if specified
-    all_voices = await edge_tts.list_voices()
-    language = language or DEFAULT_LANGUAGE  # Use default if no language specified
-    filtered_voices = [
-        {"name": v['ShortName'], "gender": v['Gender'], "language": v['Locale']}
-        for v in all_voices if language == 'all' or language is None or v['Locale'] == language
-    ]
-    return filtered_voices
+    # Load comprehensive voice list from JSON file
+    voices_json_path = "/app/openai_edge_tts_voices.json"
+    if os.path.exists(voices_json_path):
+        with open(voices_json_path, 'r') as f:
+            all_voices = json.load(f)
+        
+        language = language or DEFAULT_LANGUAGE
+        filtered_voices = []
+        
+        for voice in all_voices:
+            if language == 'all' or language is None or voice['locale'] == language:
+                filtered_voices.append({
+                    "name": voice['name'],
+                    "gender": voice['gender'],
+                    "language": voice['locale']
+                })
+        
+        return filtered_voices
+    else:
+        # Fallback to edge-tts API if JSON not available
+        all_voices = await edge_tts.list_voices()
+        language = language or DEFAULT_LANGUAGE
+        filtered_voices = [
+            {"name": v['ShortName'], "gender": v['Gender'], "language": v['Locale']}
+            for v in all_voices if language == 'all' or language is None or v['Locale'] == language
+        ]
+        return filtered_voices
 
 def get_voices(language=None):
     return asyncio.run(_get_voices(language))
