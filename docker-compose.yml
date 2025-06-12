@@ -45,7 +45,6 @@ services:
       - ./models/chatterbox:/app/model_cache
       - ./cache:/app/cache
       - chatterbox_hf_cache:/app/hf_cache
-      - ./chatterbox-tts/voices:/app/voices
       - ./chatterbox-tts/reference_audio:/app/reference_audio
       - ./chatterbox-tts/outputs:/app/outputs
       - ./chatterbox-tts/logs:/app/logs
