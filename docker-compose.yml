@@ -71,16 +71,16 @@ services:
     ports:
       - "9003:5050"
     environment:
-      - API_KEY=${API_KEY:-your_api_key_here}
-      - PORT=${PORT:-5050}
-      - DEFAULT_VOICE=${DEFAULT_VOICE:-en-US-AvaNeural}
-      - DEFAULT_RESPONSE_FORMAT=${DEFAULT_RESPONSE_FORMAT:-mp3}
-      - DEFAULT_SPEED=${DEFAULT_SPEED:-1.0}
-      - DEFAULT_LANGUAGE=${DEFAULT_LANGUAGE:-en-US}
-      - REQUIRE_API_KEY=${REQUIRE_API_KEY:-True}
-      - REMOVE_FILTER=${REMOVE_FILTER:-False}
-      - EXPAND_API=${EXPAND_API:-True}
-      - DETAILED_ERROR_LOGGING=${DETAILED_ERROR_LOGGING:-True}
+      - API_KEY=${API_KEY}
+      - PORT=${PORT}
+      - DEFAULT_VOICE=${DEFAULT_VOICE}
+      - DEFAULT_RESPONSE_FORMAT=${DEFAULT_RESPONSE_FORMAT}
+      - DEFAULT_SPEED=${DEFAULT_SPEED}
+      - DEFAULT_LANGUAGE=${DEFAULT_LANGUAGE}
+      - REQUIRE_API_KEY=${REQUIRE_API_KEY}
+      - REMOVE_FILTER=${REMOVE_FILTER}
+      - EXPAND_API=${EXPAND_API}
+      - DETAILED_ERROR_LOGGING=${DETAILED_ERROR_LOGGING}
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5050/v1/models"]
       interval: 30s
@@ -104,13 +104,13 @@ services:
     ports:
       - "9000:8000"
     environment:
-      - KOKORO_URL=${KOKORO_URL:-http://kokoro-onnx:8000}
-      - CHATTERBOX_URL=${CHATTERBOX_URL:-http://chatterbox-tts:8000}
-      - OPENAI_EDGE_TTS_URL=${OPENAI_EDGE_TTS_URL:-http://openai-edge-tts:5050}
-      - CORS_ORIGINS=${CORS_ORIGINS:-*}
-      - REDIS_ENABLED=${REDIS_ENABLED:-true}
+      - KOKORO_URL=${KOKORO_URL}
+      - CHATTERBOX_URL=${CHATTERBOX_URL}
+      - OPENAI_EDGE_TTS_URL=${OPENAI_EDGE_TTS_URL}
+      - CORS_ORIGINS=${CORS_ORIGINS}
+      - REDIS_ENABLED=${REDIS_ENABLED}
       - REDIS_URL=${REDIS_URL}
-      - REDIS_KEY_PREFIX=${REDIS_KEY_PREFIX:-tts_}
+      - REDIS_KEY_PREFIX=${REDIS_KEY_PREFIX}
     depends_on:
       - kokoro-onnx
       - chatterbox-tts
