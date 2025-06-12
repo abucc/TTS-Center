@@ -45,6 +45,9 @@ const App: React.FC = () => {
   const [result, setResult] = useState<TTSResponse | null>(null);
   const [serviceStatuses, setServiceStatuses] = useState<ServiceStatus[]>([]);
 
+  // Get the gateway URL from environment or the current origin
+  const GATEWAY_URL = import.meta.env.VITE_GATEWAY_URL || window.location.origin;
+
   // Load voices when provider changes
   useEffect(() => {
     loadVoices();
@@ -52,7 +55,7 @@ const App: React.FC = () => {
 
   const loadVoices = async () => {
     try {
-      const response = await fetch(`/voices/${provider}`);
+      const response = await fetch(`${GATEWAY_URL}/voices/${provider}`);
       if (response.ok) {
         const voicesData = await response.json();
         setVoices(Array.isArray(voicesData) ? voicesData : []);
@@ -82,7 +85,7 @@ const App: React.FC = () => {
     };
 
     try {
-      const response = await fetch('/tts', {
+      const response = await fetch(`${GATEWAY_URL}/tts`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -110,7 +113,7 @@ const App: React.FC = () => {
   const checkServiceStatus = async () => {
     try {
       console.log('Checking service status...');
-      const response = await fetch('/status');
+      const response = await fetch(`${GATEWAY_URL}/status`);
       console.log('Status response:', response.status);
       
       if (response.ok) {

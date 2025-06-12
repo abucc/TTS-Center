@@ -1,6 +1,10 @@
 # Build stage
 FROM node:18-alpine as builder
 
+# Add build arguments
+ARG VITE_GATEWAY_URL
+ENV VITE_GATEWAY_URL=$VITE_GATEWAY_URL
+
 WORKDIR /app
 
 # Copy package files
@@ -26,7 +30,10 @@ RUN npm install -g serve
 # Copy built assets from builder stage
 COPY --from=builder /app/dist .
 
-# Expose port 3003 (matches docker-compose.yml)
+# Add configuration for serve
+RUN echo '{"port": 3003, "public": ".", "rewrites": [{"source": "**", "destination": "/index.html"}]}' > serve.json
+
+# Expose port 3003
 EXPOSE 3003
 
 # Start serve
