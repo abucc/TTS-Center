@@ -15,7 +15,7 @@ docker system prune -f
 echo "Clearing Redis cache..."
 docker volume rm awesome-tts_redis_data 2>/dev/null || true
 
-# Rebuild services that have been modified
+# Rebuild services that have been modified (chatterbox-tts especially needs rebuild for server.py changes)
 echo "Rebuilding modified services..."
 docker-compose build --no-cache tts-gateway tts-frontend chatterbox-tts
 
