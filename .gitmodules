@@ -1,0 +1,4 @@
+[submodule "chatterbox-tts"]
+	path = chatterbox-tts
+	url = https://github.com/isaacgounton/Chatterbox-TTS-Server.git
+	branch = live
