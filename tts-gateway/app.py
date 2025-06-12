@@ -34,7 +34,8 @@ app.add_middleware(
 
 # Redis client for caching (optional)
 try:
-    redis_client = redis.Redis(host='redis', port=6379, decode_responses=True)
+    # Don't decode responses to handle binary audio data properly
+    redis_client = redis.Redis(host='redis', port=6379, decode_responses=False)
     redis_client.ping()
     REDIS_AVAILABLE = True
     logger.info("Redis connection established")
@@ -426,6 +427,8 @@ async def prepare_provider_request(request: TTSRequest) -> dict:
         return base_request
     
     elif request.provider == "chatterbox":
+        # Chatterbox TTS works without voice parameter for default neural voice
+        # Only include voice if one is specifically requested
         if request.voice:
             base_request["voice"] = request.voice
         base_request["pitch"] = request.pitch
@@ -450,20 +453,20 @@ async def get_audio(audio_id: str):
         raise HTTPException(status_code=404, detail="Audio not found - caching disabled")
     
     try:
+        # Get raw binary data from Redis
         audio_data = redis_client.get(f"audio:{audio_id}")
         if not audio_data:
+            logger.error(f"Audio not found in Redis for ID: {audio_id}")
             raise HTTPException(status_code=404, detail="Audio not found or expired")
         
-        # Redis returns bytes, but ensure we have proper binary data
-        if isinstance(audio_data, str):
-            # If we get a string, try to decode it back to bytes
-            try:
-                audio_data = audio_data.encode('latin-1')
-            except:
-                raise HTTPException(status_code=500, detail="Invalid audio data encoding")
-        
+        # With decode_responses=False, Redis should return bytes directly
         if not isinstance(audio_data, bytes):
-            raise HTTPException(status_code=500, detail="Invalid audio data type")
+            logger.error(f"Expected bytes, got {type(audio_data)} for audio {audio_id}")
+            raise HTTPException(status_code=500, detail="Invalid audio data type from cache")
+        
+        if len(audio_data) < 44:  # WAV header is at least 44 bytes
+            logger.error(f"Audio data too small: {len(audio_data)} bytes for {audio_id}")
+            raise HTTPException(status_code=500, detail="Invalid audio data size")
         
         # Determine content type based on audio file magic bytes
         content_type = "audio/wav"
@@ -481,6 +484,10 @@ async def get_audio(audio_id: str):
         elif audio_data.startswith(b'OggS'):
             content_type = "audio/ogg"
             file_extension = "ogg"
+        else:
+            logger.warning(f"Unknown audio format for {audio_id}, assuming WAV")
+        
+        logger.info(f"Serving audio {audio_id}: {len(audio_data)} bytes as {content_type}")
         
         return StreamingResponse(
             io.BytesIO(audio_data),
@@ -489,44 +496,61 @@ async def get_audio(audio_id: str):
                 "Content-Disposition": f"attachment; filename={audio_id}.{file_extension}",
                 "Content-Type": content_type,
                 "Cache-Control": "public, max-age=3600",
+                "Content-Length": str(len(audio_data)),
+                "Accept-Ranges": "bytes"
+            }
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error serving audio {audio_id}: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Error serving audio file: {str(e)}")
+
+# Play audio directly in browser (inline, not download)
+@app.get("/play/{audio_id}")
+async def play_audio(audio_id: str):
+    if not REDIS_AVAILABLE:
+        raise HTTPException(status_code=404, detail="Audio not found - caching disabled")
+    
+    try:
+        # Get raw binary data from Redis
+        audio_data = redis_client.get(f"audio:{audio_id}")
+        if not audio_data:
+            logger.error(f"Audio not found in Redis for playback ID: {audio_id}")
+            raise HTTPException(status_code=404, detail="Audio not found or expired")
+        
+        # With decode_responses=False, Redis should return bytes directly
+        if not isinstance(audio_data, bytes):
+            logger.error(f"Expected bytes for playback, got {type(audio_data)} for audio {audio_id}")
+            raise HTTPException(status_code=500, detail="Invalid audio data type from cache")
+        
+        # Determine content type
+        content_type = "audio/wav"
+        if audio_data.startswith(b'ID3') or audio_data.startswith(b'\xff\xfb'):
+            content_type = "audio/mpeg"
+        elif audio_data.startswith(b'RIFF') and b'WAVE' in audio_data[:12]:
+            content_type = "audio/wav"
+        elif audio_data.startswith(b'OggS'):
+            content_type = "audio/ogg"
+        
+        logger.info(f"Playing audio {audio_id}: {len(audio_data)} bytes as {content_type}")
+        
+        return StreamingResponse(
+            io.BytesIO(audio_data),
+            media_type=content_type,
+            headers={
+                "Content-Disposition": "inline",
+                "Content-Type": content_type,
+                "Cache-Control": "public, max-age=3600",
+                "Accept-Ranges": "bytes",
                 "Content-Length": str(len(audio_data))
             }
         )
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Error serving audio {audio_id}: {str(e)}")
-        raise HTTPException(status_code=500, detail="Error serving audio file")
-
-# Play audio directly in browser (inline, not download)
-@app.get("/play/{audio_id}")
-async def play_audio(audio_id: str):
-    if not REDIS_AVAILABLE:
-        raise HTTPException(status_code=404, detail="Audio not found")
-    
-    audio_data = redis_client.get(f"audio:{audio_id}")
-    if not audio_data:
-        raise HTTPException(status_code=404, detail="Audio not found or expired")
-    
-    # Convert string back to bytes if needed
-    if isinstance(audio_data, str):
-        audio_data = audio_data.encode('latin-1')
-    
-    # Determine content type
-    content_type = "audio/wav"
-    if audio_id.endswith("_mp3") or (isinstance(audio_data, bytes) and audio_data.startswith(b'ID3')):
-        content_type = "audio/mpeg"
-    
-    return StreamingResponse(
-        io.BytesIO(audio_data),
-        media_type=content_type,
-        headers={
-            "Content-Disposition": "inline",
-            "Content-Type": content_type,
-            "Cache-Control": "public, max-age=3600",
-            "Accept-Ranges": "bytes"
-        }
-    )
+        logger.error(f"Error playing audio {audio_id}: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Error playing audio file: {str(e)}")
 
 # Web interface
 @app.get("/", response_class=HTMLResponse)
