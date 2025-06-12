@@ -39,6 +39,7 @@ REDIS_HOST = os.getenv("REDIS_HOST", "redis")
 REDIS_PORT = int(os.getenv("REDIS_PORT", "6379"))
 REDIS_DB = int(os.getenv("REDIS_DB", "1"))  # Use DB 1 to avoid conflicts
 REDIS_KEY_PREFIX = os.getenv("REDIS_KEY_PREFIX", "tts_")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY") # Get the API key from environment
 
 if REDIS_ENABLED:
     try:
@@ -217,25 +218,30 @@ async def get_voices(provider: str):
     if provider not in SERVICES:
         raise HTTPException(status_code=400, detail="Invalid provider")
     
+    headers = {}
+    if provider == "openai-edge-tts":
+        if not OPENAI_API_KEY:
+            logger.error("OPENAI_API_KEY is not set in environment for tts-gateway.")
+            raise HTTPException(status_code=500, detail="OpenAI API key not configured for gateway")
+        headers["Authorization"] = f"Bearer {OPENAI_API_KEY}"
+            
     try:
         async with httpx.AsyncClient(timeout=10.0) as client:
             if provider == "openai-edge-tts":
                 # Fetch voices from the openai-edge-tts service
-                response = await client.get(f"{SERVICES[provider]}/voices")
+                response = await client.get(f"{SERVICES[provider]}/voices", headers=headers) # Pass headers
                 response.raise_for_status() # Raise an exception for bad status codes
                 voices_data = response.json()
-                # Assuming voices_data is a list of objects like in openai_edge_tts_voices.json
-                # Each object has a "name" field.
-                return [{"name": voice.get("name"), "display_name": voice.get("name")} for voice in voices_data if voice.get("name")]
+                actual_voices_list = voices_data.get("voices", []) if isinstance(voices_data, dict) else voices_data
+                return [{"name": voice.get("name"), "display_name": voice.get("name")} for voice in actual_voices_list if voice.get("name")]
             
             elif provider == "chatterbox":
                 response = await client.get(f"{SERVICES[provider]}/voices")
                 response.raise_for_status() # Raise an exception for bad status codes
                 result = response.json()
-                # Chatterbox returns {"voices": ["filename1.wav", "filename2.wav"]}
-                if isinstance(result, dict) and "voices" in result and isinstance(result["voices"], list):
-                    # Extract the filename without extension for display name
-                    return [{"name": voice_file, "display_name": voice_file.split('.')[0]} for voice_file in result["voices"]]
+                # Chatterbox now returns: List[Dict{"name": "filename.wav", "display_name": "Filename"}]
+                if isinstance(result, list):
+                    return [{"name": voice.get("name"), "display_name": voice.get("display_name", voice.get("name", "").split('.')[0])} for voice in result if voice.get("name")]
                 logger.warning(f"Unexpected voice format from chatterbox: {result}")
                 return []
             
@@ -322,7 +328,14 @@ async def text_to_speech(request: TTSRequest):
             # Different endpoints for different providers
             if request.provider == "openai-edge-tts":
                 endpoint = f"{SERVICES[request.provider]}/v1/audio/speech"
-                headers = {"Authorization": "Bearer your_api_key_here", "Content-Type": "application/json"}
+                if not OPENAI_API_KEY:
+                    logger.error("OPENAI_API_KEY is not set in environment for tts-gateway.")
+                    return TTSResponse(
+                        success=False,
+                        provider=request.provider,
+                        error="OpenAI API key not configured for gateway"
+                    )
+                headers = {"Authorization": f"Bearer {OPENAI_API_KEY}", "Content-Type": "application/json"}
                 response = await client.post(
                     endpoint,
                     json=provider_request,
