@@ -7,7 +7,8 @@ services:
       context: ./kokoro-onnx
       dockerfile: Dockerfile
     restart: unless-stopped
-    # Host port mapping removed to avoid conflicts
+    ports:
+      - "9002:8000"
     environment:
       - MODEL_PATH=/app/models
       - MAX_WORKERS=4
@@ -67,7 +68,8 @@ services:
       context: ./openai-edge-tts
       dockerfile: Dockerfile
     restart: unless-stopped
-    # Host port mapping removed to avoid conflicts
+    ports:
+      - "9003:5050"
     environment:
       - API_KEY=your_api_key_here
       - PORT=5050
