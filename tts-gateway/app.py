@@ -78,6 +78,81 @@ class TTSResponse(BaseModel):
 async def health_check():
     return {"status": "healthy", "timestamp": datetime.now().isoformat()}
 
+# Debug endpoint for troubleshooting
+@app.get("/debug")
+async def debug_info():
+    """Comprehensive debug information for troubleshooting"""
+    debug_info = {
+        "timestamp": datetime.now().isoformat(),
+        "services": {},
+        "redis": {"available": REDIS_AVAILABLE},
+        "environment": {
+            "service_urls": SERVICES
+        }
+    }
+    
+    # Test each service
+    async with httpx.AsyncClient(timeout=5.0) as client:
+        for service_name, service_url in SERVICES.items():
+            try:
+                start_time = asyncio.get_event_loop().time()
+                health_response = await client.get(f"{service_url}/health")
+                latency = (asyncio.get_event_loop().time() - start_time) * 1000
+                
+                service_info = {
+                    "url": service_url,
+                    "health_status": health_response.status_code,
+                    "latency_ms": round(latency, 2),
+                    "response": None,
+                    "voices_available": False,
+                    "voices_count": 0
+                }
+                
+                if health_response.status_code == 200:
+                    try:
+                        service_info["response"] = health_response.json()
+                    except:
+                        service_info["response"] = health_response.text[:200]
+                    
+                    # Try to get voices
+                    try:
+                        if service_name == "openai-edge-tts":
+                            headers = {"Authorization": "Bearer your_api_key_here"}
+                            voices_response = await client.get(f"{service_url}/voices", headers=headers)
+                        else:
+                            voices_response = await client.get(f"{service_url}/voices")
+                        
+                        if voices_response.status_code == 200:
+                            voices_data = voices_response.json()
+                            service_info["voices_available"] = True
+                            if isinstance(voices_data, list):
+                                service_info["voices_count"] = len(voices_data)
+                            elif isinstance(voices_data, dict) and "voices" in voices_data:
+                                service_info["voices_count"] = len(voices_data["voices"])
+                    except Exception as e:
+                        service_info["voices_error"] = str(e)
+                
+                debug_info["services"][service_name] = service_info
+                
+            except Exception as e:
+                debug_info["services"][service_name] = {
+                    "url": service_url,
+                    "error": str(e),
+                    "health_status": "unreachable"
+                }
+    
+    # Test Redis if available
+    if REDIS_AVAILABLE:
+        try:
+            redis_client.ping()
+            debug_info["redis"]["status"] = "connected"
+            debug_info["redis"]["info"] = redis_client.info("memory")
+        except Exception as e:
+            debug_info["redis"]["status"] = "error"
+            debug_info["redis"]["error"] = str(e)
+    
+    return debug_info
+
 # Service status check
 @app.get("/status", response_model=List[ServiceStatus])
 async def check_services_status():
