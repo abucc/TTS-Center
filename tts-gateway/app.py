@@ -220,33 +220,23 @@ async def get_voices(provider: str):
     try:
         async with httpx.AsyncClient(timeout=10.0) as client:
             if provider == "openai-edge-tts":
-                # OpenAI Edge TTS requires auth header
-                headers = {"Authorization": "Bearer your_api_key_here"}
-                response = await client.get(f"{SERVICES[provider]}/voices", headers=headers)
-                
-                if response.status_code != 200:
-                    logger.error(f"OpenAI Edge TTS service returned status {response.status_code}")
-                    raise HTTPException(status_code=response.status_code, detail="OpenAI Edge TTS service error")
-                
-                result = response.json()
-                # Transform the response to match expected format
-                if "voices" in result:
-                    return [{"name": v.get("name", v), "display_name": f"{v.get('name', v)} ({v.get('gender', 'unknown')})"}
-                           for v in result["voices"]]
-                return []
+                # Fetch voices from the openai-edge-tts service
+                response = await client.get(f"{SERVICES[provider]}/voices")
+                response.raise_for_status() # Raise an exception for bad status codes
+                voices_data = response.json()
+                # Assuming voices_data is a list of objects like in openai_edge_tts_voices.json
+                # Each object has a "name" field.
+                return [{"name": voice.get("name"), "display_name": voice.get("name")} for voice in voices_data if voice.get("name")]
             
             elif provider == "chatterbox":
                 response = await client.get(f"{SERVICES[provider]}/voices")
-                
-                if response.status_code != 200:
-                    logger.error(f"Chatterbox service returned status {response.status_code}")
-                    raise HTTPException(status_code=response.status_code, detail="Chatterbox service error")
-                
+                response.raise_for_status() # Raise an exception for bad status codes
                 result = response.json()
-                # Chatterbox returns [{"name": "filename", "display_name": "display"}]
-                if isinstance(result, list):
-                    return [{"name": v.get("name", v), "display_name": v.get("display_name", v.get("name", v))}
-                           for v in result]
+                # Chatterbox returns {"voices": ["filename1.wav", "filename2.wav"]}
+                if isinstance(result, dict) and "voices" in result and isinstance(result["voices"], list):
+                    # Extract the filename without extension for display name
+                    return [{"name": voice_file, "display_name": voice_file.split('.')[0]} for voice_file in result["voices"]]
+                logger.warning(f"Unexpected voice format from chatterbox: {result}")
                 return []
             
             elif provider == "kokoro":
