@@ -119,9 +119,25 @@ async def get_voices(provider: str):
     
     try:
         async with httpx.AsyncClient(timeout=10.0) as client:
-            response = await client.get(f"{SERVICES[provider]}/voices")
-            return response.json()
+            if provider == "openai-edge-tts":
+                # OpenAI Edge TTS requires auth header
+                headers = {"Authorization": "Bearer your_api_key_here"}
+                response = await client.get(f"{SERVICES[provider]}/voices", headers=headers)
+                result = response.json()
+                # Transform the response to match expected format
+                if "voices" in result:
+                    return [{"name": v.get("name", v), "display_name": f"{v.get('name', v)} ({v.get('gender', 'unknown')})"} 
+                           for v in result["voices"]]
+                return result
+            else:
+                response = await client.get(f"{SERVICES[provider]}/voices")
+                result = response.json()
+                # Ensure consistent format
+                if isinstance(result, list):
+                    return [{"name": v.get("name", v), "display_name": v.get("name", v)} for v in result]
+                return result
     except Exception as e:
+        logger.error(f"Error getting voices for {provider}: {str(e)}")
         raise HTTPException(status_code=503, detail=f"Service unavailable: {str(e)}")
 
 # Generate cache key

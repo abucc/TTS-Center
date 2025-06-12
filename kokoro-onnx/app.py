@@ -12,25 +12,11 @@ import numpy as np
 from kokoro_onnx import Kokoro
 from kokoro_onnx.tokenizer import Tokenizer
 import asyncio
+from contextlib import asynccontextmanager
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-
-app = FastAPI(
-    title="Kokoro ONNX TTS Service",
-    description="High-quality Text-to-Speech using Kokoro ONNX",
-    version="1.0.0"
-)
-
-# CORS middleware
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
 # Global TTS model and tokenizer
 tts_model = None
@@ -81,9 +67,29 @@ async def initialize_model():
         tts_model = None
         tokenizer = None
 
-@app.on_event("startup")
-async def startup_event():
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup
     await initialize_model()
+    yield
+    # Shutdown
+    pass
+
+app = FastAPI(
+    title="Kokoro ONNX TTS Service",
+    description="High-quality Text-to-Speech using Kokoro ONNX",
+    version="1.0.0",
+    lifespan=lifespan
+)
+
+# CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.get("/health")
 async def health_check():
