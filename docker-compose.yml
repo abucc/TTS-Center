@@ -8,15 +8,16 @@ services:
       dockerfile: Dockerfile
     restart: unless-stopped
     ports:
-      - "9002:8000"
+      - "9002:9002"
     environment:
       - MODEL_PATH=/app/models
       - MAX_WORKERS=4
+      - PORT=9002
     volumes:
       - ./models/kokoro:/app/models
       - ./cache:/app/cache
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:9002/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -34,11 +35,12 @@ services:
       dockerfile: Dockerfile
     restart: unless-stopped
     ports:
-      - "9001:8000"
+      - "9001:9001"
     environment:
       - HF_HOME=/app/hf_cache
       - TRANSFORMERS_CACHE=/app/hf_cache
       - HF_HUB_CACHE=/app/hf_cache
+      - PORT=9001
     volumes:
       - ./models/chatterbox:/app/model_cache
       - ./cache:/app/cache
@@ -48,7 +50,7 @@ services:
       - ./chatterbox-tts/outputs:/app/outputs
       - ./chatterbox-tts/logs:/app/logs
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:9001/health"]
       interval: 60s
       timeout: 30s
       retries: 5
@@ -69,10 +71,10 @@ services:
       dockerfile: Dockerfile
     restart: unless-stopped
     ports:
-      - "9003:5050"
+      - "5050:5050"
     environment:
       - API_KEY=${API_KEY}
-      - PORT=${PORT}
+      - PORT=5050
       - DEFAULT_VOICE=${DEFAULT_VOICE}
       - DEFAULT_RESPONSE_FORMAT=${DEFAULT_RESPONSE_FORMAT}
       - DEFAULT_SPEED=${DEFAULT_SPEED}
@@ -102,12 +104,12 @@ services:
       dockerfile: Dockerfile
     restart: unless-stopped
     ports:
-      - "9000:8000"
+      - "9000:9000"
     environment:
-      - KOKORO_URL=${KOKORO_URL}
-      - CHATTERBOX_URL=${CHATTERBOX_URL}
-      - OPENAI_EDGE_TTS_URL=${OPENAI_EDGE_TTS_URL}
-      - OPENAI_API_KEY=${OPENAI_API_KEY} # Added for gateway to authenticate with openai-edge-tts
+      - KOKORO_URL=http://kokoro-onnx:9002
+      - CHATTERBOX_URL=http://chatterbox-tts:9001
+      - OPENAI_EDGE_TTS_URL=http://openai-edge-tts:5050
+      - PORT=9000
       - CORS_ORIGINS=${CORS_ORIGINS}
       - REDIS_ENABLED=${REDIS_ENABLED}
       - REDIS_URL=${REDIS_URL}
@@ -117,7 +119,7 @@ services:
       - chatterbox-tts
       - openai-edge-tts
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:9000/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -135,13 +137,14 @@ services:
       dockerfile: Dockerfile
     restart: unless-stopped
     ports:
-      - "3003:80"
+      - "3003:3003"
     environment:
       - NODE_ENV=production
+      - PORT=3003
     depends_on:
       - tts-gateway
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:3003/health"]
       interval: 30s
       timeout: 10s
       retries: 3
