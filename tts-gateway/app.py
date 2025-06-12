@@ -33,15 +33,23 @@ app.add_middleware(
 )
 
 # Redis client for caching (optional)
-try:
-    # Don't decode responses to handle binary audio data properly
-    redis_client = redis.Redis(host='redis', port=6379, decode_responses=False)
-    redis_client.ping()
-    REDIS_AVAILABLE = True
-    logger.info("Redis connection established")
-except:
+REDIS_ENABLED = os.getenv("REDIS_ENABLED", "true").lower() == "true"
+REDIS_HOST = os.getenv("REDIS_HOST", "redis")
+REDIS_PORT = int(os.getenv("REDIS_PORT", "6379"))
+
+if REDIS_ENABLED:
+    try:
+        # Don't decode responses to handle binary audio data properly
+        redis_client = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, decode_responses=False)
+        redis_client.ping()
+        REDIS_AVAILABLE = True
+        logger.info(f"Redis connection established at {REDIS_HOST}:{REDIS_PORT}")
+    except Exception as e:
+        REDIS_AVAILABLE = False
+        logger.warning(f"Redis connection failed: {e}. Caching disabled.")
+else:
     REDIS_AVAILABLE = False
-    logger.warning("Redis not available, caching disabled")
+    logger.info("Redis caching disabled via environment variable")
 
 # Service URLs
 SERVICES = {
