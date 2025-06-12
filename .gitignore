@@ -166,6 +166,7 @@ models/
 cache/
 nginx/ssl/
 *.wav
+!chatterbox-tts/voices/*.wav
 *.mp3
 *.ogg
 *.flac
