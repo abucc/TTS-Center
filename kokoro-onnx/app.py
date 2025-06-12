@@ -126,23 +126,46 @@ async def get_voices():
         raise HTTPException(status_code=503, detail="TTS model not initialized")
     
     try:
-        voice_names = tts_model.get_voices()
-        voices = []
-        for voice in voice_names:
-            # Extract basic info from voice name
-            gender = "female" if "f_" in voice or voice.startswith("af_") else "male"
-            locale = "en-US"  # Default locale for Kokoro voices
+        # Load comprehensive voice list from JSON file
+        voices_json_path = "/app/voices/kokoro_voices.json"
+        if os.path.exists(voices_json_path):
+            with open(voices_json_path, 'r') as f:
+                voices_data = json.load(f)
             
-            voices.append(VoiceInfo(
-                name=voice,
-                gender=gender,
-                locale=locale,
-                engine="kokoro",
-                description=f"Kokoro voice: {voice}",
-                grade="A"
-            ))
+            voices = []
+            for voice_data in voices_data:
+                voices.append(VoiceInfo(
+                    name=voice_data["name"],
+                    gender=voice_data["gender"],
+                    locale=voice_data["locale"],
+                    engine=voice_data["engine"],
+                    description=voice_data["description"],
+                    grade=voice_data.get("grade", "")
+                ))
+            
+            logger.info(f"Loaded {len(voices)} voices from kokoro_voices.json")
+            return voices
+        else:
+            # Fallback to model voices if JSON not available
+            voice_names = tts_model.get_voices()
+            voices = []
+            for voice in voice_names:
+                # Extract basic info from voice name
+                gender = "female" if "f_" in voice or voice.startswith("af_") else "male"
+                locale = "en-US"  # Default locale for Kokoro voices
+                
+                voices.append(VoiceInfo(
+                    name=voice,
+                    gender=gender,
+                    locale=locale,
+                    engine="kokoro",
+                    description=f"Kokoro voice: {voice}",
+                    grade="A"
+                ))
+            
+            logger.warning("kokoro_voices.json not found, using model voices")
+            return voices
         
-        return voices
     except Exception as e:
         logger.error(f"Error getting voices: {e}")
         raise HTTPException(status_code=500, detail="Failed to get available voices")
