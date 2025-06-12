@@ -18,6 +18,9 @@ from contextlib import asynccontextmanager
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# Get port from environment variable
+PORT = int(os.getenv("PORT", "9002"))
+
 # Global TTS model and tokenizer
 tts_model = None
 tokenizer = None
@@ -223,4 +226,4 @@ async def root():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=PORT)
