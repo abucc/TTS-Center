@@ -42,7 +42,7 @@ Frontend (React) → TTS Gateway → Individual TTS Services → Redis Cache
 
 ### 1. Clone and Setup
 ```bash
-git clone https://github.com/yourusername/awesome-tts.git
+git clone https://github.com/isaacgounton/awesome-tts.git
 cd awesome-tts
 
 # Create required directories
@@ -65,7 +65,12 @@ docker-compose ps
 - **Web Interface**: http://localhost:3003
 - **API Gateway**: http://localhost:9000
 - **API Documentation**: http://localhost:9000/docs
-- **Service Status**: http://localhost:9000/status
+- **Service Status**: http://localhost:3003/api/status
+
+#### Individual Services (Direct Access)
+- **Kokoro ONNX**: http://localhost:9002
+- **Chatterbox TTS**: http://localhost:9001
+- **OpenAI Edge TTS**: http://localhost:5050
 
 ## 🌐 Web Interface
 
@@ -99,7 +104,7 @@ The modern React frontend provides:
 
 ### Basic TTS Request
 ```bash
-curl -X POST http://localhost:9000/tts \
+curl -X POST http://localhost:3003/api/tts \
   -H "Content-Type: application/json" \
   -d '{
     "text": "Hello, this is Awesome-TTS!",
@@ -114,13 +119,13 @@ curl -X POST http://localhost:9000/tts \
 ### Get Available Voices
 ```bash
 # Kokoro voices
-curl http://localhost:9000/voices/kokoro
+curl http://localhost:3003/api/voices/kokoro
 
 # Chatterbox voices
-curl http://localhost:9000/voices/chatterbox
+curl http://localhost:3003/api/voices/chatterbox
 
 # OpenAI Edge TTS voices
-curl http://localhost:9000/voices/openai-edge-tts
+curl http://localhost:3003/api/voices/openai-edge-tts
 ```
 
 ### Python Example
@@ -347,7 +352,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## ⭐ Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=yourusername/awesome-tts&type=Date)](https://star-history.com/#yourusername/awesome-tts&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=isaacgounton/awesome-tts&type=Date)](https://star-history.com/#isaacgounton/awesome-tts&Date)
 
 ---
 

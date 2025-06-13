@@ -150,7 +150,7 @@ OPENAI_API_KEY=your_key_here
 
 ```bash
 # Clone and setup
-git clone https://github.com/yourusername/awesome-tts.git
+git clone https://github.com/isaacgounton/awesome-tts.git
 cd awesome-tts
 mkdir -p models/kokoro models/chatterbox cache
 

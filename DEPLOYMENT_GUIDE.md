@@ -2,6 +2,8 @@
 
 This guide covers deploying the Awesome TTS system to production environments using Docker Compose with proper SSL, monitoring, and optimization.
 
+**Repository**: https://github.com/isaacgounton/awesome-tts
+
 ## 📋 Prerequisites
 
 - **Docker** 20.10+ and **Docker Compose** 2.0+
@@ -12,6 +14,17 @@ This guide covers deploying the Awesome TTS system to production environments us
 
 ## 🏗️ Architecture Overview
 
+### With Coolify (Recommended)
+```
+Internet → Coolify Proxy → Individual Services
+                          ├── Frontend (:3003)
+                          ├── TTS Gateway (:9000) 
+                          ├── Kokoro ONNX (:9002)
+                          ├── Chatterbox TTS (:9001)
+                          └── OpenAI Edge TTS (:5050)
+```
+
+### Manual Production (with Nginx)
 ```
 Internet → Nginx/Reverse Proxy → TTS Gateway → Individual TTS Services
                                     :9000       ├── Kokoro ONNX (:9002)
@@ -20,6 +33,14 @@ Internet → Nginx/Reverse Proxy → TTS Gateway → Individual TTS Services
                                                
 Frontend (:3003) → API Proxy → TTS Gateway
                                └── Redis Cache
+```
+
+### Local Development
+```
+localhost:3003 (Frontend) → localhost:9000 (Gateway) → Individual Services
+                                                       ├── localhost:9002 (Kokoro)
+                                                       ├── localhost:9001 (Chatterbox)
+                                                       └── localhost:5050 (OpenAI Edge)
 ```
 
 ## 🔧 Production Configuration
@@ -391,6 +412,28 @@ http {
 ```
 
 ## 🚀 Deployment Steps
+
+## Option A: Coolify Deployment (Recommended)
+
+Coolify handles SSL, reverse proxy, and domain management automatically. Simply:
+
+1. **Import Repository** in Coolify
+2. **Set Environment Variables** in Coolify UI
+3. **Deploy Each Service** with custom domains:
+   - Frontend: `https://tts.yourdomain.com:3003`
+   - Gateway: `https://tts.yourdomain.com:9000/api` 
+   - Individual services (optional): separate subdomains
+
+4. **Configure API Proxy** in Coolify to route `/api` to the gateway
+
+**Benefits of Coolify:**
+- ✅ Automatic SSL certificate management
+- ✅ Built-in reverse proxy
+- ✅ Easy domain configuration
+- ✅ No nginx setup required
+- ✅ Automatic deployments from Git
+
+## Option B: Manual Production Deployment
 
 ### 1. Server Preparation
 
