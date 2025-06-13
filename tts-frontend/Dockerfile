@@ -8,15 +8,18 @@ ENV VITE_GATEWAY_URL=$VITE_GATEWAY_URL
 WORKDIR /app
 
 # Copy package files
-COPY package.json package-lock.json* ./
+COPY package*.json ./
 
 # Install dependencies
-RUN npm install
+RUN npm ci
 
-# Copy source code
+# Copy source code and configuration files
 COPY . .
 
-# Build the application
+# Ensure TypeScript types are installed
+RUN npm i -D @types/node
+
+# Build the application (this will run TSC and then Vite)
 RUN npm run build
 
 # Production stage

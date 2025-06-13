@@ -97,7 +97,7 @@ const App: React.FC = () => {
       setResult(result);
 
       if (result.success && result.audio_url) {
-        setAudioUrl(result.audio_url);
+        setAudioUrl(`${GATEWAY_URL}${result.audio_url}`);
       }
     } catch (error) {
       setResult({
@@ -144,9 +144,9 @@ const App: React.FC = () => {
   }, []);
 
   const downloadAudio = () => {
-    if (audioUrl) {
-      const link = document.createElement('a');
-      link.href = audioUrl;
+      if (audioUrl) {
+        const link = document.createElement('a');
+        link.href = audioUrl.startsWith('http') ? audioUrl : `${GATEWAY_URL}${audioUrl}`;
       link.download = `speech_${Date.now()}.${format}`;
       document.body.appendChild(link);
       link.click();
@@ -155,10 +155,10 @@ const App: React.FC = () => {
   };
 
   const playAudio = () => {
-    if (audioUrl) {
-      // Replace /audio/ with /play/ for inline playback
-      const playUrl = audioUrl.replace('/audio/', '/play/');
-      const audio = new Audio(playUrl);
+      if (audioUrl) {
+        // Replace /audio/ with /play/ for inline playback
+        const playUrl = audioUrl.replace('/audio/', '/play/');
+        const audio = new Audio(playUrl.startsWith('http') ? playUrl : `${GATEWAY_URL}${playUrl}`);
       audio.play().catch(console.error);
     }
   };
@@ -337,7 +337,7 @@ const App: React.FC = () => {
                       <div className="bg-gray-50 p-4 rounded-lg">
                         <audio 
                           controls 
-                          src={audioUrl.replace('/audio/', '/play/')}
+                          src={audioUrl.startsWith('http') ? audioUrl.replace('/audio/', '/play/') : `${GATEWAY_URL}${audioUrl.replace('/audio/', '/play/')}`}
                           className="w-full"
                         >
                           Your browser does not support the audio element.
