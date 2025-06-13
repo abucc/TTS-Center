@@ -5,13 +5,17 @@ FROM node:18-alpine as builder
 ARG VITE_GATEWAY_URL
 ENV VITE_GATEWAY_URL=$VITE_GATEWAY_URL
 
+# Add environment variables for TypeScript
+ENV NODE_ENV=production
+ENV GENERATE_SOURCEMAP=false
+
 WORKDIR /app
 
 # Copy package files
 COPY package*.json ./
 
 # Install dependencies
-RUN npm ci
+RUN npm install
 
 # Copy source code and configuration files
 COPY . .
@@ -29,6 +33,10 @@ WORKDIR /app
 
 # Install serve
 RUN npm install -g serve
+
+# Make sure environment variable is available at runtime
+ARG VITE_GATEWAY_URL
+ENV VITE_GATEWAY_URL=$VITE_GATEWAY_URL
 
 # Copy built assets from builder stage
 COPY --from=builder /app/dist .
