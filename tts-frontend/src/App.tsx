@@ -47,6 +47,11 @@ const App: React.FC = () => {
 
   // Get the gateway URL from environment or the current origin
   const GATEWAY_URL = import.meta.env.VITE_GATEWAY_URL || window.location.origin;
+  
+  // Debug logging
+  console.log('Gateway URL:', GATEWAY_URL);
+  console.log('Environment VITE_GATEWAY_URL:', import.meta.env.VITE_GATEWAY_URL);
+  console.log('Window origin:', window.location.origin);
 
   // Load voices when provider changes
   useEffect(() => {
@@ -55,11 +60,29 @@ const App: React.FC = () => {
 
   const loadVoices = async () => {
     try {
-      const response = await fetch(`${GATEWAY_URL}/voices/${provider}`);
+      const url = `${GATEWAY_URL}/voices/${provider}`;
+      console.log('Loading voices from:', url);
+      const response = await fetch(url);
+      console.log('Voices response status:', response.status);
+      console.log('Voices response headers:', response.headers.get('content-type'));
+      
       if (response.ok) {
-        const voicesData = await response.json();
-        setVoices(Array.isArray(voicesData) ? voicesData : []);
-        setVoice(""); // Reset voice selection
+        const text = await response.text();
+        console.log('Raw voices response:', text.substring(0, 200));
+        try {
+          const voicesData = JSON.parse(text);
+          setVoices(Array.isArray(voicesData) ? voicesData : []);
+          setVoice(""); // Reset voice selection
+        } catch (parseError) {
+          console.error('Failed to parse voices JSON:', parseError);
+          console.error('Response was:', text.substring(0, 500));
+          setVoices([]);
+        }
+      } else {
+        console.error('Voices request failed with status:', response.status);
+        const text = await response.text();
+        console.error('Error response:', text.substring(0, 500));
+        setVoices([]);
       }
     } catch (error) {
       console.error('Error loading voices:', error);
@@ -112,16 +135,31 @@ const App: React.FC = () => {
 
   const checkServiceStatus = async () => {
     try {
-      console.log('Checking service status...');
-      const response = await fetch(`${GATEWAY_URL}/status`);
-      console.log('Status response:', response.status);
+      const url = `${GATEWAY_URL}/status`;
+      console.log('Checking service status at:', url);
+      const response = await fetch(url);
+      console.log('Status response status:', response.status);
+      console.log('Status response headers:', response.headers.get('content-type'));
       
       if (response.ok) {
-        const statuses: ServiceStatus[] = await response.json();
-        console.log('Received statuses:', statuses);
-        setServiceStatuses(statuses);
+        const text = await response.text();
+        console.log('Raw status response:', text.substring(0, 200));
+        try {
+          const statuses: ServiceStatus[] = JSON.parse(text);
+          console.log('Received statuses:', statuses);
+          setServiceStatuses(statuses);
+        } catch (parseError) {
+          console.error('Failed to parse status JSON:', parseError);
+          console.error('Response was:', text.substring(0, 500));
+          setServiceStatuses([{
+            service: 'gateway',
+            status: 'error',
+            error: 'Invalid JSON response from gateway'
+          }]);
+        }
       } else {
-        console.error('Status check failed:', await response.text());
+        const text = await response.text();
+        console.error('Status check failed:', response.status, text.substring(0, 500));
         setServiceStatuses([{
           service: 'gateway',
           status: 'error',
