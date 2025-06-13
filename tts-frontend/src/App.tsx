@@ -45,12 +45,11 @@ const App: React.FC = () => {
   const [result, setResult] = useState<TTSResponse | null>(null);
   const [serviceStatuses, setServiceStatuses] = useState<ServiceStatus[]>([]);
 
-  // Get the gateway URL from environment or use relative URLs
-  const GATEWAY_URL = import.meta.env.VITE_GATEWAY_URL || '';
+  // Use /api prefix for all API calls (proxied to gateway)
+  const API_PREFIX = '/api';
   
   // Debug logging
-  console.log('Gateway URL:', GATEWAY_URL || 'Using relative URLs');
-  console.log('Environment VITE_GATEWAY_URL:', import.meta.env.VITE_GATEWAY_URL);
+  console.log('Using API prefix:', API_PREFIX);
   console.log('Window origin:', window.location.origin);
 
   // Load voices when provider changes
@@ -60,7 +59,7 @@ const App: React.FC = () => {
 
   const loadVoices = async () => {
     try {
-      const url = `${GATEWAY_URL}/voices/${provider}`;
+      const url = `${API_PREFIX}/voices/${provider}`;
       console.log('Loading voices from:', url);
       const response = await fetch(url);
       console.log('Voices response status:', response.status);
@@ -108,7 +107,7 @@ const App: React.FC = () => {
     };
 
     try {
-      const response = await fetch(`${GATEWAY_URL}/tts`, {
+      const response = await fetch(`${API_PREFIX}/tts`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -120,7 +119,7 @@ const App: React.FC = () => {
       setResult(result);
 
       if (result.success && result.audio_url) {
-        setAudioUrl(`${GATEWAY_URL}${result.audio_url}`);
+        setAudioUrl(`${API_PREFIX}${result.audio_url}`);
       }
     } catch (error) {
       setResult({
@@ -135,7 +134,7 @@ const App: React.FC = () => {
 
   const checkServiceStatus = async () => {
     try {
-      const url = `${GATEWAY_URL}/status`;
+      const url = `${API_PREFIX}/status`;
       console.log('Checking service status at:', url);
       const response = await fetch(url);
       console.log('Status response status:', response.status);
@@ -184,7 +183,7 @@ const App: React.FC = () => {
   const downloadAudio = () => {
       if (audioUrl) {
         const link = document.createElement('a');
-        link.href = audioUrl.startsWith('http') ? audioUrl : `${GATEWAY_URL}${audioUrl}`;
+        link.href = audioUrl.startsWith('http') ? audioUrl : audioUrl;
       link.download = `speech_${Date.now()}.${format}`;
       document.body.appendChild(link);
       link.click();
@@ -196,7 +195,7 @@ const App: React.FC = () => {
       if (audioUrl) {
         // Replace /audio/ with /play/ for inline playback
         const playUrl = audioUrl.replace('/audio/', '/play/');
-        const audio = new Audio(playUrl.startsWith('http') ? playUrl : `${GATEWAY_URL}${playUrl}`);
+        const audio = new Audio(playUrl.startsWith('http') ? playUrl : playUrl);
       audio.play().catch(console.error);
     }
   };
@@ -375,7 +374,7 @@ const App: React.FC = () => {
                       <div className="bg-gray-50 p-4 rounded-lg">
                         <audio 
                           controls 
-                          src={audioUrl.startsWith('http') ? audioUrl.replace('/audio/', '/play/') : `${GATEWAY_URL}${audioUrl.replace('/audio/', '/play/')}`}
+                          src={audioUrl.startsWith('http') ? audioUrl.replace('/audio/', '/play/') : audioUrl.replace('/audio/', '/play/')}
                           className="w-full"
                         >
                           Your browser does not support the audio element.
