@@ -134,8 +134,6 @@ services:
     build:
       context: ./tts-frontend
       dockerfile: Dockerfile
-      args:
-        - VITE_GATEWAY_URL=${VITE_GATEWAY_URL:-}
     restart: unless-stopped
     ports:
       - "3003:3003"

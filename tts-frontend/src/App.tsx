@@ -45,11 +45,11 @@ const App: React.FC = () => {
   const [result, setResult] = useState<TTSResponse | null>(null);
   const [serviceStatuses, setServiceStatuses] = useState<ServiceStatus[]>([]);
 
-  // Get the gateway URL from environment or the current origin
-  const GATEWAY_URL = import.meta.env.VITE_GATEWAY_URL || window.location.origin;
+  // Get the gateway URL from environment or use relative URLs
+  const GATEWAY_URL = import.meta.env.VITE_GATEWAY_URL || '';
   
   // Debug logging
-  console.log('Gateway URL:', GATEWAY_URL);
+  console.log('Gateway URL:', GATEWAY_URL || 'Using relative URLs');
   console.log('Environment VITE_GATEWAY_URL:', import.meta.env.VITE_GATEWAY_URL);
   console.log('Window origin:', window.location.origin);
 
