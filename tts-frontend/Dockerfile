@@ -14,16 +14,13 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies
+# Install all dependencies (including devDependencies for build)
 RUN npm install
 
 # Copy source code and configuration files
 COPY . .
 
-# Ensure TypeScript types are installed
-RUN npm i -D @types/node
-
-# Build the application (this will run TSC and then Vite)
+# Build the application (Vite handles TypeScript compilation)
 RUN npm run build
 
 # Production stage
