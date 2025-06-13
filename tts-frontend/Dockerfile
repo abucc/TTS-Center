@@ -5,17 +5,18 @@ FROM node:18-alpine as builder
 ARG VITE_GATEWAY_URL
 ENV VITE_GATEWAY_URL=$VITE_GATEWAY_URL
 
-# Add environment variables for TypeScript
-ENV NODE_ENV=production
-ENV GENERATE_SOURCEMAP=false
-
 WORKDIR /app
 
 # Copy package files
 COPY package*.json ./
 
 # Install all dependencies (including devDependencies for build)
+# Don't set NODE_ENV=production during install to ensure devDependencies are installed
 RUN npm install
+
+# Set production environment after dependencies are installed
+ENV NODE_ENV=production
+ENV GENERATE_SOURCEMAP=false
 
 # Copy source code and configuration files
 COPY . .
