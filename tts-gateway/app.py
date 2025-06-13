@@ -335,8 +335,9 @@ async def text_to_speech(request: TTSRequest):
         # Prepare request for specific provider
         provider_request = await prepare_provider_request(request)
         
-        # Make request to provider
-        async with httpx.AsyncClient(timeout=60.0) as client:
+        # Make request to provider with extended timeout for chatterbox
+        timeout_duration = 1800.0 if request.provider == "chatterbox" else 60.0  # 30 minutes for chatterbox, 1 minute for others
+        async with httpx.AsyncClient(timeout=timeout_duration) as client:
             # Different endpoints for different providers
             if request.provider == "openai-edge-tts":
                 endpoint = f"{SERVICES[request.provider]}/v1/audio/speech"

@@ -47,10 +47,6 @@ const App: React.FC = () => {
 
   // Use /api prefix for all API calls (proxied to gateway)
   const API_PREFIX = '/api';
-  
-  // Debug logging
-  console.log('Using API prefix:', API_PREFIX);
-  console.log('Window origin:', window.location.origin);
 
   // Load voices when provider changes
   useEffect(() => {
@@ -60,27 +56,13 @@ const App: React.FC = () => {
   const loadVoices = async () => {
     try {
       const url = `${API_PREFIX}/voices/${provider}`;
-      console.log('Loading voices from:', url);
       const response = await fetch(url);
-      console.log('Voices response status:', response.status);
-      console.log('Voices response headers:', response.headers.get('content-type'));
       
       if (response.ok) {
-        const text = await response.text();
-        console.log('Raw voices response:', text.substring(0, 200));
-        try {
-          const voicesData = JSON.parse(text);
-          setVoices(Array.isArray(voicesData) ? voicesData : []);
-          setVoice(""); // Reset voice selection
-        } catch (parseError) {
-          console.error('Failed to parse voices JSON:', parseError);
-          console.error('Response was:', text.substring(0, 500));
-          setVoices([]);
-        }
+        const voicesData = await response.json();
+        setVoices(Array.isArray(voicesData) ? voicesData : []);
+        setVoice(""); // Reset voice selection
       } else {
-        console.error('Voices request failed with status:', response.status);
-        const text = await response.text();
-        console.error('Error response:', text.substring(0, 500));
         setVoices([]);
       }
     } catch (error) {
@@ -135,30 +117,12 @@ const App: React.FC = () => {
   const checkServiceStatus = async () => {
     try {
       const url = `${API_PREFIX}/status`;
-      console.log('Checking service status at:', url);
       const response = await fetch(url);
-      console.log('Status response status:', response.status);
-      console.log('Status response headers:', response.headers.get('content-type'));
       
       if (response.ok) {
-        const text = await response.text();
-        console.log('Raw status response:', text.substring(0, 200));
-        try {
-          const statuses: ServiceStatus[] = JSON.parse(text);
-          console.log('Received statuses:', statuses);
-          setServiceStatuses(statuses);
-        } catch (parseError) {
-          console.error('Failed to parse status JSON:', parseError);
-          console.error('Response was:', text.substring(0, 500));
-          setServiceStatuses([{
-            service: 'gateway',
-            status: 'error',
-            error: 'Invalid JSON response from gateway'
-          }]);
-        }
+        const statuses: ServiceStatus[] = await response.json();
+        setServiceStatuses(statuses);
       } else {
-        const text = await response.text();
-        console.error('Status check failed:', response.status, text.substring(0, 500));
         setServiceStatuses([{
           service: 'gateway',
           status: 'error',
@@ -166,7 +130,6 @@ const App: React.FC = () => {
         }]);
       }
     } catch (error) {
-      console.error('Error checking service status:', error);
       setServiceStatuses([{
         service: 'gateway',
         status: 'error',
