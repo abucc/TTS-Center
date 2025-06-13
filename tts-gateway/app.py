@@ -236,8 +236,8 @@ async def get_voices(provider: str):
         async with httpx.AsyncClient(timeout=10.0) as client:
             logger.info(f"Making request to {SERVICES[provider]}/voices")
             if provider == "openai-edge-tts":
-                # Fetch voices from the openai-edge-tts service
-                response = await client.get(f"{SERVICES[provider]}/voices", headers=headers) # Pass headers
+                # Fetch ALL voices from the openai-edge-tts service (not just English)
+                response = await client.get(f"{SERVICES[provider]}/voices/all", headers=headers) # Pass headers
                 response.raise_for_status() # Raise an exception for bad status codes
                 voices_data = response.json()
                 actual_voices_list = voices_data.get("voices", []) if isinstance(voices_data, dict) else voices_data
