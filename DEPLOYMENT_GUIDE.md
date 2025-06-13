@@ -801,9 +801,9 @@ docker-compose -f docker-compose.prod.yml logs --tail=100 -f
 ### Contact Information
 
 For critical issues:
-- System Admin: admin@yourdomain.com
-- On-call Engineer: +1-XXX-XXX-XXXX
-- Status Page: https://status.yourdomain.com
+- System Admin: isaac@etugrand.com
+- On-call Engineer: +1-438-454-1235
+- Status Page: https://status.etugrand.com
 
 ---
 
