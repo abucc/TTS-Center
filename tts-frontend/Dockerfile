@@ -39,8 +39,8 @@ ENV VITE_GATEWAY_URL=$VITE_GATEWAY_URL
 # Copy built assets from builder stage
 COPY --from=builder /app/dist .
 
-# Add configuration for serve
-RUN echo '{"port": 3003, "public": ".", "rewrites": [{"source": "**", "destination": "/index.html"}]}' > serve.json
+# Add configuration for serve (SPA routing)
+RUN echo '{"rewrites": [{"source": "**", "destination": "/index.html"}]}' > serve.json
 
 # Expose port 3003
 EXPOSE 3003
