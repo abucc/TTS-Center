@@ -12,6 +12,13 @@ from datetime import datetime
 import redis
 import hashlib
 import io
+from dotenv import load_dotenv
+
+# Load environment variables from .env file if present
+load_dotenv()
+
+# Import our storage module
+from storage import StorageManager
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -41,6 +48,8 @@ REDIS_DB = int(os.getenv("REDIS_DB", "1"))  # Use DB 1 to avoid conflicts
 REDIS_KEY_PREFIX = os.getenv("REDIS_KEY_PREFIX", "tts_")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY") # Get the API key from environment
 
+# Initialize Redis and Storage Manager
+redis_client = None
 if REDIS_ENABLED:
     try:
         # Support both Redis URL and individual parameters
@@ -67,6 +76,9 @@ if REDIS_ENABLED:
 else:
     REDIS_AVAILABLE = False
     logger.info("Redis caching disabled via environment variable")
+
+# Initialize the storage manager with Redis client
+storage_manager = StorageManager(redis_client if REDIS_AVAILABLE else None)
 
 # Service URLs with correct default ports
 SERVICES = {
@@ -317,14 +329,15 @@ async def text_to_speech(request: TTSRequest):
     # Check cache first
     if request.cache and REDIS_AVAILABLE:
         try:
-            cached_audio = redis_client.get(f"audio:{cache_key}")
+            cached_audio = storage_manager.get_audio(cache_key)
             if cached_audio:
                 logger.info(f"Cache hit for key: {cache_key}")
+                audio_url = storage_manager.get_audio_url(cache_key, request.format)
                 return TTSResponse(
                     success=True,
                     provider=request.provider,
                     cached=True,
-                    audio_url=f"/audio/{cache_key}"
+                    audio_url=audio_url
                 )
         except Exception as e:
             logger.warning(f"Cache check failed: {e}")
@@ -389,13 +402,12 @@ async def text_to_speech(request: TTSRequest):
                         error="Generated audio file is too small, likely corrupted"
                     )
                 
-                # Cache the audio data
-                if REDIS_AVAILABLE:
-                    try:
-                        redis_client.setex(f"audio:{cache_key}", 3600, audio_data)  # 1 hour cache
-                        logger.info(f"Cached audio with key: {cache_key}")
-                    except Exception as e:
-                        logger.warning(f"Failed to cache audio: {e}")
+                # Store the audio data using the storage manager
+                audio_format = request.format or "wav"
+                success, audio_url = storage_manager.store_audio(audio_data, cache_key, audio_format)
+                
+                if not success:
+                    logger.warning(f"Failed to store audio with key: {cache_key}")
                 
                 duration = (asyncio.get_event_loop().time() - start_time) * 1000
                 
@@ -403,7 +415,7 @@ async def text_to_speech(request: TTSRequest):
                     success=True,
                     provider=request.provider,
                     duration=round(duration, 2),
-                    audio_url=f"/audio/{cache_key}"
+                    audio_url=audio_url
                 )
             else:
                 # JSON response - try to handle it
@@ -490,14 +502,14 @@ async def prepare_provider_request(request: TTSRequest) -> dict:
 # Serve cached audio files
 @app.get("/audio/{audio_id}")
 async def get_audio(audio_id: str):
-    if not REDIS_AVAILABLE:
-        raise HTTPException(status_code=404, detail="Audio not found - caching disabled")
+    if not REDIS_AVAILABLE and not storage_manager.s3_enabled:
+        raise HTTPException(status_code=404, detail="Audio not found - storage unavailable")
     
     try:
         # Get raw binary data from Redis
-        audio_data = redis_client.get(f"audio:{audio_id}")
+        audio_data = storage_manager.get_audio(audio_id)
         if not audio_data:
-            logger.error(f"Audio not found in Redis for ID: {audio_id}")
+            logger.error(f"Audio not found in storage for ID: {audio_id}")
             raise HTTPException(status_code=404, detail="Audio not found or expired")
         
         # With decode_responses=False, Redis should return bytes directly
@@ -550,14 +562,14 @@ async def get_audio(audio_id: str):
 # Play audio directly in browser (inline, not download)
 @app.get("/play/{audio_id}")
 async def play_audio(audio_id: str):
-    if not REDIS_AVAILABLE:
-        raise HTTPException(status_code=404, detail="Audio not found - caching disabled")
+    if not REDIS_AVAILABLE and not storage_manager.s3_enabled:
+        raise HTTPException(status_code=404, detail="Audio not found - storage unavailable")
     
     try:
-        # Get raw binary data from Redis
-        audio_data = redis_client.get(f"audio:{audio_id}")
+        # Get raw binary data from storage
+        audio_data = storage_manager.get_audio(audio_id)
         if not audio_data:
-            logger.error(f"Audio not found in Redis for playback ID: {audio_id}")
+            logger.error(f"Audio not found in storage for playback ID: {audio_id}")
             raise HTTPException(status_code=404, detail="Audio not found or expired")
         
         # With decode_responses=False, Redis should return bytes directly

@@ -5,6 +5,26 @@ All notable changes to the Awesome TTS project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2025-06-14
+
+### 🚀 Feature Enhancements
+
+#### Added
+- **Cloud Storage Support** for TTS audio files
+  - S3-compatible storage integration (AWS S3, DigitalOcean Spaces, etc.)
+  - Automatic URL generation for stored files
+  - Public/CDN URL support
+  - Backward compatibility with Redis caching
+
+#### Fixed
+- Audio URL issues when accessing through external domains
+- Improved error handling for storage operations
+
+#### Changed
+- TTS Gateway now supports both Redis caching and cloud storage
+- Updated Docker configuration with new environment variables
+- Added detailed documentation for storage configuration
+
 ## [1.0.0] - 2025-01-13
 
 ### 🎉 Initial Release
@@ -137,6 +157,13 @@ REDIS_URL=redis://redis:6379/1
 
 # API Keys
 OPENAI_API_KEY=your_key_here
+
+# Cloud Storage (Optional)
+CLOUD_STORAGE_ENABLED=true
+CLOUD_STORAGE_URL=https://your-storage-endpoint
+CLOUD_STORAGE_BUCKET=your-bucket-name
+CLOUD_STORAGE_ACCESS_KEY=your-access-key
+CLOUD_STORAGE_SECRET_KEY=your-secret-key
 ```
 
 #### Service Ports
@@ -188,23 +215,23 @@ This project is licensed under the MIT License - see [LICENSE](LICENSE).
 
 ## Release Notes
 
-### What's New in v1.0.0
+### What's New in v1.1.0
 
-🎤 **First stable release** of Awesome TTS with a complete multi-provider architecture!
+🚀 **Exciting updates** in Awesome TTS with cloud storage support!
 
 **Key Highlights:**
-- **3 High-Quality TTS Providers** unified in a single system
-- **Modern React Frontend** with real-time controls
-- **Production-Ready Deployment** with Docker Compose
-- **Comprehensive Documentation** and deployment guides
+- **Cloud Storage Integration** for audio files
+- **Automatic URL Generation** and CDN support
+- **Improved Error Handling** and external access fixes
+- **Backward Compatibility** with existing Redis caching
 
 **Getting Started:**
-1. Clone the repository
-2. Run `docker-compose up -d`
-3. Access http://localhost:3003 for the web interface
+1. Update your `.env` file with cloud storage credentials
+2. Rebuild and restart your Docker containers
+3. Enjoy seamless TTS audio file management
 
 **For Production:**
-See [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md) for SSL, monitoring, and scaling.
+See [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md) for updated storage configuration and best practices.
 
 ---
 

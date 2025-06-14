@@ -12,6 +12,7 @@ A unified Text-to-Speech gateway that combines multiple TTS providers into a sin
 - **Modern React Web Interface** with real-time controls and audio playback
 - **REST API** with consistent endpoints across all providers
 - **Redis Caching** for improved performance and reduced latency
+- **Cloud Storage Support** (S3, DigitalOcean Spaces) for audio files
 - **Production Ready** with health monitoring and error handling
 - **Docker Compose** deployment for easy setup
 - **Real-time Service Monitoring** with status dashboard
@@ -166,28 +167,48 @@ else:
 | `/play/{id}` | GET | Stream audio for inline playback |
 | `/debug` | GET | Comprehensive debug information |
 
-## 🔧 Configuration
+## ⚙️ Configuration
 
 ### Environment Variables
 
-The services can be configured via environment variables in `docker-compose.yml`:
+Create a `.env` file in the project root to customize the deployment:
 
-```yaml
-# TTS Gateway
-environment:
-  - KOKORO_URL=http://kokoro-onnx:9002
-  - CHATTERBOX_URL=http://chatterbox-tts:9001
-  - OPENAI_EDGE_TTS_URL=http://openai-edge-tts:5050
-  - PORT=9000
-  - CORS_ORIGINS=*
-  - REDIS_ENABLED=true
-  - REDIS_URL=redis://redis:6379/1
+```bash
+# Basic Configuration
+CORS_ORIGINS=*
+REDIS_ENABLED=true
+REDIS_URL=redis://redis:6379/1
 
-# Individual Services
-# Kokoro ONNX (PORT=9002)
-# Chatterbox TTS (PORT=9001) 
-# OpenAI Edge TTS (PORT=5050)
-# Frontend (PORT=3003)
+# Cloud Storage Configuration (Optional)
+S3_ENABLED=true
+S3_ENDPOINT_URL=https://your-region.digitaloceanspaces.com
+S3_ACCESS_KEY=your_access_key
+S3_SECRET_KEY=your_secret_key
+S3_BUCKET_NAME=your-bucket-name
+S3_REGION=your-region
+PUBLIC_URL=https://tts.yourdomain.com
+```
+
+### Cloud Storage Setup
+
+The TTS Gateway supports storing audio files in S3-compatible cloud storage:
+
+1. **Create S3 Bucket**: Set up a bucket in AWS S3, DigitalOcean Spaces, or similar
+2. **Configure CORS**: Allow access from your domain
+3. **Set Environment Variables**: Update `.env` with your credentials
+4. **Restart Services**: `docker-compose down && docker-compose up -d`
+
+#### Example S3 CORS Configuration
+```json
+[
+  {
+    "AllowedHeaders": ["*"],
+    "AllowedMethods": ["GET"],
+    "AllowedOrigins": ["https://yourdomain.com"],
+    "ExposeHeaders": ["ETag"],
+    "MaxAgeSeconds": 3600
+  }
+]
 ```
 
 ### Voice Configuration
