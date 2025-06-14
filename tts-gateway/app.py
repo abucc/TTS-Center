@@ -409,14 +409,23 @@ async def text_to_speech(request: TTSRequest):
                 if not success:
                     logger.warning(f"Failed to store audio with key: {cache_key}")
                 
+                # Detect the actual format to inform the client
+                actual_format = storage_manager.detect_audio_format(audio_data)
+                
                 duration = (asyncio.get_event_loop().time() - start_time) * 1000
                 
-                return TTSResponse(
+                response_data = TTSResponse(
                     success=True,
                     provider=request.provider,
                     duration=round(duration, 2),
                     audio_url=audio_url
                 )
+                
+                # Add actual format information if different from requested
+                if actual_format != audio_format:
+                    logger.info(f"Format conversion status: Requested {audio_format}, got {actual_format}")
+                
+                return response_data
             else:
                 # JSON response - try to handle it
                 try:

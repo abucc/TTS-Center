@@ -63,6 +63,33 @@ class StorageManager:
                 logger.error(f"Failed to initialize S3 storage: {str(e)}")
                 self.s3_enabled = False
     
+    def detect_audio_format(self, audio_data: bytes) -> str:
+        """
+        Detect the actual audio format from the file content.
+        
+        Args:
+            audio_data: The raw audio data as bytes
+            
+        Returns:
+            The detected format (mp3, wav, ogg, etc.)
+        """
+        if audio_data.startswith(b'ID3') or (len(audio_data) > 1 and audio_data[0:2] == b'\xff\xfb'):
+            return "mp3"
+        elif audio_data.startswith(b'RIFF') and len(audio_data) > 12 and audio_data[8:12] == b'WAVE':
+            return "wav"
+        elif audio_data.startswith(b'OggS'):
+            return "ogg"
+        elif audio_data.startswith(b'fLaC'):
+            return "flac"
+        else:
+            # Default fallback - try to guess from common patterns
+            if b'WAVE' in audio_data[:20]:
+                return "wav"
+            elif b'MP3' in audio_data[:20] or b'mp3' in audio_data[:20]:
+                return "mp3"
+            else:
+                return "mp3"  # Default to mp3 as fallback
+    
     def store_audio(self, audio_data: bytes, cache_key: str, format: str = "wav") -> Tuple[bool, str]:
         """
         Store audio data in Redis cache and/or S3 storage.
@@ -70,11 +97,18 @@ class StorageManager:
         Args:
             audio_data: The raw audio data as bytes
             cache_key: The cache key for the audio
-            format: Audio format (wav, mp3, etc.)
+            format: Audio format (wav, mp3, etc.) - requested format
             
         Returns:
             Tuple of (success, audio_url)
         """
+        # Detect the actual format from the audio data
+        actual_format = self.detect_audio_format(audio_data)
+        
+        # Log if there's a mismatch between requested and actual format
+        if actual_format != format:
+            logger.warning(f"Format mismatch detected! Requested: {format}, Actual: {actual_format}. Using actual format.")
+            format = actual_format
         # First, try to cache in Redis if available
         redis_success = False
         if self.redis_client:

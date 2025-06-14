@@ -68,6 +68,8 @@ services:
     build:
       context: ./openai-edge-tts
       dockerfile: Dockerfile
+      args:
+        INSTALL_FFMPEG: "true"
     restart: unless-stopped
     ports:
       - "5050:5050"
