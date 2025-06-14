@@ -5,6 +5,7 @@ import logging
 import io
 import uuid
 from typing import Optional, Tuple, Dict, Any, Union
+import mimetypes
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -22,7 +23,7 @@ class StorageManager:
         self.s3_enabled = os.getenv("S3_ENABLED", "false").lower() == "true"
         self.s3_client = None
         self.s3_bucket = None
-        self.s3_public_url = None
+        self.s3_url = None
         
         # Base URL for publicly accessible files
         self.base_url = os.getenv("PUBLIC_URL", "").rstrip("/")
@@ -31,8 +32,8 @@ class StorageManager:
             try:
                 # Initialize S3 client
                 self.s3_bucket = os.getenv("S3_BUCKET_NAME", "")
-                endpoint_url = os.getenv("S3_ENDPOINT_URL", None)
-                region = os.getenv("S3_REGION", None)
+                self.s3_endpoint_url = os.getenv("S3_ENDPOINT_URL", None)
+                self.s3_region = os.getenv("S3_REGION", None)
                 
                 # S3 client initialization options
                 s3_options = {
@@ -41,16 +42,16 @@ class StorageManager:
                 }
                 
                 # Add optional parameters if they exist
-                if endpoint_url:
-                    s3_options["endpoint_url"] = endpoint_url
-                if region:
-                    s3_options["region_name"] = region
+                if self.s3_endpoint_url:
+                    s3_options["endpoint_url"] = self.s3_endpoint_url
+                if self.s3_region:
+                    s3_options["region_name"] = self.s3_region
                 
                 # Create S3 client
                 self.s3_client = boto3.client("s3", **s3_options)
                 
-                # Optional base URL for direct S3 access (CDN or public S3 URL)
-                self.s3_public_url = os.getenv("S3_PUBLIC_URL", "").rstrip("/")
+                # Store the endpoint URL for generating file URLs
+                self.s3_url = self.s3_endpoint_url
                 
                 logger.info(f"S3 storage initialized for bucket: {self.s3_bucket}")
                 
@@ -89,41 +90,31 @@ class StorageManager:
         
         if self.s3_enabled and self.s3_client:
             try:
-                # Generate object key with appropriate extension
-                object_key = f"audio/{cache_key}.{format}"
+                # Generate a filename with appropriate extension
+                filename = f"{cache_key}.{format}"
+                
+                # Determine content type based on format
+                content_type = f"audio/{format}"
+                
+                # For Minio and other S3-compatible services, log details
+                logger.info(f"Uploading audio to S3: bucket={self.s3_bucket}, filename={filename}, content_type={content_type}")
                 
                 # Upload to S3
                 self.s3_client.upload_fileobj(
                     io.BytesIO(audio_data),
                     self.s3_bucket,
-                    object_key,
+                    filename,
                     ExtraArgs={
-                        'ContentType': f'audio/{format}',
+                        'ContentType': content_type,
                         'ACL': 'public-read'  # Make the file publicly readable
                     }
                 )
                 
-                # Generate URL
-                if self.s3_public_url:
-                    # Use custom public URL (e.g., CDN)
-                    s3_url = f"{self.s3_public_url}/{object_key}"
-                else:
-                    # Construct S3 URL based on region and bucket
-                    region = os.getenv("S3_REGION", "us-east-1")
-                    endpoint = os.getenv("S3_ENDPOINT_URL", "")
-                    
-                    if endpoint and "digitaloceanspaces" in endpoint:
-                        # DigitalOcean Spaces URL format
-                        s3_url = f"{endpoint}/{object_key}"
-                    elif endpoint:
-                        # Custom endpoint URL
-                        s3_url = f"{endpoint}/{self.s3_bucket}/{object_key}"
-                    else:
-                        # Standard AWS S3 URL
-                        s3_url = f"https://{self.s3_bucket}.s3.{region}.amazonaws.com/{object_key}"
+                # Generate URL following the dahopevi pattern
+                s3_url = f"{self.s3_url}/{self.s3_bucket}/{filename}"
                 
                 s3_success = True
-                logger.info(f"Uploaded audio to S3: {object_key}, URL: {s3_url}")
+                logger.info(f"Uploaded audio to S3: {filename}, URL: {s3_url}")
                 
             except Exception as e:
                 logger.error(f"Failed to upload audio to S3: {str(e)}")
@@ -133,9 +124,8 @@ class StorageManager:
         if s3_success and s3_url:
             # If we have a successful S3 upload with URL, return it
             return True, s3_url
-        elif redis_success or s3_success:
-            # If either storage method worked but we don't have a direct S3 URL,
-            # return the API endpoint URL
+        elif redis_success:
+            # If Redis caching worked but S3 failed, return the API endpoint URL
             return True, f"/audio/{cache_key}"
         else:
             # Both storage methods failed
@@ -172,21 +162,9 @@ class StorageManager:
             The URL for the audio file
         """
         if self.s3_enabled:
-            # Construct the S3 URL
-            object_key = f"audio/{cache_key}.{format}"
-            
-            if self.s3_public_url:
-                return f"{self.s3_public_url}/{object_key}"
-            else:
-                region = os.getenv("S3_REGION", "us-east-1")
-                endpoint = os.getenv("S3_ENDPOINT_URL", "")
-                
-                if endpoint and "digitaloceanspaces" in endpoint:
-                    return f"{endpoint}/{object_key}"
-                elif endpoint:
-                    return f"{endpoint}/{self.s3_bucket}/{object_key}"
-                else:
-                    return f"https://{self.s3_bucket}.s3.{region}.amazonaws.com/{object_key}"
+            # Construct the S3 URL - simplified to match dahopevi pattern
+            filename = f"{cache_key}.{format}"
+            return f"{self.s3_url}/{self.s3_bucket}/{filename}"
         else:
             # Return the API endpoint URL
             if self.base_url:
