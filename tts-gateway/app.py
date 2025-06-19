@@ -1,6 +1,7 @@
-from fastapi import FastAPI, HTTPException, BackgroundTasks, UploadFile, File
+from fastapi import FastAPI, HTTPException, BackgroundTasks, UploadFile, File, Depends
 from fastapi.responses import StreamingResponse, HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel
 from typing import Optional, Dict, Any, List
 import httpx
@@ -8,10 +9,12 @@ import asyncio
 import os
 import json
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 import redis
 import hashlib
 import io
+import jwt
+import bcrypt
 from dotenv import load_dotenv
 
 # Load environment variables from .env file if present
@@ -47,6 +50,14 @@ REDIS_PORT = int(os.getenv("REDIS_PORT", "6379"))
 REDIS_DB = int(os.getenv("REDIS_DB", "1"))  # Use DB 1 to avoid conflicts
 REDIS_KEY_PREFIX = os.getenv("REDIS_KEY_PREFIX", "tts_")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY") # Get the API key from environment
+
+# Authentication configuration
+SECRET_KEY = os.getenv("SESSION_SECRET", "your-secret-key-change-this")
+AUTH_USERNAME = os.getenv("AUTH_USERNAME", "admin")
+AUTH_PASSWORD_HASH = os.getenv("AUTH_PASSWORD_HASH", "$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBQ72SJWJzX4gS")  # default: "password"
+
+# Security
+security = HTTPBearer()
 
 # Initialize Redis and Storage Manager
 redis_client = None
@@ -110,6 +121,60 @@ class TTSResponse(BaseModel):
     cached: Optional[bool] = False
     audio_url: Optional[str] = None
     error: Optional[str] = None
+
+class LoginRequest(BaseModel):
+    username: str
+    password: str
+
+class LoginResponse(BaseModel):
+    success: bool
+    token: Optional[str] = None
+    message: Optional[str] = None
+
+# Authentication functions
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    """Verify a password against its hash."""
+    try:
+        return bcrypt.checkpw(plain_password.encode('utf-8'), hashed_password.encode('utf-8'))
+    except Exception:
+        return False
+
+def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
+    """Create a JWT access token."""
+    to_encode = data.copy()
+    if expires_delta:
+        expire = datetime.utcnow() + expires_delta
+    else:
+        expire = datetime.utcnow() + timedelta(hours=24)
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm="HS256")
+    return encoded_jwt
+
+def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
+    """Verify JWT token from Authorization header."""
+    try:
+        payload = jwt.decode(credentials.credentials, SECRET_KEY, algorithms=["HS256"])
+        username: str = payload.get("sub")
+        if username is None:
+            raise HTTPException(status_code=401, detail="Invalid authentication credentials")
+        return username
+    except jwt.PyJWTError:
+        raise HTTPException(status_code=401, detail="Invalid authentication credentials")
+
+# Authentication endpoints
+@app.post("/api/auth/login", response_model=LoginResponse)
+async def login(request: LoginRequest):
+    """Authenticate user and return JWT token."""
+    if request.username == AUTH_USERNAME and verify_password(request.password, AUTH_PASSWORD_HASH):
+        access_token = create_access_token(data={"sub": request.username})
+        return LoginResponse(success=True, token=access_token)
+    else:
+        return LoginResponse(success=False, message="Invalid username or password")
+
+@app.get("/api/auth/verify")
+async def verify_auth(username: str = Depends(verify_token)):
+    """Verify JWT token."""
+    return {"valid": True, "username": username}
 
 # Health check endpoint
 @app.get("/health")
@@ -315,7 +380,7 @@ def generate_cache_key(request: TTSRequest) -> str:
 
 # Main TTS endpoint
 @app.post("/tts", response_model=TTSResponse)
-async def text_to_speech(request: TTSRequest):
+async def text_to_speech(request: TTSRequest, username: str = Depends(verify_token)):
     if request.provider not in SERVICES:
         return TTSResponse(
             success=False,
