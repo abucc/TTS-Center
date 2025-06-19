@@ -54,6 +54,7 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY") # Get the API key from environment
 # Authentication configuration
 SECRET_KEY = os.getenv("SESSION_SECRET", "your-secret-key-change-this")
 AUTH_USERNAME = os.getenv("AUTH_USERNAME", "admin")
+AUTH_PASSWORD = os.getenv("AUTH_PASSWORD")  # Plain text password (optional)
 AUTH_PASSWORD_HASH = os.getenv("AUTH_PASSWORD_HASH", "$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBQ72SJWJzX4gS")  # default: "password"
 
 # Security
@@ -139,6 +140,19 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     except Exception:
         return False
 
+def authenticate_user(username: str, password: str) -> bool:
+    """Authenticate user with either plain text password or hash."""
+    # Check username first
+    if username != AUTH_USERNAME:
+        return False
+    
+    # If plain text password is set, use it directly
+    if AUTH_PASSWORD:
+        return password == AUTH_PASSWORD
+    
+    # Otherwise, use the password hash
+    return verify_password(password, AUTH_PASSWORD_HASH)
+
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     """Create a JWT access token."""
     to_encode = data.copy()
@@ -165,7 +179,7 @@ def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
 @app.post("/api/auth/login", response_model=LoginResponse)
 async def login(request: LoginRequest):
     """Authenticate user and return JWT token."""
-    if request.username == AUTH_USERNAME and verify_password(request.password, AUTH_PASSWORD_HASH):
+    if authenticate_user(request.username, request.password):
         access_token = create_access_token(data={"sub": request.username})
         return LoginResponse(success=True, token=access_token)
     else:

@@ -138,9 +138,6 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
             )}
           </button>
 
-          <div className="text-center text-purple-300 text-sm">
-            <p>✨ Default credentials: admin / password</p>
-          </div>
         </form>
       </div>
     </div>
