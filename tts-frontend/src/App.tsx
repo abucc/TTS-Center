@@ -151,7 +151,8 @@ const App: React.FC = () => {
       setResult(result);
 
       if (result.success && result.audio_url) {
-        setAudioUrl(`${API_PREFIX}${result.audio_url}`);
+        // Use the audio_url as-is if it's absolute, otherwise prepend API_PREFIX
+        setAudioUrl(result.audio_url.startsWith('http') ? result.audio_url : `${API_PREFIX}${result.audio_url}`);
       }
     } catch (error) {
       setResult({
