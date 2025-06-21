@@ -175,6 +175,19 @@ def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
     except jwt.PyJWTError:
         raise HTTPException(status_code=401, detail="Invalid authentication credentials")
 
+# API key check for endpoints (used for /tts)
+def optional_api_key_check(credentials: HTTPAuthorizationCredentials = Depends(security)):
+    """Optional API key check that allows requests without Authorization header if REQUIRE_API_KEY is false."""
+    REQUIRE_API_KEY = os.getenv("REQUIRE_API_KEY", "false").lower() == "true"
+    API_KEY = os.getenv("API_KEY")
+    if not REQUIRE_API_KEY:
+        return True  # API key not required
+    if not credentials:
+        raise HTTPException(status_code=401, detail="API key required")
+    if credentials.credentials == API_KEY:
+        return True
+    raise HTTPException(status_code=401, detail="Invalid API key")
+
 # Authentication endpoints
 @app.post("/auth/login", response_model=LoginResponse)
 async def login(request: LoginRequest):
