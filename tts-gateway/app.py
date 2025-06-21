@@ -176,7 +176,7 @@ def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
         raise HTTPException(status_code=401, detail="Invalid authentication credentials")
 
 # Authentication endpoints
-@app.post("/api/auth/login", response_model=LoginResponse)
+@app.post("/auth/login", response_model=LoginResponse)
 async def login(request: LoginRequest):
     """Authenticate user and return JWT token."""
     if authenticate_user(request.username, request.password):
@@ -185,7 +185,7 @@ async def login(request: LoginRequest):
     else:
         return LoginResponse(success=False, message="Invalid username or password")
 
-@app.get("/api/auth/verify")
+@app.get("/auth/verify")
 async def verify_auth(username: str = Depends(verify_token)):
     """Verify JWT token."""
     return {"valid": True, "username": username}
