@@ -142,6 +142,7 @@ const App: React.FC = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': 'Bearer sk-awesometts-f8a9c2e1b6d4f7a3c9e5b2d8f1a6c4e7b9d2f5a8c1e4b7d0f3a6c9e2b5d8f1a4',
         },
         body: JSON.stringify(request),
       });
