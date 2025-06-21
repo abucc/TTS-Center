@@ -235,4 +235,4 @@ See [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md) for updated storage configuration
 
 ---
 
-*Made with ❤️ for the TTS community*
+*Made with ❤️ by Isaac Gounton for the TTS community*
