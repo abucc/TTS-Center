@@ -9,7 +9,7 @@ import asyncio
 import os
 import json
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import redis
 import hashlib
 import io
@@ -157,9 +157,9 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     """Create a JWT access token."""
     to_encode = data.copy()
     if expires_delta:
-        expire = datetime.utcnow() + expires_delta
+        expire = datetime.now(tz=timezone.utc) + expires_delta
     else:
-        expire = datetime.utcnow() + timedelta(hours=24)
+        expire = datetime.now(tz=timezone.utc) + timedelta(hours=24)
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm="HS256")
     return encoded_jwt
@@ -394,7 +394,7 @@ def generate_cache_key(request: TTSRequest) -> str:
 
 # Main TTS endpoint
 @app.post("/tts", response_model=TTSResponse)
-async def text_to_speech(request: TTSRequest, username: str = Depends(verify_token)):
+async def text_to_speech(request: TTSRequest, api_auth: bool = Depends(optional_api_key_check)):
     if request.provider not in SERVICES:
         return TTSResponse(
             success=False,
