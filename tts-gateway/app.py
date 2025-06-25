@@ -49,7 +49,9 @@ REDIS_HOST = os.getenv("REDIS_HOST", "redis")
 REDIS_PORT = int(os.getenv("REDIS_PORT", "6379"))
 REDIS_DB = int(os.getenv("REDIS_DB", "1"))  # Use DB 1 to avoid conflicts
 REDIS_KEY_PREFIX = os.getenv("REDIS_KEY_PREFIX", "tts_")
-OPENAI_EDGE_TTS_API_KEY = os.getenv("OPENAI_EDGE_TTS_API_KEY") # Get the API key from environment
+
+# Use single API key for all services
+API_KEY = os.getenv("API_KEY")
 
 # Authentication configuration
 SECRET_KEY = os.getenv("SESSION_SECRET", "your-secret-key-change-this")
@@ -222,7 +224,7 @@ async def debug_info():
         },
         "environment": {
             "service_urls": SERVICES,
-            "openai_api_key_configured": bool(OPENAI_EDGE_TTS_API_KEY)
+            "api_key_configured": bool(API_KEY)
         }
     }
     
@@ -263,10 +265,10 @@ async def debug_info():
                     try:
                         headers = {}
                         if service_name == "openai-edge-tts":
-                            if not OPENAI_EDGE_TTS_API_KEY:
-                                service_info["voices_error"] = "OPENAI_EDGE_TTS_API_KEY not configured"
+                            if not API_KEY:
+                                service_info["voices_error"] = "API_KEY not configured"
                             else:
-                                headers["Authorization"] = f"Bearer {OPENAI_EDGE_TTS_API_KEY}"
+                                headers["Authorization"] = f"Bearer {API_KEY}"
                         
                         voices_response = await client.get(
                             f"{service_url}/voices",
@@ -359,10 +361,10 @@ async def get_voices(provider: str):
     
     headers = {}
     if provider == "openai-edge-tts":
-        if not OPENAI_EDGE_TTS_API_KEY:
-            logger.error("OPENAI_EDGE_TTS_API_KEY is not set in environment for tts-gateway.")
-            raise HTTPException(status_code=500, detail="OpenAI API key not configured for gateway")
-        headers["Authorization"] = f"Bearer {OPENAI_EDGE_TTS_API_KEY}"
+        if not API_KEY:
+            logger.error("API_KEY is not set in environment for tts-gateway.")
+            raise HTTPException(status_code=500, detail="API key not configured for gateway")
+        headers["Authorization"] = f"Bearer {API_KEY}"
             
     try:
         async with httpx.AsyncClient(timeout=10.0) as client:
@@ -474,14 +476,14 @@ async def text_to_speech(request: TTSRequest, api_auth: bool = Depends(optional_
             # Different endpoints for different providers
             if request.provider == "openai-edge-tts":
                 endpoint = f"{SERVICES[request.provider]}/v1/audio/speech"
-                if not OPENAI_EDGE_TTS_API_KEY:
-                    logger.error("OPENAI_EDGE_TTS_API_KEY is not set in environment for tts-gateway.")
+                if not API_KEY:
+                    logger.error("API_KEY is not set in environment for tts-gateway.")
                     return TTSResponse(
                         success=False,
                         provider=request.provider,
-                        error="OpenAI API key not configured for gateway"
+                        error="API key not configured for gateway"
                     )
-                headers = {"Authorization": f"Bearer {OPENAI_EDGE_TTS_API_KEY}", "Content-Type": "application/json"}
+                headers = {"Authorization": f"Bearer {API_KEY}", "Content-Type": "application/json"}
                 response = await client.post(
                     endpoint,
                     json=provider_request,
