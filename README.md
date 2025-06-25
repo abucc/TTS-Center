@@ -136,8 +136,8 @@ import requests
 # Generate speech
 response = requests.post('http://localhost:9000/tts', json={
     "text": "Hello world!",
-    "provider": "kokoro",
-    "voice": "af_heart",
+    "provider": "kokoro",  # Can be "kokoro", "chatterbox", or "openai-edge-tts"
+    "voice": "af_heart",   # Use appropriate voice for selected provider
     "speed": 1.2,
     "format": "wav"
 })
@@ -153,6 +153,19 @@ if result['success']:
         f.write(audio_response.content)
 else:
     print(f"Error: {result['error']}")
+```
+
+### OpenAI Edge TTS Example
+```bash
+curl -X POST "http://localhost:9000/v1/audio/speech" \
+  -H "Authorization: Bearer your_api_key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "text": "Hello world, this is a test of text-to-speech conversion",
+    "voice": "en-US-AvaNeural", 
+    "speed": 1.0,
+    "provider": "openai-edge-tts"
+  }'
 ```
 
 ### Available Endpoints
@@ -305,9 +318,15 @@ We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guid
 5. Update frontend provider list
 6. Submit pull request
 
-## 📋 System Requirements
+## 🔒 Security Considerations
 
-### Minimum Requirements
+Before making the repository public:
+1. Ensure all sensitive credentials are in `.env` (not committed)
+2. Review all API keys and secrets
+3. Consider adding a SECURITY.md file
+4. Enable GitHub's vulnerability scanning
+
+## 📋 System Requirements
 - **Docker** 20.10+
 - **Docker Compose** 2.0+
 - **4GB RAM**

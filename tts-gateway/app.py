@@ -49,7 +49,7 @@ REDIS_HOST = os.getenv("REDIS_HOST", "redis")
 REDIS_PORT = int(os.getenv("REDIS_PORT", "6379"))
 REDIS_DB = int(os.getenv("REDIS_DB", "1"))  # Use DB 1 to avoid conflicts
 REDIS_KEY_PREFIX = os.getenv("REDIS_KEY_PREFIX", "tts_")
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY") # Get the API key from environment
+OPENAI_EDGE_TTS_API_KEY = os.getenv("OPENAI_EDGE_TTS_API_KEY") # Get the API key from environment
 
 # Authentication configuration
 SECRET_KEY = os.getenv("SESSION_SECRET", "your-secret-key-change-this")
@@ -215,42 +215,64 @@ async def debug_info():
     debug_info = {
         "timestamp": datetime.now().isoformat(),
         "services": {},
-        "redis": {"available": REDIS_AVAILABLE},
+        "redis": {
+            "available": REDIS_AVAILABLE,
+            "url": REDIS_URL or f"redis://{REDIS_HOST}:{REDIS_PORT}/{REDIS_DB}",
+            "key_prefix": REDIS_KEY_PREFIX
+        },
         "environment": {
-            "service_urls": SERVICES
+            "service_urls": SERVICES,
+            "openai_api_key_configured": bool(OPENAI_EDGE_TTS_API_KEY)
         }
     }
     
-    # Test each service
+    # Test each service with detailed error reporting
     async with httpx.AsyncClient(timeout=5.0) as client:
         for service_name, service_url in SERVICES.items():
+            service_info = {
+                "url": service_url,
+                "health_status": None,
+                "latency_ms": None,
+                "error": None,
+                "response": None,
+                "voices_available": False,
+                "voices_count": 0
+            }
+            
             try:
+                # Health check
                 start_time = asyncio.get_event_loop().time()
-                health_response = await client.get(f"{service_url}/health")
-                latency = (asyncio.get_event_loop().time() - start_time) * 1000
-                
-                service_info = {
-                    "url": service_url,
-                    "health_status": health_response.status_code,
-                    "latency_ms": round(latency, 2),
-                    "response": None,
-                    "voices_available": False,
-                    "voices_count": 0
-                }
-                
-                if health_response.status_code == 200:
-                    try:
-                        service_info["response"] = health_response.json()
-                    except:
-                        service_info["response"] = health_response.text[:200]
+                try:
+                    health_response = await client.get(f"{service_url}/health")
+                    service_info["health_status"] = health_response.status_code
+                    service_info["latency_ms"] = round((asyncio.get_event_loop().time() - start_time) * 1000, 2)
                     
-                    # Try to get voices
+                    if health_response.status_code == 200:
+                        try:
+                            service_info["response"] = health_response.json()
+                        except:
+                            service_info["response"] = health_response.text[:200]
+                    else:
+                        service_info["error"] = f"HTTP {health_response.status_code}: {health_response.text[:200]}"
+                except Exception as e:
+                    service_info["error"] = f"Health check failed: {str(e)}"
+                    service_info["health_status"] = "unreachable"
+                
+                # Voice check (only if health check passed)
+                if service_info["health_status"] == 200:
                     try:
+                        headers = {}
                         if service_name == "openai-edge-tts":
-                            headers = {"Authorization": "Bearer your_api_key_here"}
-                            voices_response = await client.get(f"{service_url}/voices", headers=headers)
-                        else:
-                            voices_response = await client.get(f"{service_url}/voices")
+                            if not OPENAI_EDGE_TTS_API_KEY:
+                                service_info["voices_error"] = "OPENAI_EDGE_TTS_API_KEY not configured"
+                            else:
+                                headers["Authorization"] = f"Bearer {OPENAI_EDGE_TTS_API_KEY}"
+                        
+                        voices_response = await client.get(
+                            f"{service_url}/voices",
+                            headers=headers,
+                            timeout=10.0
+                        )
                         
                         if voices_response.status_code == 200:
                             voices_data = voices_response.json()
@@ -259,27 +281,33 @@ async def debug_info():
                                 service_info["voices_count"] = len(voices_data)
                             elif isinstance(voices_data, dict) and "voices" in voices_data:
                                 service_info["voices_count"] = len(voices_data["voices"])
+                        else:
+                            service_info["voices_error"] = f"HTTP {voices_response.status_code}: {voices_response.text[:200]}"
                     except Exception as e:
-                        service_info["voices_error"] = str(e)
-                
-                debug_info["services"][service_name] = service_info
+                        service_info["voices_error"] = f"Voices check failed: {str(e)}"
                 
             except Exception as e:
-                debug_info["services"][service_name] = {
-                    "url": service_url,
-                    "error": str(e),
-                    "health_status": "unreachable"
-                }
+                service_info["error"] = f"Service check failed: {str(e)}"
+            
+            debug_info["services"][service_name] = service_info
     
-    # Test Redis if available
+    # Detailed Redis check
     if REDIS_AVAILABLE:
         try:
             redis_client.ping()
             debug_info["redis"]["status"] = "connected"
-            debug_info["redis"]["info"] = redis_client.info("memory")
+            debug_info["redis"]["info"] = {
+                "version": redis_client.info("server").get("redis_version"),
+                "memory_used": redis_client.info("memory").get("used_memory_human"),
+                "keys": redis_client.dbsize()
+            }
         except Exception as e:
             debug_info["redis"]["status"] = "error"
             debug_info["redis"]["error"] = str(e)
+            debug_info["redis"]["info"] = None
+    
+    # Add debug logging
+    logger.info(f"Debug endpoint called - returning: {debug_info}")
     
     return debug_info
 
@@ -331,10 +359,10 @@ async def get_voices(provider: str):
     
     headers = {}
     if provider == "openai-edge-tts":
-        if not OPENAI_API_KEY:
-            logger.error("OPENAI_API_KEY is not set in environment for tts-gateway.")
+        if not OPENAI_EDGE_TTS_API_KEY:
+            logger.error("OPENAI_EDGE_TTS_API_KEY is not set in environment for tts-gateway.")
             raise HTTPException(status_code=500, detail="OpenAI API key not configured for gateway")
-        headers["Authorization"] = f"Bearer {OPENAI_API_KEY}"
+        headers["Authorization"] = f"Bearer {OPENAI_EDGE_TTS_API_KEY}"
             
     try:
         async with httpx.AsyncClient(timeout=10.0) as client:
@@ -424,7 +452,7 @@ async def text_to_speech(request: TTSRequest, api_auth: bool = Depends(optional_
             cached_audio = storage_manager.get_audio(cache_key)
             if cached_audio:
                 logger.info(f"Cache hit for key: {cache_key}")
-                audio_url = storage_manager.get_audio_url(cache_key, request.format)
+                audio_url = storage_manager.get_audio_url(cache_key, request.format or "wav")
                 return TTSResponse(
                     success=True,
                     provider=request.provider,
@@ -446,14 +474,14 @@ async def text_to_speech(request: TTSRequest, api_auth: bool = Depends(optional_
             # Different endpoints for different providers
             if request.provider == "openai-edge-tts":
                 endpoint = f"{SERVICES[request.provider]}/v1/audio/speech"
-                if not OPENAI_API_KEY:
-                    logger.error("OPENAI_API_KEY is not set in environment for tts-gateway.")
+                if not OPENAI_EDGE_TTS_API_KEY:
+                    logger.error("OPENAI_EDGE_TTS_API_KEY is not set in environment for tts-gateway.")
                     return TTSResponse(
                         success=False,
                         provider=request.provider,
                         error="OpenAI API key not configured for gateway"
                     )
-                headers = {"Authorization": f"Bearer {OPENAI_API_KEY}", "Content-Type": "application/json"}
+                headers = {"Authorization": f"Bearer {OPENAI_EDGE_TTS_API_KEY}", "Content-Type": "application/json"}
                 response = await client.post(
                     endpoint,
                     json=provider_request,
