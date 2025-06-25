@@ -6,10 +6,10 @@ export default defineConfig({
   plugins: [react()],
   server: {
     host: true,
-    port: 3000,
+    port: 3003,
     proxy: {
       '/api': {
-        target: 'http://tts-gateway:8000',
+        target: 'http://tts-gateway:9000',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, '')
       }

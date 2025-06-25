@@ -8,15 +8,16 @@ services:
       dockerfile: Dockerfile
     restart: unless-stopped
     ports:
-      - "9002:8000"
+      - "9002:9002"
     environment:
       - MODEL_PATH=/app/models
       - MAX_WORKERS=4
+      - PORT=9002
     volumes:
       - ./models/kokoro:/app/models
       - ./cache:/app/cache
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:9002/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -34,21 +35,21 @@ services:
       dockerfile: Dockerfile
     restart: unless-stopped
     ports:
-      - "9001:8000"
+      - "9001:9001"
     environment:
       - HF_HOME=/app/hf_cache
       - TRANSFORMERS_CACHE=/app/hf_cache
       - HF_HUB_CACHE=/app/hf_cache
+      - PORT=9001
     volumes:
       - ./models/chatterbox:/app/model_cache
       - ./cache:/app/cache
       - chatterbox_hf_cache:/app/hf_cache
-      - ./chatterbox-tts/voices:/app/voices
       - ./chatterbox-tts/reference_audio:/app/reference_audio
       - ./chatterbox-tts/outputs:/app/outputs
       - ./chatterbox-tts/logs:/app/logs
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:9001/health"]
       interval: 60s
       timeout: 30s
       retries: 5
@@ -67,20 +68,22 @@ services:
     build:
       context: ./openai-edge-tts
       dockerfile: Dockerfile
+      args:
+        INSTALL_FFMPEG: "true"
     restart: unless-stopped
     ports:
-      - "9003:5050"
+      - "5050:5050"
     environment:
-      - API_KEY=your_api_key_here
+      - API_KEY=${API_KEY}
       - PORT=5050
-      - DEFAULT_VOICE=en-US-AvaNeural
-      - DEFAULT_RESPONSE_FORMAT=mp3
-      - DEFAULT_SPEED=1.0
-      - DEFAULT_LANGUAGE=en-US
-      - REQUIRE_API_KEY=True
-      - REMOVE_FILTER=False
-      - EXPAND_API=True
-      - DETAILED_ERROR_LOGGING=True
+      - DEFAULT_VOICE=${DEFAULT_VOICE}
+      - DEFAULT_RESPONSE_FORMAT=${DEFAULT_RESPONSE_FORMAT}
+      - DEFAULT_SPEED=${DEFAULT_SPEED}
+      - DEFAULT_LANGUAGE=${DEFAULT_LANGUAGE}
+      - REQUIRE_API_KEY=${REQUIRE_API_KEY}
+      - REMOVE_FILTER=${REMOVE_FILTER}
+      - EXPAND_API=${EXPAND_API}
+      - DETAILED_ERROR_LOGGING=${DETAILED_ERROR_LOGGING}
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5050/v1/models"]
       interval: 30s
@@ -102,21 +105,31 @@ services:
       dockerfile: Dockerfile
     restart: unless-stopped
     ports:
-      - "9000:8000"
+      - "9000:9000"
     environment:
-      - KOKORO_URL=http://kokoro-onnx:8000
-      - CHATTERBOX_URL=http://chatterbox-tts:8000
+      - KOKORO_URL=http://kokoro-onnx:9002
+      - CHATTERBOX_URL=http://chatterbox-tts:9001
       - OPENAI_EDGE_TTS_URL=http://openai-edge-tts:5050
-      - CORS_ORIGINS=*
-      - REDIS_ENABLED=true
-      - REDIS_URL=  # Set this in Coolify environment variables
-      - REDIS_KEY_PREFIX=tts_
+      - PORT=9000
+      - CORS_ORIGINS=${CORS_ORIGINS}
+      - REDIS_ENABLED=${REDIS_ENABLED}
+      - REDIS_URL=${REDIS_URL}
+      - REDIS_KEY_PREFIX=${REDIS_KEY_PREFIX}
+      # S3 Storage Configuration
+      - S3_ENABLED=${S3_ENABLED:-false}
+      - S3_ENDPOINT_URL=${S3_ENDPOINT_URL:-}
+      - S3_ACCESS_KEY=${S3_ACCESS_KEY:-}
+      - S3_SECRET_KEY=${S3_SECRET_KEY:-}
+      - S3_BUCKET_NAME=${S3_BUCKET_NAME:-}
+      - S3_REGION=${S3_REGION:-}
+      - S3_PUBLIC_URL=${S3_PUBLIC_URL:-}
+      - PUBLIC_URL=${PUBLIC_URL:-}
     depends_on:
       - kokoro-onnx
       - chatterbox-tts
       - openai-edge-tts
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:9000/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -134,13 +147,14 @@ services:
       dockerfile: Dockerfile
     restart: unless-stopped
     ports:
-      - "3003:80"
+      - "3003:3003"
     environment:
       - NODE_ENV=production
+      - PORT=3003
     depends_on:
       - tts-gateway
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:3003/health"]
       interval: 30s
       timeout: 10s
       retries: 3
