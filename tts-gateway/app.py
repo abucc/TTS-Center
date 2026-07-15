@@ -21,7 +21,7 @@ import bcrypt
 import httpx
 import jwt
 from dotenv import load_dotenv
-from fastapi import Depends, FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
@@ -83,6 +83,8 @@ class TTSRequest(BaseModel):
     text: str
     provider: str = "local-first"
     voice: Optional[str] = None
+    agent: Optional[str] = None
+    speaker: Optional[str] = None
     speed: float = 1.0
     pitch: float = 1.0
     format: str = "wav"
@@ -106,6 +108,7 @@ class ServiceStatus(BaseModel):
     status: str
     latency: Optional[float] = None
     error: Optional[str] = None
+    details: Optional[Dict[str, Any]] = None
 
 
 class LoginRequest(BaseModel):
@@ -136,9 +139,10 @@ class Provider:
 QWEN_URL = os.getenv("QWEN_URL", "http://host.docker.internal:7861").rstrip("/")
 CONFIG_DIR = Path(os.getenv("VOICE_HUB_CONFIG_DIR", "/app/config"))
 FALLBACK_CHAINS_PATH = CONFIG_DIR / "fallback-chains.json"
+VOICE_ROUTING_PATH = CONFIG_DIR / "voice-routing.json"
 VOICE_STYLE_PATH = Path(os.getenv("VOICE_STYLE_PATH", "/opt/data/voice_styles.json"))
-TARGET_TTS_CHARS = int(os.getenv("VOICE_HUB_TARGET_TTS_CHARS", "80"))
-MAX_TTS_CHARS = int(os.getenv("VOICE_HUB_MAX_TTS_CHARS", "120"))
+TARGET_TTS_CHARS = int(os.getenv("VOICE_HUB_TARGET_TTS_CHARS", "45"))
+MAX_TTS_CHARS = int(os.getenv("VOICE_HUB_MAX_TTS_CHARS", "60"))
 ALIYUN_COMMAND = os.getenv(
     "ALIYUN_TTS_COMMAND",
     "/usr/local/bin/python "
@@ -146,6 +150,15 @@ ALIYUN_COMMAND = os.getenv(
     "{text} {output_path} --voice {voice} --format {format}",
 )
 ALIYUN_DEFAULT_VOICE = os.getenv("ALIYUN_DEFAULT_VOICE", "zhimi_emo")
+DEFAULT_VOICE_ROUTING: Dict[str, Any] = {
+    "fallback_provider": "aliyun-zhimi",
+    "fallback_voice": ALIYUN_DEFAULT_VOICE,
+    "agent_voices": {
+        "栗子": "栗子",
+        "水水": "水水",
+        "兔娘": "兔娘",
+    },
+}
 DEFAULT_VOICE_STYLES: Dict[str, Any] = {
     "\u6817\u5b50": {
         "enabled": True,
@@ -185,7 +198,69 @@ DEFAULT_VOICE_STYLES: Dict[str, Any] = {
 }
 
 
+def load_voice_routing() -> dict:
+    config = json.loads(json.dumps(DEFAULT_VOICE_ROUTING, ensure_ascii=False))
+    if VOICE_ROUTING_PATH.exists():
+        try:
+            data = json.loads(VOICE_ROUTING_PATH.read_text(encoding="utf-8"))
+            if isinstance(data, dict):
+                config.update({k: v for k, v in data.items() if k != "agent_voices"})
+                if isinstance(data.get("agent_voices"), dict):
+                    config["agent_voices"] = {
+                        str(agent): str(voice)
+                        for agent, voice in data["agent_voices"].items()
+                        if str(agent).strip() and str(voice).strip()
+                    }
+        except Exception as exc:
+            logger.warning("Failed to read voice routing config: %s", exc)
+    if not config.get("fallback_provider"):
+        config["fallback_provider"] = "aliyun-zhimi"
+    if not config.get("fallback_voice"):
+        config["fallback_voice"] = ALIYUN_DEFAULT_VOICE
+    if not isinstance(config.get("agent_voices"), dict):
+        config["agent_voices"] = {}
+    return config
+
+
+def save_voice_routing(payload: dict) -> dict:
+    if not isinstance(payload, dict):
+        raise HTTPException(status_code=400, detail="routing config must be an object")
+    fallback_provider = str(payload.get("fallback_provider") or "aliyun-zhimi").strip()
+    if fallback_provider not in PROVIDERS or fallback_provider == "local-first":
+        raise HTTPException(status_code=400, detail="fallback_provider is invalid")
+    fallback_voice = str(payload.get("fallback_voice") or ALIYUN_DEFAULT_VOICE).strip()
+    agent_voices = payload.get("agent_voices") or {}
+    if not isinstance(agent_voices, dict):
+        raise HTTPException(status_code=400, detail="agent_voices must be an object")
+    config = {
+        "fallback_provider": fallback_provider,
+        "fallback_voice": fallback_voice,
+        "agent_voices": {
+            str(agent).strip(): str(voice).strip()
+            for agent, voice in agent_voices.items()
+            if str(agent).strip() and str(voice).strip()
+        },
+    }
+    CONFIG_DIR.mkdir(parents=True, exist_ok=True)
+    tmp_path = VOICE_ROUTING_PATH.with_suffix(VOICE_ROUTING_PATH.suffix + ".tmp")
+    tmp_path.write_text(json.dumps(config, ensure_ascii=False, indent=2), encoding="utf-8")
+    os.replace(tmp_path, VOICE_ROUTING_PATH)
+    PROVIDERS["local-first"] = Provider(
+        id="local-first",
+        name=PROVIDERS["local-first"].name,
+        kind="fallback",
+        description=PROVIDERS["local-first"].description,
+        chain=("qwen-local", fallback_provider),
+        timeout=PROVIDERS["local-first"].timeout,
+    )
+    return config
+
+
 def _load_fallback_chain() -> tuple[str, ...]:
+    routing = load_voice_routing()
+    fallback_provider = str(routing.get("fallback_provider") or "aliyun-zhimi")
+    if fallback_provider:
+        return ("qwen-local", fallback_provider)
     if FALLBACK_CHAINS_PATH.exists():
         try:
             data = json.loads(FALLBACK_CHAINS_PATH.read_text(encoding="utf-8"))
@@ -204,7 +279,7 @@ PROVIDERS: Dict[str, Provider] = {
         kind="fallback",
         description="Try local Qwen3-TTS first, then fall back to Aliyun.",
         chain=_load_fallback_chain(),
-        timeout=float(os.getenv("LOCAL_FIRST_TIMEOUT", "900")),
+        timeout=float(os.getenv("LOCAL_FIRST_TIMEOUT", "120")),
     ),
     "qwen-local": Provider(
         id="qwen-local",
@@ -214,7 +289,7 @@ PROVIDERS: Dict[str, Provider] = {
         default_voice=os.getenv("QWEN_DEFAULT_VOICE", "cloned-reference"),
         output_format="wav",
         url=QWEN_URL,
-        timeout=float(os.getenv("QWEN_TIMEOUT", "900")),
+        timeout=float(os.getenv("QWEN_TIMEOUT", "75")),
     ),
     "aliyun-zhimi": Provider(
         id="aliyun-zhimi",
@@ -343,6 +418,51 @@ def audio_duration_ms(audio_data: bytes) -> Optional[float]:
             return reader.getnframes() / frame_rate * 1000
     except wave.Error:
         return None
+
+
+def ranged_audio_response(
+    audio_data: bytes,
+    media_type: str,
+    request: Request,
+    cache_control: str,
+) -> StreamingResponse:
+    total = len(audio_data)
+    range_header = request.headers.get("range")
+    headers = {
+        "Accept-Ranges": "bytes",
+        "Cache-Control": cache_control,
+    }
+    if not range_header or not range_header.startswith("bytes=") or total <= 0:
+        headers["Content-Length"] = str(total)
+        return StreamingResponse(io.BytesIO(audio_data), media_type=media_type, headers=headers)
+
+    start_text, _, end_text = range_header.removeprefix("bytes=").partition("-")
+    try:
+        if start_text:
+            start = int(start_text)
+            end = int(end_text) if end_text else total - 1
+        else:
+            suffix_length = int(end_text)
+            start = max(total - suffix_length, 0)
+            end = total - 1
+        start = max(0, min(start, total - 1))
+        end = max(start, min(end, total - 1))
+    except ValueError:
+        start, end = 0, total - 1
+
+    chunk = audio_data[start : end + 1]
+    headers.update(
+        {
+            "Content-Range": f"bytes {start}-{end}/{total}",
+            "Content-Length": str(len(chunk)),
+        }
+    )
+    return StreamingResponse(
+        io.BytesIO(chunk),
+        status_code=206,
+        media_type=media_type,
+        headers=headers,
+    )
 
 
 def add_history(
@@ -533,15 +653,40 @@ def split_tts_chunks(
 
 
 def provider_to_info(provider: Provider) -> ProviderInfo:
+    default_voice = provider.default_voice or None
+    if provider.id == "aliyun-zhimi":
+        default_voice = str(load_voice_routing().get("fallback_voice") or provider.default_voice or None)
     return ProviderInfo(
         id=provider.id,
         name=provider.name,
         kind=provider.kind,
         description=provider.description,
-        default_voice=provider.default_voice or None,
+        default_voice=default_voice,
         format=provider.output_format,
         chain=list(provider.chain),
     )
+
+
+def resolve_request_voice(request: TTSRequest) -> TTSRequest:
+    routing = load_voice_routing()
+    agent = (request.agent or request.speaker or "").strip()
+    if not agent and request.voice:
+        voice_as_agent = request.voice.strip()
+        if voice_as_agent in routing.get("agent_voices", {}):
+            agent = voice_as_agent
+    if request.voice and not agent:
+        return request
+    if request.voice and agent and request.voice.strip() not in routing.get("agent_voices", {}):
+        return request
+    if not agent:
+        return request
+    mapped_voice = routing.get("agent_voices", {}).get(agent)
+    if not mapped_voice:
+        return request
+    update = {"voice": mapped_voice}
+    if hasattr(request, "model_copy"):
+        return request.model_copy(update=update)
+    return request.copy(update=update)
 
 
 async def call_http_provider(provider: Provider, request: TTSRequest) -> bytes:
@@ -564,6 +709,8 @@ async def call_http_provider(provider: Provider, request: TTSRequest) -> bytes:
 async def call_command_provider(provider: Provider, request: TTSRequest) -> bytes:
     audio_format = request.format or provider.output_format
     voice = provider.default_voice
+    if provider.id == "aliyun-zhimi":
+        voice = str(load_voice_routing().get("fallback_voice") or provider.default_voice)
     suffix = f".{audio_format}"
     with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as handle:
         output_path = Path(handle.name)
@@ -702,6 +849,16 @@ async def voice_admin_voices():
     return await qwen_get("/voices")
 
 
+@app.get("/voice-admin/gpu-status")
+async def voice_admin_gpu_status():
+    return await qwen_get("/gpu-status")
+
+
+@app.post("/voice-admin/gpu-load")
+async def voice_admin_gpu_load():
+    return await qwen_post("/gpu-load", {}, timeout=300.0)
+
+
 @app.post("/voice-admin/process")
 async def voice_admin_process(payload: dict):
     return await qwen_post("/process-audio", payload, timeout=180.0)
@@ -755,20 +912,21 @@ async def voice_admin_style_preview(payload: dict):
 
 
 @app.get("/voice-admin/audio-file")
-async def voice_admin_audio_file(path: str):
+async def voice_admin_audio_file(path: str, request: Request):
     async with httpx.AsyncClient(timeout=60.0) as client:
         response = await client.get(f"{QWEN_URL}/audio-file", params={"path": path})
         response.raise_for_status()
-        return StreamingResponse(
-            io.BytesIO(response.content),
+        return ranged_audio_response(
+            response.content,
             media_type=response.headers.get("content-type", "audio/wav"),
-            headers={"Cache-Control": "no-store"},
+            request=request,
+            cache_control="no-store",
         )
 
 
 @app.get("/settings/fallback")
 async def get_fallback_settings():
-    return {"default": list(PROVIDERS["local-first"].chain)}
+    return {"default": list(PROVIDERS["local-first"].chain), "routing": load_voice_routing()}
 
 
 @app.post("/settings/fallback")
@@ -781,6 +939,9 @@ async def save_fallback_settings(payload: dict):
         json.dumps({"default": [str(item) for item in chain]}, ensure_ascii=False, indent=2),
         encoding="utf-8",
     )
+    routing = load_voice_routing()
+    routing["fallback_provider"] = str(chain[-1])
+    save_voice_routing(routing)
     PROVIDERS["local-first"] = Provider(
         id="local-first",
         name=PROVIDERS["local-first"].name,
@@ -790,6 +951,16 @@ async def save_fallback_settings(payload: dict):
         timeout=PROVIDERS["local-first"].timeout,
     )
     return {"default": list(PROVIDERS["local-first"].chain)}
+
+
+@app.get("/settings/voice-routing")
+async def get_voice_routing_settings():
+    return {"path": str(VOICE_ROUTING_PATH), **load_voice_routing()}
+
+
+@app.post("/settings/voice-routing")
+async def save_voice_routing_settings(payload: dict):
+    return {"path": str(VOICE_ROUTING_PATH), **save_voice_routing(payload)}
 
 
 @app.get("/status", response_model=List[ServiceStatus])
@@ -804,12 +975,21 @@ async def check_status():
                 try:
                     response = await client.get(f"{provider.url}/health")
                     latency = (asyncio.get_event_loop().time() - start) * 1000
+                    details = None
+                    if response.status_code == 200 and provider.id == "qwen-local":
+                        try:
+                            gpu_response = await client.get(f"{provider.url}/gpu-status")
+                            if gpu_response.status_code == 200:
+                                details = gpu_response.json()
+                        except Exception as exc:
+                            details = {"error": f"GPU status failed: {exc}"}
                     statuses.append(
                         ServiceStatus(
                             service=provider.id,
                             status="healthy" if response.status_code == 200 else "unhealthy",
                             latency=round(latency, 2),
                             error=None if response.status_code == 200 else f"HTTP {response.status_code}",
+                            details=details,
                         )
                     )
                 except Exception as exc:
@@ -839,6 +1019,7 @@ async def check_status():
 
 @app.post("/tts", response_model=TTSResponse)
 async def text_to_speech(request: TTSRequest, _: bool = Depends(optional_api_key_check)):
+    request = resolve_request_voice(request)
     if request.provider not in PROVIDERS:
         return TTSResponse(success=False, provider=request.provider, error="Invalid provider")
     if not request.text.strip():
@@ -890,20 +1071,21 @@ async def text_to_speech(request: TTSRequest, _: bool = Depends(optional_api_key
 
 
 @app.get("/audio/{audio_id}")
-async def get_audio(audio_id: str):
+async def get_audio(audio_id: str, request: Request):
     audio_data = get_audio_bytes(audio_id)
     if not audio_data:
         raise HTTPException(status_code=404, detail="Audio not found")
-    return StreamingResponse(
-        io.BytesIO(audio_data),
+    return ranged_audio_response(
+        audio_data,
         media_type=audio_content_type(audio_data),
-        headers={"Cache-Control": "public, max-age=3600"},
+        request=request,
+        cache_control="public, max-age=3600",
     )
 
 
 @app.get("/play/{audio_id}")
-async def play_audio(audio_id: str):
-    return await get_audio(audio_id)
+async def play_audio(audio_id: str, request: Request):
+    return await get_audio(audio_id, request)
 
 
 @app.get("/history")

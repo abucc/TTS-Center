@@ -6,11 +6,13 @@ import {
   Loader2,
   LogOut,
   Play,
+  Plus,
   RefreshCw,
   Save,
   Scissors,
   ShieldCheck,
   Sparkles,
+  Trash2,
   Volume2,
 } from 'lucide-react';
 import Login from './components/Login';
@@ -20,6 +22,19 @@ interface ServiceStatus {
   status: string;
   latency?: number;
   error?: string;
+  details?: {
+    model_type?: string;
+    model_size?: string;
+    qwen_pid?: number;
+    loaded?: boolean;
+    loaded_status?: string;
+    gpu_available?: boolean;
+    gpu_memory_used_mb?: number;
+    gpu_memory_free_mb?: number;
+    qwen_gpu_memory_mb?: number;
+    load_status?: string;
+    error?: string;
+  };
 }
 
 interface VoiceFile {
@@ -79,6 +94,18 @@ interface StylePreview {
   max_tts_chars: number;
 }
 
+interface VoiceRouting {
+  fallback_provider: string;
+  fallback_voice: string;
+  agent_voices: Record<string, string>;
+}
+
+interface AgentVoiceRow {
+  id: string;
+  agent: string;
+  voice: string;
+}
+
 const defaultTestText = '你好，这是语音中心的测试。';
 
 function makeApiBase() {
@@ -115,6 +142,8 @@ const App: React.FC = () => {
   const [referenceText, setReferenceText] = useState('');
   const [clipStart, setClipStart] = useState(0);
   const [clipDuration, setClipDuration] = useState(20);
+  const [sourceAudioDuration, setSourceAudioDuration] = useState(300);
+  const [referenceAudioVersion, setReferenceAudioVersion] = useState(0);
   const [testVoice, setTestVoice] = useState('');
   const [testText, setTestText] = useState(defaultTestText);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
@@ -132,6 +161,9 @@ const App: React.FC = () => {
   const [stylePreview, setStylePreview] = useState<StylePreview | null>(null);
   const [styleTargetTtsChars, setStyleTargetTtsChars] = useState(80);
   const [styleMaxTtsChars, setStyleMaxTtsChars] = useState(80);
+  const [fallbackProvider, setFallbackProvider] = useState('aliyun-zhimi');
+  const [fallbackVoice, setFallbackVoice] = useState('zhimi_emo');
+  const [agentVoiceRows, setAgentVoiceRows] = useState<AgentVoiceRow[]>([]);
   const [busy, setBusy] = useState('');
   const isBusy = Boolean(busy);
 
@@ -165,6 +197,9 @@ const App: React.FC = () => {
     if (!response.ok) throw new Error(await response.text());
     return response.json();
   };
+
+  const audioFileUrl = (path: string, version = 0) =>
+    `${apiBase}/voice-admin/audio-file?path=${encodeURIComponent(path)}${version ? `&v=${version}` : ''}`;
 
   const linesToList = (value: string) =>
     value
@@ -234,13 +269,14 @@ const App: React.FC = () => {
   const refreshAll = async () => {
     setBusy('refresh');
     try {
-      const [statusData, configData, filesData, voicesData, historyData, stylesData] = await Promise.all([
+      const [statusData, configData, filesData, voicesData, historyData, stylesData, routingData] = await Promise.all([
         apiGet('/status'),
         apiGet('/voice-admin/config'),
         apiGet('/voice-admin/files'),
         apiGet('/voice-admin/voices'),
         apiGet('/history'),
         apiGet('/voice-admin/styles'),
+        apiGet('/settings/voice-routing'),
       ]);
       setStatuses(statusData);
       setVoicesDir(configData.voices_dir || '');
@@ -250,6 +286,15 @@ const App: React.FC = () => {
       setVoiceStyles(stylesData.styles || {});
       setStyleTargetTtsChars(stylesData.target_tts_chars || 80);
       setStyleMaxTtsChars(stylesData.max_tts_chars || 80);
+      setFallbackProvider(routingData.fallback_provider || 'aliyun-zhimi');
+      setFallbackVoice(routingData.fallback_voice || 'zhimi_emo');
+      setAgentVoiceRows(
+        Object.entries(routingData.agent_voices || {}).map(([agent, voice]) => ({
+          id: `${agent}-${voice}`,
+          agent,
+          voice: String(voice),
+        })),
+      );
       const firstVoice = Object.keys(voicesData.voices || {})[0] || '';
       setTestVoice((current) => current || firstVoice);
       const firstStyleVoice = styleVoice || firstVoice || Object.keys(stylesData.styles || {})[0] || '';
@@ -274,6 +319,41 @@ const App: React.FC = () => {
     }
   };
 
+  const saveRouting = async () => {
+    setBusy('routing-save');
+    try {
+      const agent_voices = agentVoiceRows.reduce<Record<string, string>>((items, row) => {
+        const agent = row.agent.trim();
+        const voice = row.voice.trim();
+        if (agent && voice) items[agent] = voice;
+        return items;
+      }, {});
+      await apiPost('/settings/voice-routing', {
+        fallback_provider: fallbackProvider,
+        fallback_voice: fallbackVoice,
+        agent_voices,
+      });
+      setMessage('调用配置已保存');
+      await refreshAll();
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : '保存调用配置失败');
+    } finally {
+      setBusy('');
+    }
+  };
+
+  const updateAgentVoiceRow = (id: string, field: 'agent' | 'voice', value: string) => {
+    setAgentVoiceRows((rows) => rows.map((row) => (row.id === id ? { ...row, [field]: value } : row)));
+  };
+
+  const addAgentVoiceRow = () => {
+    setAgentVoiceRows((rows) => [...rows, { id: `agent-${Date.now()}`, agent: '', voice: '' }]);
+  };
+
+  const removeAgentVoiceRow = (id: string) => {
+    setAgentVoiceRows((rows) => rows.filter((row) => row.id !== id));
+  };
+
   const selectFile = (file: VoiceFile) => {
     if (isBusy) return;
     const config = file.config;
@@ -283,6 +363,10 @@ const App: React.FC = () => {
     setVoiceName(config?.name || file.file_name.replace(/\.[^.]+$/, ''));
     setReferenceAudio(config?.reference_audio || file.path);
     setReferenceText(config?.reference_text || '');
+    setClipStart(0);
+    setClipDuration(20);
+    setSourceAudioDuration(300);
+    setReferenceAudioVersion(0);
     loadStyleForm(nextVoiceId, voiceStyles);
     setMessage('');
   };
@@ -298,6 +382,7 @@ const App: React.FC = () => {
         duration: clipDuration,
       });
       setReferenceAudio(result.reference_audio);
+      setReferenceAudioVersion(Date.now());
       setMessage(`清洗裁剪完成：${result.reference_audio}`);
     } catch (error) {
       setMessage(error instanceof Error ? error.message : '清洗裁剪失败');
@@ -379,6 +464,19 @@ const App: React.FC = () => {
     }
   };
 
+  const loadQwenGpu = async () => {
+    setBusy('gpu-load');
+    try {
+      const result = await apiPost('/voice-admin/gpu-load', {});
+      setMessage(result.load_status || (result.loaded ? '模型已加载到 GPU' : '已发送加载请求，请刷新查看状态'));
+      await refreshAll();
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : '重新加载 GPU 失败');
+    } finally {
+      setBusy('');
+    }
+  };
+
   const testGenerate = async () => {
     setBusy('test');
     setAudioUrl(null);
@@ -413,6 +511,7 @@ const App: React.FC = () => {
   const fallbackStatus = statuses.find((item) => item.service === 'aliyun-zhimi');
   const configuredVoices = Object.values(voices);
   const hasProcessedAudio = Boolean(selectedFile && referenceAudio && referenceAudio !== selectedFile.path);
+  const qwenGpu = qwenStatus?.details;
 
   if (isCheckingAuth) {
     return (
@@ -478,7 +577,25 @@ const App: React.FC = () => {
               本机 Qwen
             </div>
             <div className="mt-2 text-2xl font-semibold">{qwenStatus ? statusText(qwenStatus.status) : '未知'}</div>
-            <div className="mt-1 text-xs text-slate-500">{qwenStatus?.latency ? `${qwenStatus.latency} ms` : qwenStatus?.error || '用于克隆音色'}</div>
+            <div className="mt-1 text-xs text-slate-500">
+              {qwenStatus?.latency ? `${qwenStatus.latency} ms` : qwenStatus?.error || '用于克隆音色'}
+            </div>
+            <div className={`mt-3 rounded-md border px-3 py-2 text-xs ${qwenGpu?.loaded ? 'border-emerald-200 bg-emerald-50 text-emerald-900' : 'border-amber-200 bg-amber-50 text-amber-900'}`}>
+              <div className="font-medium">{qwenGpu?.loaded ? 'GPU 已加载模型' : 'GPU 未确认加载'}</div>
+              <div className="mt-1">
+                模型：Base {qwenGpu?.model_size || '-'}；显存：{qwenGpu?.gpu_memory_used_mb ?? '-'} MB
+                {qwenGpu?.qwen_gpu_memory_mb ? `；Qwen：${qwenGpu.qwen_gpu_memory_mb} MB` : ''}
+              </div>
+              {qwenGpu?.loaded_status && <div className="mt-1 line-clamp-2 break-words">{qwenGpu.loaded_status}</div>}
+            </div>
+            <button
+              onClick={loadQwenGpu}
+              disabled={isBusy || qwenStatus?.status !== 'healthy'}
+              className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm hover:bg-slate-100 disabled:bg-slate-100"
+            >
+              {busy === 'gpu-load' ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+              重新加载到 GPU
+            </button>
           </div>
           <div className="rounded-md border border-slate-200 bg-white p-4">
             <div className="flex items-center gap-2 text-sm text-slate-500">
@@ -495,6 +612,112 @@ const App: React.FC = () => {
             </div>
             <div className="mt-2 text-2xl font-semibold">{configuredVoices.length}</div>
             <div className="mt-1 text-xs text-slate-500">Hermes/OpenClaw 使用音色 ID 调用</div>
+          </div>
+        </section>
+
+        <section className="mb-5 rounded-md border border-slate-200 bg-white p-4 md:p-5">
+          <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <div>
+              <h2 className="text-lg font-semibold">调用配置</h2>
+              <p className="mt-1 text-sm text-slate-500">配置保底 TTS 音色，以及每个 AI 默认使用哪个克隆音色。</p>
+            </div>
+            <button
+              onClick={saveRouting}
+              disabled={isBusy}
+              className="inline-flex w-full items-center justify-center gap-2 rounded-md bg-teal-700 px-4 py-2 text-sm font-semibold text-white hover:bg-teal-800 disabled:bg-slate-400 md:w-auto"
+            >
+              {busy === 'routing-save' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+              保存调用配置
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-[320px_1fr]">
+            <div className="rounded-md border border-slate-200 bg-slate-50 p-3">
+              <div className="mb-3 text-sm font-medium text-slate-800">保底 TTS</div>
+              <label className="block text-sm font-medium">
+                保底服务
+                <select
+                  value={fallbackProvider}
+                  onChange={(event) => setFallbackProvider(event.target.value)}
+                  disabled={isBusy}
+                  className="mt-2 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm disabled:bg-slate-100"
+                >
+                  <option value="aliyun-zhimi">阿里云 TTS</option>
+                </select>
+              </label>
+              <label className="mt-3 block text-sm font-medium">
+                阿里云音色
+                <input
+                  value={fallbackVoice}
+                  onChange={(event) => setFallbackVoice(event.target.value)}
+                  disabled={isBusy}
+                  className="mt-2 w-full rounded-md border border-slate-300 px-3 py-2 text-sm disabled:bg-slate-100"
+                  placeholder="例如 zhimi_emo"
+                />
+              </label>
+              <div className="mt-2 text-xs text-slate-500">本地 Qwen 失败或超时后，会用这里的音色调用保底服务。</div>
+            </div>
+
+            <div className="rounded-md border border-slate-200 bg-slate-50 p-3">
+              <div className="mb-3 flex items-center justify-between gap-3">
+                <div className="text-sm font-medium text-slate-800">AI 默认音色</div>
+                <button
+                  onClick={addAgentVoiceRow}
+                  disabled={isBusy}
+                  className="inline-flex items-center gap-1 rounded-md border border-slate-300 bg-white px-2 py-1.5 text-xs hover:bg-slate-100 disabled:bg-slate-100"
+                >
+                  <Plus className="h-3.5 w-3.5" />
+                  添加
+                </button>
+              </div>
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                {agentVoiceRows.map((row) => (
+                  <div key={row.id} className="rounded-md border border-slate-200 bg-white p-3">
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
+                      <label className="text-sm font-medium">
+                        AI 名称
+                        <input
+                          value={row.agent}
+                          onChange={(event) => updateAgentVoiceRow(row.id, 'agent', event.target.value)}
+                          disabled={isBusy}
+                          className="mt-2 w-full rounded-md border border-slate-300 px-3 py-2 text-sm disabled:bg-slate-100"
+                          placeholder="例如 栗子"
+                        />
+                      </label>
+                      <label className="text-sm font-medium">
+                        默认音色
+                        <select
+                          value={row.voice}
+                          onChange={(event) => updateAgentVoiceRow(row.id, 'voice', event.target.value)}
+                          disabled={isBusy}
+                          className="mt-2 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm disabled:bg-slate-100"
+                        >
+                          <option value="">选择音色</option>
+                          {configuredVoices.map((voice) => (
+                            <option key={voice.id} value={voice.id}>
+                              {voice.name} ({voice.id})
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                      <button
+                        onClick={() => removeAgentVoiceRow(row.id)}
+                        disabled={isBusy}
+                        title="删除映射"
+                        className="inline-flex h-10 items-center justify-center rounded-md border border-slate-300 bg-white px-3 text-sm hover:bg-slate-100 disabled:bg-slate-100"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+                {agentVoiceRows.length === 0 && (
+                  <div className="rounded-md border border-dashed border-slate-300 bg-white p-4 text-sm text-slate-500">
+                    还没有配置 AI 默认音色。
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </section>
 
@@ -543,7 +766,55 @@ const App: React.FC = () => {
               <div className="text-sm text-slate-500">先从左侧选择一个音频。</div>
             ) : (
               <div className="space-y-4">
-                <audio controls src={`${apiBase}/voice-admin/audio-file?path=${encodeURIComponent(selectedFile.path)}`} className="w-full" />
+                <div className="rounded-md border border-slate-200 bg-slate-50 p-3">
+                  <div className="mb-2 text-sm font-medium text-slate-800">源音频</div>
+                  <audio
+                    controls
+                    preload="metadata"
+                    src={audioFileUrl(selectedFile.path)}
+                    onLoadedMetadata={(event) => {
+                      const duration = Number(event.currentTarget.duration);
+                      if (Number.isFinite(duration) && duration > 0) {
+                        setSourceAudioDuration(duration);
+                        setClipStart((current) => Math.min(current, Math.max(0, duration - 1)));
+                        setClipDuration((current) => Math.min(20, Math.max(1, Math.min(current, duration))));
+                      }
+                    }}
+                    className="w-full"
+                  />
+                  <div className="mt-3 grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <label className="text-sm font-medium">
+                      源音频截取起点
+                      <input
+                        type="number"
+                        min={0}
+                        max={Math.max(0, sourceAudioDuration - 0.5)}
+                        step={0.5}
+                        value={clipStart}
+                        onChange={(event) =>
+                          setClipStart(Math.min(Math.max(0, sourceAudioDuration - 0.5), Math.max(0, Number(event.target.value) || 0)))
+                        }
+                        disabled={isBusy}
+                        className="mt-2 w-full rounded-md border border-slate-300 px-3 py-2 text-sm disabled:bg-slate-100"
+                      />
+                      <div className="mt-1 text-xs text-slate-500">默认 0 秒，从源音频这个位置开始截取。</div>
+                    </label>
+                    <label className="text-sm font-medium">
+                      源音频截取时长
+                      <input
+                        type="number"
+                        min={1}
+                        max={20}
+                        step={0.5}
+                        value={clipDuration}
+                        onChange={(event) => setClipDuration(Math.min(20, Math.max(1, Number(event.target.value) || 20)))}
+                        disabled={isBusy}
+                        className="mt-2 w-full rounded-md border border-slate-300 px-3 py-2 text-sm disabled:bg-slate-100"
+                      />
+                      <div className="mt-1 text-xs text-slate-500">先截取源音频，再清洗；最多 20 秒。</div>
+                    </label>
+                  </div>
+                </div>
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <label className="text-sm font-medium">
                     音色 ID
@@ -564,40 +835,11 @@ const App: React.FC = () => {
                     <div className="mt-1 break-all text-xs text-emerald-800">{referenceAudio}</div>
                     <audio
                       controls
-                      src={`${apiBase}/voice-admin/audio-file?path=${encodeURIComponent(referenceAudio)}`}
+                      src={audioFileUrl(referenceAudio, referenceAudioVersion)}
                       className="mt-3 w-full"
                     />
                   </div>
                 )}
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                  <label className="text-sm font-medium">
-                    源音频截取起点：{clipStart.toFixed(1)} 秒
-                    <input
-                      type="range"
-                      min={0}
-                      max={300}
-                      step={0.5}
-                      value={clipStart}
-                      onChange={(event) => setClipStart(Number(event.target.value))}
-                      disabled={isBusy}
-                      className="mt-2 w-full"
-                    />
-                  </label>
-                  <label className="text-sm font-medium">
-                    源音频截取时长
-                    <input
-                      type="number"
-                      min={1}
-                      max={20}
-                      step={0.5}
-                      value={clipDuration}
-                      onChange={(event) => setClipDuration(Math.min(20, Math.max(1, Number(event.target.value) || 20)))}
-                      disabled={isBusy}
-                      className="mt-2 w-full rounded-md border border-slate-300 px-3 py-2 text-sm disabled:bg-slate-100"
-                    />
-                    <div className="mt-1 text-xs text-slate-500">先从源音频截取这一段，再清洗；最多 20 秒，源音频不足时按实际长度输出。</div>
-                  </label>
-                </div>
                 <div className="flex flex-wrap gap-2">
                   <a
                     href="https://dy.kukutool.com/"

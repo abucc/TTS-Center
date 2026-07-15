@@ -17,15 +17,15 @@ services:
       - SESSION_SECRET=${SESSION_SECRET:-change-this-session-secret}
       - REQUIRE_API_KEY=${REQUIRE_API_KEY:-false}
       - QWEN_URL=${QWEN_URL:-http://192.168.31.167:7861}
-      - QWEN_TIMEOUT=${QWEN_TIMEOUT:-900}
+      - QWEN_TIMEOUT=${QWEN_TIMEOUT:-75}
       - ALIYUN_DEFAULT_VOICE=${ALIYUN_DEFAULT_VOICE:-zhimi_emo}
       - ALIYUN_OUTPUT_FORMAT=${ALIYUN_OUTPUT_FORMAT:-wav}
       - ALIYUN_TIMEOUT=${ALIYUN_TIMEOUT:-180}
       - ALIYUN_TTS_COMMAND=${ALIYUN_TTS_COMMAND:-/usr/local/bin/python /opt/data/skills/aliyun-tts/scripts/aliyun_tts.py {text_file} {output_path} --voice {voice} --format {format}}
       - VOICE_HUB_CONFIG_DIR=/app/config
       - VOICE_STYLE_PATH=/opt/data/voice_styles.json
-      - VOICE_HUB_TARGET_TTS_CHARS=${VOICE_HUB_TARGET_TTS_CHARS:-80}
-      - VOICE_HUB_MAX_TTS_CHARS=${VOICE_HUB_MAX_TTS_CHARS:-120}
+      - VOICE_HUB_TARGET_TTS_CHARS=${VOICE_HUB_TARGET_TTS_CHARS:-45}
+      - VOICE_HUB_MAX_TTS_CHARS=${VOICE_HUB_MAX_TTS_CHARS:-60}
     volumes:
       - /volume1/docker/hermes-agent/data:/opt/data
       - ./config:/app/config

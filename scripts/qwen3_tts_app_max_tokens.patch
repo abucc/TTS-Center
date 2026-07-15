@@ -1,0 +1,56 @@
+﻿diff --git a/app.py b/app.py
+index a6f2adf..dd5587a 100644
+--- a/app.py
++++ b/app.py
+@@ -414,7 +414,7 @@ def generate_voice_design(text, language, voice_description, seed):
+         return None, f"Error: {type(e).__name__}: {e}"
+ 
+ 
+-def generate_voice_clone(ref_audio, ref_text, target_text, language, use_xvector_only, model_size, max_chunk_chars, chunk_gap, seed):
++def generate_voice_clone(ref_audio, ref_text, target_text, language, use_xvector_only, model_size, max_chunk_chars, chunk_gap, seed):
+     """Generate speech using Base (Voice Clone) model."""
+     if not target_text or not target_text.strip():
+         return None, "Error: Target text is required."
+@@ -423,11 +423,11 @@ def generate_voice_clone(ref_audio, ref_text, target_text, language, use_xvector
+     if audio_tuple is None:
+         return None, "Error: Reference audio is required."
+ 
+-    if not use_xvector_only and (not ref_text or not ref_text.strip()):
+-        return None, "Error: Reference text is required when 'Use x-vector only' is not enabled."
+-
+-    try:
+-        from tqdm import tqdm
++    if not use_xvector_only and (not ref_text or not ref_text.strip()):
++        return None, "Error: Reference text is required when 'Use x-vector only' is not enabled."
++
++    try:
++        from tqdm import tqdm
+         
+         # Handle seed - if -1 (auto), generate one and use it for all chunks
+         if seed == -1:
+@@ -450,15 +450,16 @@ def generate_voice_clone(ref_audio, ref_text, target_text, language, use_xvector
+             # Set seed before each chunk to ensure consistency
+             set_seed(seed)
+             
+-            print(f"\n🔊 Chunk {i+1}/{len(chunks)} [Seed: {seed}]: \"{chunk[:50]}{'...' if len(chunk) > 50 else ''}\"")
+-            wavs, sr = tts.generate_voice_clone(
+-                text=chunk,
+-                language=language,
+-                ref_audio=audio_tuple,
+-                ref_text=ref_text.strip() if ref_text else None,
+-                x_vector_only_mode=use_xvector_only,
+-                max_new_tokens=2048,
+-            )
++            print(f"\n🔊 Chunk {i+1}/{len(chunks)} [Seed: {seed}]: \"{chunk[:50]}{'...' if len(chunk) > 50 else ''}\"")
++            max_new_tokens = max(192, min(768, len(chunk) * 24 + 192))
++            wavs, sr = tts.generate_voice_clone(
++                text=chunk,
++                language=language,
++                ref_audio=audio_tuple,
++                ref_text=ref_text.strip() if ref_text else None,
++                x_vector_only_mode=use_xvector_only,
++                max_new_tokens=max_new_tokens,
++            )
+             all_wavs.append(wavs[0])
+             print(f"   ✅ Generated {len(wavs[0])/sr:.2f}s of audio")
+         
