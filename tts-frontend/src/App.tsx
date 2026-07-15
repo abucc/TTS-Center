@@ -113,6 +113,8 @@ const App: React.FC = () => {
   const [voiceName, setVoiceName] = useState('');
   const [referenceAudio, setReferenceAudio] = useState('');
   const [referenceText, setReferenceText] = useState('');
+  const [clipStart, setClipStart] = useState(0);
+  const [clipDuration, setClipDuration] = useState(20);
   const [testVoice, setTestVoice] = useState('');
   const [testText, setTestText] = useState(defaultTestText);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
@@ -131,6 +133,7 @@ const App: React.FC = () => {
   const [styleTargetTtsChars, setStyleTargetTtsChars] = useState(80);
   const [styleMaxTtsChars, setStyleMaxTtsChars] = useState(80);
   const [busy, setBusy] = useState('');
+  const isBusy = Boolean(busy);
 
   useEffect(() => {
     checkAuth();
@@ -272,6 +275,7 @@ const App: React.FC = () => {
   };
 
   const selectFile = (file: VoiceFile) => {
+    if (isBusy) return;
     const config = file.config;
     const nextVoiceId = config?.id || file.id;
     setSelectedFile(file);
@@ -290,8 +294,8 @@ const App: React.FC = () => {
       const result = await apiPost('/voice-admin/process', {
         source_audio: selectedFile.path,
         id: voiceId,
-        start: 0,
-        duration: 20,
+        start: clipStart,
+        duration: clipDuration,
       });
       setReferenceAudio(result.reference_audio);
       setMessage(`清洗裁剪完成：${result.reference_audio}`);
@@ -449,6 +453,14 @@ const App: React.FC = () => {
       </header>
 
       <div className="mx-auto max-w-6xl px-5 py-5">
+        {isBusy && (
+          <div className="fixed inset-0 z-40 flex items-center justify-center bg-slate-950/20 backdrop-blur-[1px]">
+            <div className="inline-flex items-center gap-3 rounded-md border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 shadow-lg">
+              <Loader2 className="h-5 w-5 animate-spin text-teal-700" />
+              正在处理，请稍等...
+            </div>
+          </div>
+        )}
         {message && (
           <div className="fixed bottom-5 right-5 z-50 max-w-md rounded-md border border-teal-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-lg">
             <div className="font-medium">操作提示</div>
@@ -498,7 +510,7 @@ const App: React.FC = () => {
               className="flex-1 rounded-md border border-slate-300 px-3 py-2 text-sm"
               placeholder="例如 D:\aiData\voices"
             />
-            <button onClick={saveDirectory} disabled={busy === 'directory'} className="inline-flex items-center justify-center gap-2 rounded-md bg-teal-700 px-4 py-2 text-sm font-semibold text-white hover:bg-teal-800 disabled:bg-slate-400">
+            <button onClick={saveDirectory} disabled={isBusy} className="inline-flex items-center justify-center gap-2 rounded-md bg-teal-700 px-4 py-2 text-sm font-semibold text-white hover:bg-teal-800 disabled:bg-slate-400">
               {busy === 'directory' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
               保存目录
             </button>
@@ -515,6 +527,7 @@ const App: React.FC = () => {
                 <button
                   key={file.path}
                   onClick={() => selectFile(file)}
+                  disabled={isBusy}
                   className={`w-full rounded-md border px-3 py-3 text-left hover:bg-slate-50 ${selectedFile?.path === file.path ? 'border-teal-600 bg-teal-50' : 'border-slate-200 bg-white'}`}
                 >
                   <div className="font-medium">{file.file_name}</div>
@@ -534,16 +547,16 @@ const App: React.FC = () => {
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <label className="text-sm font-medium">
                     音色 ID
-                    <input value={voiceId} onChange={(event) => setVoiceId(event.target.value)} className="mt-2 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
+                    <input value={voiceId} onChange={(event) => setVoiceId(event.target.value)} disabled={isBusy} className="mt-2 w-full rounded-md border border-slate-300 px-3 py-2 text-sm disabled:bg-slate-100" />
                   </label>
                   <label className="text-sm font-medium">
                     显示名称
-                    <input value={voiceName} onChange={(event) => setVoiceName(event.target.value)} className="mt-2 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
+                    <input value={voiceName} onChange={(event) => setVoiceName(event.target.value)} disabled={isBusy} className="mt-2 w-full rounded-md border border-slate-300 px-3 py-2 text-sm disabled:bg-slate-100" />
                   </label>
                 </div>
                 <label className="block text-sm font-medium">
                   参考音频
-                  <input value={referenceAudio} onChange={(event) => setReferenceAudio(event.target.value)} className="mt-2 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
+                  <input value={referenceAudio} onChange={(event) => setReferenceAudio(event.target.value)} disabled={isBusy} className="mt-2 w-full rounded-md border border-slate-300 px-3 py-2 text-sm disabled:bg-slate-100" />
                 </label>
                 {hasProcessedAudio && (
                   <div className="rounded-md border border-emerald-200 bg-emerald-50 p-3">
@@ -556,7 +569,45 @@ const App: React.FC = () => {
                     />
                   </div>
                 )}
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <label className="text-sm font-medium">
+                    裁剪起点：{clipStart.toFixed(1)} 秒
+                    <input
+                      type="range"
+                      min={0}
+                      max={300}
+                      step={0.5}
+                      value={clipStart}
+                      onChange={(event) => setClipStart(Number(event.target.value))}
+                      disabled={isBusy}
+                      className="mt-2 w-full"
+                    />
+                  </label>
+                  <label className="text-sm font-medium">
+                    裁剪时长
+                    <input
+                      type="number"
+                      min={1}
+                      max={20}
+                      step={0.5}
+                      value={clipDuration}
+                      onChange={(event) => setClipDuration(Math.min(20, Math.max(1, Number(event.target.value) || 20)))}
+                      disabled={isBusy}
+                      className="mt-2 w-full rounded-md border border-slate-300 px-3 py-2 text-sm disabled:bg-slate-100"
+                    />
+                    <div className="mt-1 text-xs text-slate-500">最多 20 秒，原音频不足时会按实际长度输出。</div>
+                  </label>
+                </div>
                 <div className="flex flex-wrap gap-2">
+                  <a
+                    href="https://dy.kukutool.com/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm hover:bg-slate-100"
+                  >
+                    <ExternalLink className="h-4 w-4" />
+                    在线提取音频
+                  </a>
                   <a
                     href="https://vocalremover.org/"
                     target="_blank"
@@ -566,11 +617,11 @@ const App: React.FC = () => {
                     <ExternalLink className="h-4 w-4" />
                     提取人声
                   </a>
-                  <button onClick={processAudio} disabled={busy === 'process'} className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm hover:bg-slate-100 disabled:bg-slate-100">
+                  <button onClick={processAudio} disabled={isBusy} className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm hover:bg-slate-100 disabled:bg-slate-100">
                     {busy === 'process' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Scissors className="h-4 w-4" />}
                     清洗裁剪 20 秒
                   </button>
-                  <button onClick={transcribe} disabled={busy === 'transcribe'} className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm hover:bg-slate-100 disabled:bg-slate-100">
+                  <button onClick={transcribe} disabled={isBusy} className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm hover:bg-slate-100 disabled:bg-slate-100">
                     {busy === 'transcribe' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
                     {hasProcessedAudio ? '识别清洗后的文本' : '自动识别参考文本'}
                   </button>
@@ -580,9 +631,9 @@ const App: React.FC = () => {
                 </p>
                 <label className="block text-sm font-medium">
                   参考文本
-                  <textarea value={referenceText} onChange={(event) => setReferenceText(event.target.value)} className="mt-2 h-28 w-full rounded-md border border-slate-300 px-3 py-2 text-sm leading-6" placeholder="这段参考音频实际说的话。可以自动识别，也可以手动修改。" />
+                  <textarea value={referenceText} onChange={(event) => setReferenceText(event.target.value)} disabled={isBusy} className="mt-2 h-28 w-full rounded-md border border-slate-300 px-3 py-2 text-sm leading-6 disabled:bg-slate-100" placeholder="这段参考音频实际说的话。可以自动识别，也可以手动修改。" />
                 </label>
-                <button onClick={saveVoice} disabled={busy === 'save'} className="inline-flex w-full items-center justify-center gap-2 rounded-md bg-teal-700 px-4 py-3 text-sm font-semibold text-white hover:bg-teal-800 disabled:bg-slate-400">
+                <button onClick={saveVoice} disabled={isBusy} className="inline-flex w-full items-center justify-center gap-2 rounded-md bg-teal-700 px-4 py-3 text-sm font-semibold text-white hover:bg-teal-800 disabled:bg-slate-400">
                   {busy === 'save' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
                   保存为音色
                 </button>
@@ -611,7 +662,8 @@ const App: React.FC = () => {
                 max={80}
                 value={styleMaxSentenceChars}
                 onChange={(event) => setStyleMaxSentenceChars(Number(event.target.value))}
-                className="mt-2 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+                disabled={isBusy}
+                className="mt-2 w-full rounded-md border border-slate-300 px-3 py-2 text-sm disabled:bg-slate-100"
               />
             </label>
             <label className="text-sm font-medium">
@@ -619,13 +671,14 @@ const App: React.FC = () => {
               <input
                 value={stylePrefix}
                 onChange={(event) => setStylePrefix(event.target.value)}
-                className="mt-2 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+                disabled={isBusy}
+                className="mt-2 w-full rounded-md border border-slate-300 px-3 py-2 text-sm disabled:bg-slate-100"
                 placeholder="默认留空"
               />
             </label>
           </div>
           <label className="mt-4 inline-flex items-center gap-2 text-sm">
-            <input type="checkbox" checked={styleEnabled} onChange={(event) => setStyleEnabled(event.target.checked)} />
+            <input type="checkbox" checked={styleEnabled} onChange={(event) => setStyleEnabled(event.target.checked)} disabled={isBusy} />
             启用这个音色的风格整理
           </label>
           <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-3">
@@ -634,7 +687,8 @@ const App: React.FC = () => {
               <textarea
                 value={styleCommonWords}
                 onChange={(event) => setStyleCommonWords(event.target.value)}
-                className="mt-2 h-28 w-full rounded-md border border-slate-300 px-3 py-2 text-sm leading-6"
+                disabled={isBusy}
+                className="mt-2 h-28 w-full rounded-md border border-slate-300 px-3 py-2 text-sm leading-6 disabled:bg-slate-100"
                 placeholder="一行一个，当前只保存不自动乱插"
               />
             </label>
@@ -643,7 +697,8 @@ const App: React.FC = () => {
               <textarea
                 value={styleForbidden}
                 onChange={(event) => setStyleForbidden(event.target.value)}
-                className="mt-2 h-28 w-full rounded-md border border-slate-300 px-3 py-2 text-sm leading-6"
+                disabled={isBusy}
+                className="mt-2 h-28 w-full rounded-md border border-slate-300 px-3 py-2 text-sm leading-6 disabled:bg-slate-100"
                 placeholder="一行一个，出现就删除"
               />
             </label>
@@ -652,7 +707,8 @@ const App: React.FC = () => {
               <textarea
                 value={styleReplacements}
                 onChange={(event) => setStyleReplacements(event.target.value)}
-                className="mt-2 h-28 w-full rounded-md border border-slate-300 px-3 py-2 text-sm leading-6"
+                disabled={isBusy}
+                className="mt-2 h-28 w-full rounded-md border border-slate-300 px-3 py-2 text-sm leading-6 disabled:bg-slate-100"
                 placeholder="好的=>好嘛"
               />
             </label>
@@ -663,7 +719,8 @@ const App: React.FC = () => {
               <textarea
                 value={stylePreviewText}
                 onChange={(event) => setStylePreviewText(event.target.value)}
-                className="mt-2 h-32 w-full rounded-md border border-slate-300 px-3 py-2 text-sm leading-6"
+                disabled={isBusy}
+                className="mt-2 h-32 w-full rounded-md border border-slate-300 px-3 py-2 text-sm leading-6 disabled:bg-slate-100"
               />
             </label>
             <div className="rounded-md border border-slate-200 bg-slate-50 p-3">
@@ -679,11 +736,11 @@ const App: React.FC = () => {
             </div>
           </div>
           <div className="mt-4 flex flex-wrap gap-2">
-            <button onClick={previewStyle} disabled={busy === 'style-preview'} className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-4 py-2 text-sm hover:bg-slate-100 disabled:bg-slate-100">
+            <button onClick={previewStyle} disabled={isBusy} className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-4 py-2 text-sm hover:bg-slate-100 disabled:bg-slate-100">
               {busy === 'style-preview' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
               预览整理
             </button>
-            <button onClick={saveStyle} disabled={busy === 'style-save'} className="inline-flex items-center gap-2 rounded-md bg-teal-700 px-4 py-2 text-sm font-semibold text-white hover:bg-teal-800 disabled:bg-slate-400">
+            <button onClick={saveStyle} disabled={isBusy} className="inline-flex items-center gap-2 rounded-md bg-teal-700 px-4 py-2 text-sm font-semibold text-white hover:bg-teal-800 disabled:bg-slate-400">
               {busy === 'style-save' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
               保存风格
             </button>
@@ -693,7 +750,7 @@ const App: React.FC = () => {
         <section className="mt-5 rounded-md border border-slate-200 bg-white p-5">
           <h2 className="mb-4 text-lg font-semibold">测试生成</h2>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-[240px_1fr]">
-            <select value={testVoice} onChange={(event) => setTestVoice(event.target.value)} className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm">
+            <select value={testVoice} onChange={(event) => setTestVoice(event.target.value)} disabled={isBusy} className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm disabled:bg-slate-100">
               <option value="">默认音色</option>
               {configuredVoices.map((voice) => (
                 <option key={voice.id} value={voice.id}>
@@ -701,9 +758,9 @@ const App: React.FC = () => {
                 </option>
               ))}
             </select>
-            <input value={testText} onChange={(event) => setTestText(event.target.value)} className="rounded-md border border-slate-300 px-3 py-2 text-sm" />
+            <input value={testText} onChange={(event) => setTestText(event.target.value)} disabled={isBusy} className="rounded-md border border-slate-300 px-3 py-2 text-sm disabled:bg-slate-100" />
           </div>
-          <button onClick={testGenerate} disabled={busy === 'test'} className="mt-4 inline-flex items-center gap-2 rounded-md bg-teal-700 px-4 py-2 text-sm font-semibold text-white hover:bg-teal-800 disabled:bg-slate-400">
+          <button onClick={testGenerate} disabled={isBusy} className="mt-4 inline-flex items-center gap-2 rounded-md bg-teal-700 px-4 py-2 text-sm font-semibold text-white hover:bg-teal-800 disabled:bg-slate-400">
             {busy === 'test' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4" />}
             生成试听
           </button>

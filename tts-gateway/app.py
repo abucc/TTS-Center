@@ -563,7 +563,7 @@ async def call_http_provider(provider: Provider, request: TTSRequest) -> bytes:
 
 async def call_command_provider(provider: Provider, request: TTSRequest) -> bytes:
     audio_format = request.format or provider.output_format
-    voice = request.voice or provider.default_voice
+    voice = provider.default_voice
     suffix = f".{audio_format}"
     with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as handle:
         output_path = Path(handle.name)
