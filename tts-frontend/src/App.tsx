@@ -44,6 +44,7 @@ interface TTSResponse {
   provider: string;
   actual_provider?: string;
   duration?: number;
+  generation_duration?: number;
   audio_url?: string;
   error?: string;
   history_id?: string;
@@ -58,6 +59,7 @@ interface HistoryItem {
   actual_provider: string;
   audio_url: string;
   duration: number;
+  generation_duration?: number;
 }
 
 interface VoiceStyle {
@@ -73,6 +75,7 @@ interface StylePreview {
   styled_text: string;
   chunks: string[];
   lengths: number[];
+  target_tts_chars: number;
   max_tts_chars: number;
 }
 
@@ -89,6 +92,12 @@ function statusText(status: string) {
   if (status === 'configured') return '已配置';
   if (status === 'missing') return '缺失';
   return '异常';
+}
+
+function formatMs(value?: number | null) {
+  if (value === undefined || value === null) return '-';
+  if (value >= 1000) return `${(value / 1000).toFixed(1)} 秒`;
+  return `${Math.round(value)} ms`;
 }
 
 const App: React.FC = () => {
@@ -119,6 +128,7 @@ const App: React.FC = () => {
   const [styleReplacements, setStyleReplacements] = useState('');
   const [stylePreviewText, setStylePreviewText] = useState('好的，作为AI我已经明白了这个问题，用户可以继续测试这段比较长的文本看看断句是否自然一点。');
   const [stylePreview, setStylePreview] = useState<StylePreview | null>(null);
+  const [styleTargetTtsChars, setStyleTargetTtsChars] = useState(80);
   const [styleMaxTtsChars, setStyleMaxTtsChars] = useState(80);
   const [busy, setBusy] = useState('');
 
@@ -235,6 +245,7 @@ const App: React.FC = () => {
       setVoices(voicesData.voices || {});
       setHistory(historyData.items || []);
       setVoiceStyles(stylesData.styles || {});
+      setStyleTargetTtsChars(stylesData.target_tts_chars || 80);
       setStyleMaxTtsChars(stylesData.max_tts_chars || 80);
       const firstVoice = Object.keys(voicesData.voices || {})[0] || '';
       setTestVoice((current) => current || firstVoice);
@@ -353,6 +364,7 @@ const App: React.FC = () => {
         voice: styleVoice.trim(),
         text: stylePreviewText,
         styles: nextStyles,
+        target_tts_chars: styleTargetTtsChars,
         max_tts_chars: styleMaxTtsChars,
       });
       setStylePreview(result);
@@ -582,7 +594,7 @@ const App: React.FC = () => {
         <section className="mt-5 rounded-md border border-slate-200 bg-white p-5">
           <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <h2 className="text-lg font-semibold">音色风格配置</h2>
-            <div className="text-sm text-slate-500">单次 TTS 最多 {styleMaxTtsChars} 字，超出会自动拆分后拼接</div>
+            <div className="text-sm text-slate-500">单次 TTS 目标 {styleTargetTtsChars} 字，最多 {styleMaxTtsChars} 字，优先在停顿处拆分</div>
           </div>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-[220px_140px_1fr]">
             <label className="text-sm font-medium">
@@ -713,7 +725,7 @@ const App: React.FC = () => {
                       <div className="text-xs text-slate-500">{item.created_at}</div>
                     </div>
                     <div className="mt-1 text-xs text-slate-500">
-                      音色：{item.voice || '默认'} | 实际后端：{item.actual_provider || item.provider} | 用时：{Math.round(item.duration)} ms
+                      音色：{item.voice || '默认'} | 实际后端：{item.actual_provider || item.provider} | 音频时长：{formatMs(item.duration)} | 生成耗时：{formatMs(item.generation_duration)}
                     </div>
                     <audio controls src={url.replace('/audio/', '/play/')} className="mt-2 w-full" />
                   </div>

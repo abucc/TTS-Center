@@ -94,6 +94,7 @@ class TTSResponse(BaseModel):
     provider: str
     actual_provider: Optional[str] = None
     duration: Optional[float] = None
+    generation_duration: Optional[float] = None
     cached: bool = False
     audio_url: Optional[str] = None
     error: Optional[str] = None
@@ -136,7 +137,8 @@ QWEN_URL = os.getenv("QWEN_URL", "http://host.docker.internal:7861").rstrip("/")
 CONFIG_DIR = Path(os.getenv("VOICE_HUB_CONFIG_DIR", "/app/config"))
 FALLBACK_CHAINS_PATH = CONFIG_DIR / "fallback-chains.json"
 VOICE_STYLE_PATH = Path(os.getenv("VOICE_STYLE_PATH", "/opt/data/voice_styles.json"))
-MAX_TTS_CHARS = int(os.getenv("VOICE_HUB_MAX_TTS_CHARS", "80"))
+TARGET_TTS_CHARS = int(os.getenv("VOICE_HUB_TARGET_TTS_CHARS", "80"))
+MAX_TTS_CHARS = int(os.getenv("VOICE_HUB_MAX_TTS_CHARS", "120"))
 ALIYUN_COMMAND = os.getenv(
     "ALIYUN_TTS_COMMAND",
     "/usr/local/bin/python "
@@ -330,7 +332,26 @@ def concatenate_wav_audio(parts: list[bytes]) -> bytes:
     return output.getvalue()
 
 
-def add_history(request: TTSRequest, actual_provider: str, audio_url: str, duration: float) -> str:
+def audio_duration_ms(audio_data: bytes) -> Optional[float]:
+    if not audio_data.startswith(b"RIFF") or b"WAVE" not in audio_data[:16]:
+        return None
+    try:
+        with wave.open(io.BytesIO(audio_data), "rb") as reader:
+            frame_rate = reader.getframerate()
+            if frame_rate <= 0:
+                return None
+            return reader.getnframes() / frame_rate * 1000
+    except wave.Error:
+        return None
+
+
+def add_history(
+    request: TTSRequest,
+    actual_provider: str,
+    audio_url: str,
+    duration: Optional[float],
+    generation_duration: Optional[float],
+) -> str:
     created_at = now_shanghai()
     history_id = f"hist_{created_at.strftime('%Y%m%d%H%M%S%f')}"
     generated_history.insert(
@@ -343,7 +364,8 @@ def add_history(request: TTSRequest, actual_provider: str, audio_url: str, durat
             "provider": request.provider,
             "actual_provider": actual_provider,
             "audio_url": audio_url,
-            "duration": round(duration, 2),
+            "duration": round(duration, 2) if duration is not None else None,
+            "generation_duration": round(generation_duration, 2) if generation_duration is not None else None,
         },
     )
     del generated_history[10:]
@@ -463,29 +485,51 @@ def apply_voice_style(text: str, voice: str, styles: Optional[dict] = None) -> s
     return styled[:1200]
 
 
-def split_tts_chunks(text: str, max_chars: int = MAX_TTS_CHARS) -> list[str]:
+def choose_tts_break(text: str, target_chars: int, max_chars: int) -> int:
+    if len(text) <= max_chars:
+        return len(text)
+
+    strong_punctuation = "\u3002\uff01\uff1f!?\uff1b;"
+    soft_punctuation = "\uff0c,\u3001\uff1a: "
+    upper = min(max_chars, len(text))
+    lower = min(target_chars, upper)
+
+    for punctuation in (strong_punctuation, soft_punctuation):
+        for index in range(upper - 1, lower - 1, -1):
+            if text[index] in punctuation:
+                return index + 1
+
+    for punctuation in (strong_punctuation, soft_punctuation):
+        for index in range(lower - 1, max(target_chars // 2, 1) - 1, -1):
+            if text[index] in punctuation:
+                return index + 1
+
+    return upper
+
+
+def split_tts_chunks(
+    text: str,
+    max_chars: int = MAX_TTS_CHARS,
+    target_chars: int = TARGET_TTS_CHARS,
+) -> list[str]:
+    text = re.sub(r"\s+", " ", text).strip()
     if max_chars <= 0 or len(text) <= max_chars:
         return [text]
+    target_chars = max(1, min(target_chars, max_chars))
     chunks: list[str] = []
-    for paragraph in re.split(r"\n+", text):
-        paragraph = paragraph.strip()
-        if not paragraph:
-            continue
-        for sentence in re.split(r"(?<=[\u3002\uFF01\uFF1F!?\uFF1B;])", paragraph):
-            sentence = sentence.strip()
-            if not sentence:
-                continue
-            if len(sentence) <= max_chars:
-                chunks.append(sentence)
-            else:
-                chunks.extend(split_long_sentence(sentence, max_chars))
-    merged: list[str] = []
-    for chunk in chunks:
-        if merged and len(merged[-1]) + len(chunk) <= max_chars:
-            merged[-1] += chunk
+    remaining = text
+    while len(remaining) > max_chars:
+        break_at = choose_tts_break(remaining, target_chars, max_chars)
+        chunk = remaining[:break_at].strip()
+        remaining = remaining[break_at:].strip()
+        if chunk:
+            chunks.append(chunk)
+    if remaining:
+        if chunks and len(remaining) <= target_chars // 3 and len(chunks[-1]) + len(remaining) <= max_chars:
+            chunks[-1] = f"{chunks[-1]}{remaining}"
         else:
-            merged.append(chunk)
-    return merged or [text[:max_chars]]
+            chunks.append(remaining)
+    return chunks or [text[:max_chars]]
 
 
 def provider_to_info(provider: Provider) -> ProviderInfo:
@@ -675,7 +719,12 @@ async def voice_admin_save_voice(payload: dict):
 
 @app.get("/voice-admin/styles")
 async def voice_admin_styles():
-    return {"path": str(VOICE_STYLE_PATH), "max_tts_chars": MAX_TTS_CHARS, "styles": load_voice_styles()}
+    return {
+        "path": str(VOICE_STYLE_PATH),
+        "target_tts_chars": TARGET_TTS_CHARS,
+        "max_tts_chars": MAX_TTS_CHARS,
+        "styles": load_voice_styles(),
+    }
 
 
 @app.post("/voice-admin/styles")
@@ -690,15 +739,17 @@ async def voice_admin_style_preview(payload: dict):
     voice = str(payload.get("voice") or "").strip()
     styles = payload.get("styles") if isinstance(payload.get("styles"), dict) else load_voice_styles()
     max_tts_chars = int(payload.get("max_tts_chars") or MAX_TTS_CHARS)
+    target_tts_chars = int(payload.get("target_tts_chars") or TARGET_TTS_CHARS)
     if not text:
         raise HTTPException(status_code=400, detail="text is required")
     styled = apply_voice_style(text, voice, styles)
-    chunks = split_tts_chunks(styled, max_tts_chars)
+    chunks = split_tts_chunks(styled, max_tts_chars, target_tts_chars)
     return {
         "voice": voice,
         "styled_text": styled,
         "chunks": chunks,
         "lengths": [len(chunk) for chunk in chunks],
+        "target_tts_chars": target_tts_chars,
         "max_tts_chars": max_tts_chars,
     }
 
@@ -794,16 +845,18 @@ async def text_to_speech(request: TTSRequest, _: bool = Depends(optional_api_key
         return TTSResponse(success=False, provider=request.provider, error="Text is required")
 
     styled_text = apply_voice_style(request.text, request.voice or "")
-    chunks = split_tts_chunks(styled_text, MAX_TTS_CHARS)
+    chunks = split_tts_chunks(styled_text, MAX_TTS_CHARS, TARGET_TTS_CHARS)
     effective_request = with_request_text(request, styled_text)
     cache_key = generate_cache_key(effective_request)
     if request.cache:
         cached_audio = get_audio_bytes(cache_key)
         if cached_audio:
+            cached_duration = audio_duration_ms(cached_audio)
             return TTSResponse(
                 success=True,
                 provider=request.provider,
                 cached=True,
+                duration=round(cached_duration, 2) if cached_duration is not None else None,
                 audio_url=f"/audio/{cache_key}",
             )
 
@@ -819,13 +872,15 @@ async def text_to_speech(request: TTSRequest, _: bool = Depends(optional_api_key
         if len(audio_data) < 128:
             raise RuntimeError("Generated audio is too small")
         audio_url = store_audio(audio_data, cache_key, request.format or "wav")
-        duration = (asyncio.get_event_loop().time() - start) * 1000
-        history_id = add_history(effective_request, actual_provider, audio_url, duration)
+        generation_duration = (asyncio.get_event_loop().time() - start) * 1000
+        duration = audio_duration_ms(audio_data)
+        history_id = add_history(effective_request, actual_provider, audio_url, duration, generation_duration)
         return TTSResponse(
             success=True,
             provider=request.provider,
             actual_provider=actual_provider,
-            duration=round(duration, 2),
+            duration=round(duration, 2) if duration is not None else None,
+            generation_duration=round(generation_duration, 2),
             audio_url=audio_url,
             history_id=history_id,
         )

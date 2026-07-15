@@ -9,7 +9,7 @@ This fork is used as a NAS voice center for Hermes/OpenClaw:
 - Chinese management UI: `http://192.168.31.180:3003`
 - Gateway API: `http://192.168.31.180:9000`
 - Local-first provider: Qwen3-TTS first, configurable fallback TTS second
-- Voice style rules: common words, forbidden words, replacements, sentence splitting, and 80-character chunking
+- Voice style rules: common words, forbidden words, replacements, sentence splitting, and pause-aware chunking
 
 Project-specific docs:
 

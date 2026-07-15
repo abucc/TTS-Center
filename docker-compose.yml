@@ -24,6 +24,8 @@ services:
       - ALIYUN_TTS_COMMAND=${ALIYUN_TTS_COMMAND:-/usr/local/bin/python /opt/data/skills/aliyun-tts/scripts/aliyun_tts.py {text_file} {output_path} --voice {voice} --format {format}}
       - VOICE_HUB_CONFIG_DIR=/app/config
       - VOICE_STYLE_PATH=/opt/data/voice_styles.json
+      - VOICE_HUB_TARGET_TTS_CHARS=${VOICE_HUB_TARGET_TTS_CHARS:-80}
+      - VOICE_HUB_MAX_TTS_CHARS=${VOICE_HUB_MAX_TTS_CHARS:-120}
     volumes:
       - /volume1/docker/hermes-agent/data:/opt/data
       - ./config:/app/config
