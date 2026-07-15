@@ -161,6 +161,10 @@ cython_debug/
 # VS Code
 .vscode/
 
+# Frontend dependencies
+node_modules/
+tts-frontend/node_modules/
+
 # TTS specific files and directories
 models/
 cache/

@@ -1,173 +1,65 @@
-version: '3.8'
-
 services:
-  # Kokoro ONNX TTS
-  kokoro-onnx:
-    build:
-      context: ./kokoro-onnx
-      dockerfile: Dockerfile
-    restart: unless-stopped
-    ports:
-      - "9002:9002"
-    environment:
-      - MODEL_PATH=/app/models
-      - MAX_WORKERS=4
-      - PORT=9002
-    volumes:
-      - ./models/kokoro:/app/models
-      - ./cache:/app/cache
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9002/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-    deploy:
-      resources:
-        limits:
-          memory: 4G
-        reservations:
-          memory: 2G
-
-  # Chatterbox TTS Server (Optional - comment out if causing issues)
-  chatterbox-tts:
-    build:
-      context: ./chatterbox-tts
-      dockerfile: Dockerfile
-    restart: unless-stopped
-    ports:
-      - "9001:9001"
-    environment:
-      - HF_HOME=/app/hf_cache
-      - TRANSFORMERS_CACHE=/app/hf_cache
-      - HF_HUB_CACHE=/app/hf_cache
-      - PORT=9001
-    volumes:
-      - ./models/chatterbox:/app/model_cache
-      - ./cache:/app/cache
-      - chatterbox_hf_cache:/app/hf_cache
-      - ./chatterbox-tts/reference_audio:/app/reference_audio
-      - ./chatterbox-tts/outputs:/app/outputs
-      - ./chatterbox-tts/logs:/app/logs
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9001/health"]
-      interval: 60s
-      timeout: 30s
-      retries: 5
-      start_period: 900s  # 15 minutes for model download
-    deploy:
-      resources:
-        limits:
-          memory: 6G  # Increased memory for model loading
-        reservations:
-          memory: 2G
-
-
-
-  # OpenAI Edge TTS
-  openai-edge-tts:
-    build:
-      context: ./openai-edge-tts
-      dockerfile: Dockerfile
-      args:
-        INSTALL_FFMPEG: "true"
-    restart: unless-stopped
-    ports:
-      - "5050:5050"
-    environment:
-      - API_KEY=${API_KEY}
-      - PORT=5050
-      - DEFAULT_VOICE=${DEFAULT_VOICE}
-      - DEFAULT_RESPONSE_FORMAT=${DEFAULT_RESPONSE_FORMAT}
-      - DEFAULT_SPEED=${DEFAULT_SPEED}
-      - DEFAULT_LANGUAGE=${DEFAULT_LANGUAGE}
-      - REQUIRE_API_KEY=${REQUIRE_API_KEY}
-      - REMOVE_FILTER=${REMOVE_FILTER}
-      - EXPAND_API=${EXPAND_API}
-      - DETAILED_ERROR_LOGGING=${DETAILED_ERROR_LOGGING}
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5050/v1/models"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-    deploy:
-      resources:
-        limits:
-          memory: 1G
-        reservations:
-          memory: 512M
-
-
-
-  # Unified TTS Gateway/API (Main service for Coolify)
-  tts-gateway:
+  voice-hub-gateway:
     build:
       context: ./tts-gateway
       dockerfile: Dockerfile
+      args:
+        PIP_INDEX_URL: ${PIP_INDEX_URL:-https://pypi.tuna.tsinghua.edu.cn/simple}
+    container_name: voice-hub-gateway
     restart: unless-stopped
     ports:
       - "9000:9000"
     environment:
-      - KOKORO_URL=http://kokoro-onnx:9002
-      - CHATTERBOX_URL=http://chatterbox-tts:9001
-      - OPENAI_EDGE_TTS_URL=http://openai-edge-tts:5050
       - PORT=9000
-      - CORS_ORIGINS=${CORS_ORIGINS}
-      - REDIS_ENABLED=${REDIS_ENABLED}
-      - REDIS_URL=${REDIS_URL}
-      - REDIS_KEY_PREFIX=${REDIS_KEY_PREFIX}
-      # S3 Storage Configuration
-      - S3_ENABLED=${S3_ENABLED:-false}
-      - S3_ENDPOINT_URL=${S3_ENDPOINT_URL:-}
-      - S3_ACCESS_KEY=${S3_ACCESS_KEY:-}
-      - S3_SECRET_KEY=${S3_SECRET_KEY:-}
-      - S3_BUCKET_NAME=${S3_BUCKET_NAME:-}
-      - S3_REGION=${S3_REGION:-}
-      - S3_PUBLIC_URL=${S3_PUBLIC_URL:-}
-      - PUBLIC_URL=${PUBLIC_URL:-}
-    depends_on:
-      - kokoro-onnx
-      - chatterbox-tts
-      - openai-edge-tts
+      - TZ=Asia/Shanghai
+      - AUTH_USERNAME=${AUTH_USERNAME:-admin}
+      - AUTH_PASSWORD=${AUTH_PASSWORD:-change-me}
+      - SESSION_SECRET=${SESSION_SECRET:-change-this-session-secret}
+      - REQUIRE_API_KEY=${REQUIRE_API_KEY:-false}
+      - QWEN_URL=${QWEN_URL:-http://192.168.31.167:7861}
+      - QWEN_TIMEOUT=${QWEN_TIMEOUT:-900}
+      - ALIYUN_DEFAULT_VOICE=${ALIYUN_DEFAULT_VOICE:-zhimi_emo}
+      - ALIYUN_OUTPUT_FORMAT=${ALIYUN_OUTPUT_FORMAT:-wav}
+      - ALIYUN_TIMEOUT=${ALIYUN_TIMEOUT:-180}
+      - ALIYUN_TTS_COMMAND=${ALIYUN_TTS_COMMAND:-/usr/local/bin/python /opt/data/skills/aliyun-tts/scripts/aliyun_tts.py {text_file} {output_path} --voice {voice} --format {format}}
+      - VOICE_HUB_CONFIG_DIR=/app/config
+      - VOICE_STYLE_PATH=/opt/data/voice_styles.json
+    volumes:
+      - /volume1/docker/hermes-agent/data:/opt/data
+      - ./config:/app/config
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9000/health"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:9000/health', timeout=5).read()"]
       interval: 30s
       timeout: 10s
       retries: 3
     deploy:
       resources:
         limits:
-          memory: 1G
-        reservations:
           memory: 512M
 
-  # Modern React Frontend
-  tts-frontend:
+  voice-hub-frontend:
     build:
       context: ./tts-frontend
       dockerfile: Dockerfile
+      args:
+        VITE_API_BASE: ${VITE_API_BASE:-}
+        NPM_REGISTRY: ${NPM_REGISTRY:-https://registry.npmmirror.com}
+    container_name: voice-hub-frontend
     restart: unless-stopped
     ports:
       - "3003:3003"
-    environment:
-      - NODE_ENV=production
-      - PORT=3003
     depends_on:
-      - tts-gateway
+      - voice-hub-gateway
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3003/health"]
+      test: ["CMD", "wget", "-qO-", "http://localhost:3003"]
       interval: 30s
       timeout: 10s
       retries: 3
     deploy:
       resources:
         limits:
-          memory: 512M
-        reservations:
           memory: 256M
-
-volumes:
-  chatterbox_hf_cache:
 
 networks:
   default:
-    name: tts-network
+    name: voice-hub-network

@@ -1,146 +1,107 @@
 import React, { useState } from 'react';
-import { Lock, Eye, EyeOff, User } from 'lucide-react';
+import { Eye, EyeOff, Lock, LogIn, User } from 'lucide-react';
 
 interface LoginProps {
+  apiBase: string;
   onLogin: (success: boolean) => void;
 }
 
-const Login: React.FC<LoginProps> = ({ onLogin }) => {
+const Login: React.FC<LoginProps> = ({ apiBase, onLogin }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
     setIsLoading(true);
     setError('');
 
     try {
-      const response = await fetch('/api/auth/login', {
+      const response = await fetch(`${apiBase}/auth/login`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password }),
       });
-
-      if (response.ok) {
-        const data = await response.json();
+      const data = await response.json();
+      if (response.ok && data.success && data.token) {
         localStorage.setItem('authToken', data.token);
         onLogin(true);
       } else {
-        const errorData = await response.json();
-        setError(errorData.message || 'Invalid credentials');
+        setError(data.message || '账号或密码不正确');
       }
     } catch (error) {
-      setError('Connection error. Please try again.');
+      setError(error instanceof Error ? error.message : '连接语音中心失败');
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-indigo-900 relative overflow-hidden flex items-center justify-center p-4">
-      {/* Animated background elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-1/2 -left-1/2 w-full h-full bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute -bottom-1/2 -right-1/2 w-full h-full bg-gradient-to-br from-purple-500/10 to-pink-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
-      </div>
-
-      <div className="relative z-10 max-w-md w-full bg-white/10 backdrop-blur-md rounded-2xl shadow-2xl border border-white/20 p-8 transition-all duration-300 hover:bg-white/15">
-        <div className="text-center mb-8">
-          <div className="mx-auto w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mb-6 shadow-2xl animate-bounce">
-            <Lock className="w-10 h-10 text-white" />
+    <main className="min-h-screen bg-slate-50 text-slate-900 flex items-center justify-center px-4">
+      <section className="w-full max-w-sm rounded-md border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="mb-6 flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-md bg-teal-700 text-white">
+            <Lock className="h-5 w-5" />
           </div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent mb-4">
-            🎤 Awesome TTS
-          </h1>
-          <p className="text-purple-200 text-lg font-medium">
-            Please sign in to access the TTS system
-          </p>
-          <div className="mt-4 w-24 h-1 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full mx-auto"></div>
+          <div>
+            <h1 className="text-xl font-semibold">语音中心</h1>
+            <p className="text-sm text-slate-500">登录后管理音色和 TTS 配置</p>
+          </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label htmlFor="username" className="block text-sm font-bold text-purple-200 mb-3">
-              👤 Username
-            </label>
-            <div className="relative">
-              <div className="absolute left-3 top-1/2 transform -translate-y-1/2 w-6 h-6 bg-purple-500/20 rounded-lg flex items-center justify-center">
-                <User className="text-purple-300 w-4 h-4" />
-              </div>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <label className="block text-sm font-medium text-slate-700">
+            账号
+            <div className="relative mt-2">
+              <User className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
               <input
-                id="username"
-                type="text"
                 value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                className="w-full pl-12 pr-4 py-4 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl text-white placeholder-purple-300 focus:ring-2 focus:ring-purple-400 focus:border-purple-400 transition-all duration-300"
-                placeholder="Enter your username..."
+                onChange={(event) => setUsername(event.target.value)}
+                className="w-full rounded-md border border-slate-300 py-2 pl-9 pr-3 text-sm"
+                autoComplete="username"
                 required
               />
             </div>
-          </div>
+          </label>
 
-          <div>
-            <label htmlFor="password" className="block text-sm font-bold text-purple-200 mb-3">
-              🔒 Password
-            </label>
-            <div className="relative">
-              <div className="absolute left-3 top-1/2 transform -translate-y-1/2 w-6 h-6 bg-purple-500/20 rounded-lg flex items-center justify-center">
-                <Lock className="text-purple-300 w-4 h-4" />
-              </div>
+          <label className="block text-sm font-medium text-slate-700">
+            密码
+            <div className="relative mt-2">
+              <Lock className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
               <input
-                id="password"
                 type={showPassword ? 'text' : 'password'}
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full pl-12 pr-14 py-4 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl text-white placeholder-purple-300 focus:ring-2 focus:ring-purple-400 focus:border-purple-400 transition-all duration-300"
-                placeholder="Enter your password..."
+                onChange={(event) => setPassword(event.target.value)}
+                className="w-full rounded-md border border-slate-300 py-2 pl-9 pr-10 text-sm"
+                autoComplete="current-password"
                 required
               />
               <button
                 type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 w-8 h-8 bg-white/10 rounded-lg flex items-center justify-center text-purple-300 hover:text-white hover:bg-white/20 transition-all duration-300"
+                onClick={() => setShowPassword((value) => !value)}
+                className="absolute right-2 top-1.5 rounded p-1 text-slate-500 hover:bg-slate-100"
+                title={showPassword ? '隐藏密码' : '显示密码'}
               >
-                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
             </div>
-          </div>
+          </label>
 
-          {error && (
-            <div className="bg-red-500/20 backdrop-blur-sm border border-red-400/30 text-red-200 px-4 py-3 rounded-xl flex items-center">
-              <span className="text-xl mr-3">❌</span>
-              <span className="font-medium">{error}</span>
-            </div>
-          )}
+          {error && <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{error}</div>}
 
           <button
             type="submit"
             disabled={isLoading || !username || !password}
-            className="w-full bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 hover:from-blue-700 hover:via-purple-700 hover:to-pink-700 disabled:from-gray-600 disabled:via-gray-700 disabled:to-gray-800 text-white font-bold py-4 px-8 rounded-xl transition-all duration-300 flex items-center justify-center shadow-2xl hover:shadow-purple-500/25 hover:scale-105 disabled:scale-100 disabled:cursor-not-allowed"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-md bg-teal-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-teal-800 disabled:cursor-not-allowed disabled:bg-slate-400"
           >
-            {isLoading ? (
-              <>
-                <div className="w-6 h-6 border-3 border-white/30 border-t-white rounded-full animate-spin mr-3"></div>
-                <span className="text-lg">✨ Signing in...</span>
-              </>
-            ) : (
-              <>
-                <div className="w-6 h-6 bg-white/20 rounded-lg flex items-center justify-center mr-3">
-                  <span className="text-sm">🚀</span>
-                </div>
-                <span className="text-lg">🎤 Sign In</span>
-              </>
-            )}
+            {isLoading ? <Lock className="h-4 w-4" /> : <LogIn className="h-4 w-4" />}
+            登录
           </button>
-
         </form>
-      </div>
-    </div>
+      </section>
+    </main>
   );
 };
 

@@ -2,6 +2,21 @@
 
 A unified Text-to-Speech gateway that combines multiple TTS providers into a single, easy-to-use API and modern React web interface.
 
+## NAS Voice Hub Notes
+
+This fork is used as a NAS voice center for Hermes/OpenClaw:
+
+- Chinese management UI: `http://192.168.31.180:3003`
+- Gateway API: `http://192.168.31.180:9000`
+- Local-first provider: Qwen3-TTS first, configurable fallback TTS second
+- Voice style rules: common words, forbidden words, replacements, sentence splitting, and 80-character chunking
+
+Project-specific docs:
+
+- [Voice Hub usage](docs/VOICE_HUB_USAGE.md)
+- [Hermes TTS config](docs/HERMES_TTS_CONFIG.md)
+- [AI TTS handoff](docs/AI_TTS_HANDOFF.md)
+
 [![Docker](https://img.shields.io/badge/Docker-Ready-blue.svg)](https://docker.com)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
