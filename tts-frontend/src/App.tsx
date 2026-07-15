@@ -571,7 +571,7 @@ const App: React.FC = () => {
                 )}
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <label className="text-sm font-medium">
-                    裁剪起点：{clipStart.toFixed(1)} 秒
+                    源音频截取起点：{clipStart.toFixed(1)} 秒
                     <input
                       type="range"
                       min={0}
@@ -584,7 +584,7 @@ const App: React.FC = () => {
                     />
                   </label>
                   <label className="text-sm font-medium">
-                    裁剪时长
+                    源音频截取时长
                     <input
                       type="number"
                       min={1}
@@ -595,7 +595,7 @@ const App: React.FC = () => {
                       disabled={isBusy}
                       className="mt-2 w-full rounded-md border border-slate-300 px-3 py-2 text-sm disabled:bg-slate-100"
                     />
-                    <div className="mt-1 text-xs text-slate-500">最多 20 秒，原音频不足时会按实际长度输出。</div>
+                    <div className="mt-1 text-xs text-slate-500">先从源音频截取这一段，再清洗；最多 20 秒，源音频不足时按实际长度输出。</div>
                   </label>
                 </div>
                 <div className="flex flex-wrap gap-2">
@@ -619,7 +619,7 @@ const App: React.FC = () => {
                   </a>
                   <button onClick={processAudio} disabled={isBusy} className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm hover:bg-slate-100 disabled:bg-slate-100">
                     {busy === 'process' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Scissors className="h-4 w-4" />}
-                    清洗裁剪 20 秒
+                    截取源音频并清洗
                   </button>
                   <button onClick={transcribe} disabled={isBusy} className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm hover:bg-slate-100 disabled:bg-slate-100">
                     {busy === 'transcribe' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
@@ -627,7 +627,7 @@ const App: React.FC = () => {
                   </button>
                 </div>
                 <p className="text-sm text-slate-500">
-                  自动识别可以直接用原音频，但建议先清洗裁剪；保存音色时会优先使用上方显示的清洗后参考音频。
+                  处理顺序是先按起点和时长截取源音频，再对截出的片段降噪、响度统一和转单声道；保存音色时会优先使用上方显示的处理后参考音频。
                 </p>
                 <label className="block text-sm font-medium">
                   参考文本
