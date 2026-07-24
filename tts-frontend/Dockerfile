@@ -30,23 +30,10 @@ FROM node:18-alpine
 
 WORKDIR /app
 
-ARG NPM_REGISTRY=https://registry.npmmirror.com
+# Copy built assets and the lightweight static/proxy server
+COPY --from=builder /app/dist /app
+COPY server.js /server.js
 
-# Install serve
-RUN npm install -g serve --registry=$NPM_REGISTRY
-
-# Make sure environment variable is available at runtime
-ARG VITE_API_BASE
-ENV VITE_API_BASE=$VITE_API_BASE
-
-# Copy built assets from builder stage
-COPY --from=builder /app/dist .
-
-# Add configuration for serve (SPA routing)
-RUN echo '{"rewrites": [{"source": "**", "destination": "/index.html"}]}' > serve.json
-
-# Expose port 3003
 EXPOSE 3003
 
-# Start serve
-CMD ["serve", "-s", ".", "-l", "3003"]
+CMD ["node", "/server.js"]

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import base64
 import hashlib
 import io
 import json
@@ -15,13 +16,14 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+from urllib.parse import quote
 from zoneinfo import ZoneInfo
 
 import bcrypt
 import httpx
 import jwt
 from dotenv import load_dotenv
-from fastapi import Depends, FastAPI, HTTPException, Request
+from fastapi import Depends, FastAPI, File, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
@@ -137,12 +139,19 @@ class Provider:
 
 
 QWEN_URL = os.getenv("QWEN_URL", "http://host.docker.internal:7861").rstrip("/")
-CONFIG_DIR = Path(os.getenv("VOICE_HUB_CONFIG_DIR", "/app/config"))
+VOICE_HUB_DATA_DIR = Path(os.getenv("VOICE_HUB_DATA_DIR", "/opt/data/voice-hub"))
+CONFIG_DIR = Path(os.getenv("VOICE_HUB_CONFIG_DIR", str(VOICE_HUB_DATA_DIR / "config")))
+VOICE_UPLOAD_DIR = Path(os.getenv("VOICE_HUB_VOICES_DIR", str(VOICE_HUB_DATA_DIR / "voices")))
+PROCESSED_VOICE_DIR = VOICE_UPLOAD_DIR / "processed"
+VOICE_DEFINITIONS_PATH = CONFIG_DIR / "voices.json"
+VOICE_HUB_DOCS_DIR = Path(os.getenv("VOICE_HUB_DOCS_DIR", "/app/docs"))
 FALLBACK_CHAINS_PATH = CONFIG_DIR / "fallback-chains.json"
 VOICE_ROUTING_PATH = CONFIG_DIR / "voice-routing.json"
-VOICE_STYLE_PATH = Path(os.getenv("VOICE_STYLE_PATH", "/opt/data/voice_styles.json"))
+VOICE_STYLE_PATH = Path(os.getenv("VOICE_STYLE_PATH", str(CONFIG_DIR / "voice-styles.json")))
+VOICE_HUB_PUBLIC_URL = os.getenv("VOICE_HUB_PUBLIC_URL", "http://192.168.31.180:9000").rstrip("/")
 TARGET_TTS_CHARS = int(os.getenv("VOICE_HUB_TARGET_TTS_CHARS", "45"))
 MAX_TTS_CHARS = int(os.getenv("VOICE_HUB_MAX_TTS_CHARS", "60"))
+SUPPORTED_UPLOAD_EXTS = {".wav", ".mp3", ".m4a", ".flac", ".ogg", ".aac", ".webm"}
 ALIYUN_COMMAND = os.getenv(
     "ALIYUN_TTS_COMMAND",
     "/usr/local/bin/python "
@@ -150,6 +159,11 @@ ALIYUN_COMMAND = os.getenv(
     "{text} {output_path} --voice {voice} --format {format}",
 )
 ALIYUN_DEFAULT_VOICE = os.getenv("ALIYUN_DEFAULT_VOICE", "zhimi_emo")
+MIMO_API_KEY = os.getenv("MIMO_API_KEY", "")
+MIMO_BASE_URL = os.getenv("MIMO_BASE_URL", "https://api.xiaomimimo.com/v1").rstrip("/")
+MIMO_MODEL = os.getenv("MIMO_MODEL", "mimo-v2.5-tts-voiceclone")
+MIMO_AUTH_HEADER = os.getenv("MIMO_AUTH_HEADER", "auto").strip().lower()
+MIMO_TIMEOUT = float(os.getenv("MIMO_TIMEOUT", "180"))
 DEFAULT_VOICE_ROUTING: Dict[str, Any] = {
     "fallback_provider": "aliyun-zhimi",
     "fallback_voice": ALIYUN_DEFAULT_VOICE,
@@ -198,6 +212,86 @@ DEFAULT_VOICE_STYLES: Dict[str, Any] = {
 }
 
 
+def _atomic_write_json(path: Path, payload: dict) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp_path = path.with_suffix(path.suffix + ".tmp")
+    tmp_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+    os.replace(tmp_path, path)
+
+
+def _safe_id(value: str) -> str:
+    cleaned = "".join(ch.lower() if ch.isalnum() else "_" for ch in value.strip())
+    cleaned = "_".join(part for part in cleaned.split("_") if part)
+    return cleaned or "voice"
+
+
+def _safe_filename(filename: str) -> str:
+    raw = Path(filename or "audio.wav").name
+    stem = _safe_id(Path(raw).stem)
+    suffix = Path(raw).suffix.lower()
+    if suffix not in SUPPORTED_UPLOAD_EXTS:
+        raise HTTPException(status_code=400, detail="unsupported audio file type")
+    return f"{stem}{suffix}"
+
+
+def _migrate_json_if_needed(new_path: Path, old_path: Path) -> None:
+    if new_path.exists() or not old_path.exists():
+        return
+    try:
+        new_path.parent.mkdir(parents=True, exist_ok=True)
+        new_path.write_text(old_path.read_text(encoding="utf-8"), encoding="utf-8")
+        logger.info("Migrated %s to %s", old_path, new_path)
+    except Exception as exc:
+        logger.warning("Failed to migrate %s to %s: %s", old_path, new_path, exc)
+
+
+def ensure_voice_hub_dirs() -> None:
+    VOICE_UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+    PROCESSED_VOICE_DIR.mkdir(parents=True, exist_ok=True)
+    CONFIG_DIR.mkdir(parents=True, exist_ok=True)
+    _migrate_json_if_needed(VOICE_DEFINITIONS_PATH, Path("/app/config/voices.json"))
+    _migrate_json_if_needed(VOICE_ROUTING_PATH, Path("/app/config/voice-routing.json"))
+    _migrate_json_if_needed(FALLBACK_CHAINS_PATH, Path("/app/config/fallback-chains.json"))
+    _migrate_json_if_needed(VOICE_STYLE_PATH, Path("/opt/data/voice_styles.json"))
+
+
+def load_voice_definitions() -> dict:
+    ensure_voice_hub_dirs()
+    if not VOICE_DEFINITIONS_PATH.exists():
+        return {}
+    try:
+        data = json.loads(VOICE_DEFINITIONS_PATH.read_text(encoding="utf-8"))
+        voices = data.get("voices", data) if isinstance(data, dict) else {}
+        return voices if isinstance(voices, dict) else {}
+    except Exception as exc:
+        logger.warning("Failed to read voice definitions: %s", exc)
+        return {}
+
+
+def save_voice_definitions(voices: dict) -> None:
+    _atomic_write_json(VOICE_DEFINITIONS_PATH, {"voices": voices})
+
+
+def audio_file_url(path: str) -> str:
+    return f"{VOICE_HUB_PUBLIC_URL}/voice-admin/audio-file?path={quote(path, safe='')}"
+
+
+def bridge_voice_payload(config: dict) -> dict:
+    payload = dict(config)
+    if payload.get("source_audio"):
+        payload["source_audio_url"] = audio_file_url(str(payload["source_audio"]))
+    if payload.get("reference_audio"):
+        payload["reference_audio_url"] = audio_file_url(str(payload["reference_audio"]))
+    return payload
+
+
+async def sync_voice_to_qwen(config: dict) -> None:
+    try:
+        await qwen_post("/voices", bridge_voice_payload(config), timeout=30.0)
+    except Exception as exc:
+        logger.warning("Failed to sync voice %s to Qwen bridge: %s", config.get("id"), exc)
+
+
 def load_voice_routing() -> dict:
     config = json.loads(json.dumps(DEFAULT_VOICE_ROUTING, ensure_ascii=False))
     if VOICE_ROUTING_PATH.exists():
@@ -215,8 +309,10 @@ def load_voice_routing() -> dict:
             logger.warning("Failed to read voice routing config: %s", exc)
     if not config.get("fallback_provider"):
         config["fallback_provider"] = "aliyun-zhimi"
-    if not config.get("fallback_voice"):
+    if config.get("fallback_provider") == "aliyun-zhimi" and not config.get("fallback_voice"):
         config["fallback_voice"] = ALIYUN_DEFAULT_VOICE
+    if config.get("fallback_provider") == "mimo-voiceclone":
+        config["fallback_voice"] = ""
     if not isinstance(config.get("agent_voices"), dict):
         config["agent_voices"] = {}
     return config
@@ -228,7 +324,11 @@ def save_voice_routing(payload: dict) -> dict:
     fallback_provider = str(payload.get("fallback_provider") or "aliyun-zhimi").strip()
     if fallback_provider not in PROVIDERS or fallback_provider == "local-first":
         raise HTTPException(status_code=400, detail="fallback_provider is invalid")
-    fallback_voice = str(payload.get("fallback_voice") or ALIYUN_DEFAULT_VOICE).strip()
+    fallback_voice = str(payload.get("fallback_voice") or "").strip()
+    if fallback_provider == "aliyun-zhimi" and not fallback_voice:
+        fallback_voice = ALIYUN_DEFAULT_VOICE
+    if fallback_provider == "mimo-voiceclone":
+        fallback_voice = ""
     agent_voices = payload.get("agent_voices") or {}
     if not isinstance(agent_voices, dict):
         raise HTTPException(status_code=400, detail="agent_voices must be an object")
@@ -277,7 +377,7 @@ PROVIDERS: Dict[str, Provider] = {
         id="local-first",
         name="Local Qwen first",
         kind="fallback",
-        description="Try local Qwen3-TTS first, then fall back to Aliyun.",
+        description="Try local Qwen3-TTS first, then fall back to the configured provider.",
         chain=_load_fallback_chain(),
         timeout=float(os.getenv("LOCAL_FIRST_TIMEOUT", "120")),
     ),
@@ -300,6 +400,16 @@ PROVIDERS: Dict[str, Provider] = {
         output_format=os.getenv("ALIYUN_OUTPUT_FORMAT", "wav"),
         command=ALIYUN_COMMAND,
         timeout=float(os.getenv("ALIYUN_TIMEOUT", "180")),
+    ),
+    "mimo-voiceclone": Provider(
+        id="mimo-voiceclone",
+        name="Xiaomi Mimo voice clone",
+        kind="mimo",
+        description="Xiaomi Mimo TTS voice clone fallback using the selected reference audio.",
+        default_voice=os.getenv("MIMO_DEFAULT_VOICE", ""),
+        output_format="wav",
+        url=MIMO_BASE_URL,
+        timeout=MIMO_TIMEOUT,
     ),
 }
 
@@ -355,6 +465,25 @@ def audio_content_type(audio_data: bytes) -> str:
     if audio_data.startswith(b"OggS"):
         return "audio/ogg"
     return "application/octet-stream"
+
+
+def mime_type_for_path(path: Path) -> str:
+    suffix = path.suffix.lower()
+    if suffix == ".wav":
+        return "audio/wav"
+    if suffix == ".mp3":
+        return "audio/mpeg"
+    if suffix == ".ogg":
+        return "audio/ogg"
+    if suffix == ".m4a":
+        return "audio/mp4"
+    if suffix == ".flac":
+        return "audio/flac"
+    if suffix == ".aac":
+        return "audio/aac"
+    if suffix == ".webm":
+        return "audio/webm"
+    return "audio/mpeg"
 
 
 def generate_cache_key(request: TTSRequest) -> str:
@@ -668,28 +797,14 @@ def provider_to_info(provider: Provider) -> ProviderInfo:
 
 
 def resolve_request_voice(request: TTSRequest) -> TTSRequest:
-    routing = load_voice_routing()
-    agent = (request.agent or request.speaker or "").strip()
-    if not agent and request.voice:
-        voice_as_agent = request.voice.strip()
-        if voice_as_agent in routing.get("agent_voices", {}):
-            agent = voice_as_agent
-    if request.voice and not agent:
-        return request
-    if request.voice and agent and request.voice.strip() not in routing.get("agent_voices", {}):
-        return request
-    if not agent:
-        return request
-    mapped_voice = routing.get("agent_voices", {}).get(agent)
-    if not mapped_voice:
-        return request
-    update = {"voice": mapped_voice}
-    if hasattr(request, "model_copy"):
-        return request.model_copy(update=update)
-    return request.copy(update=update)
+    return request
 
 
 async def call_http_provider(provider: Provider, request: TTSRequest) -> bytes:
+    if provider.id == "qwen-local" and request.voice:
+        config = load_voice_definitions().get(request.voice)
+        if config:
+            await sync_voice_to_qwen(config)
     payload = {
         "text": request.text,
         "voice": request.voice or provider.default_voice or None,
@@ -760,6 +875,60 @@ async def call_command_provider(provider: Provider, request: TTSRequest) -> byte
             pass
 
 
+async def call_mimo_provider(provider: Provider, request: TTSRequest) -> bytes:
+    if not MIMO_API_KEY:
+        raise RuntimeError("MIMO_API_KEY is not configured")
+    voice_id = (request.voice or "").strip()
+    if not voice_id:
+        raise RuntimeError("Mimo requires request.voice; pass agent or voice so Voice Hub can select the reference audio")
+    voice = load_voice_definitions().get(voice_id)
+    if not voice or not voice.get("enabled", True):
+        raise RuntimeError(f"Mimo voice is not configured: {voice_id}")
+    reference_audio = Path(str(voice.get("reference_audio") or voice.get("source_audio") or ""))
+    if not reference_audio.exists() or not reference_audio.is_file():
+        raise RuntimeError(f"Mimo reference audio not found: {reference_audio}")
+    reference_bytes = reference_audio.read_bytes()
+    if len(reference_bytes) < 128:
+        raise RuntimeError(f"Mimo reference audio is empty: {reference_audio}")
+    voice_base64 = base64.b64encode(reference_bytes).decode("utf-8")
+    payload = {
+        "model": MIMO_MODEL,
+        "messages": [
+            {"role": "user", "content": ""},
+            {"role": "assistant", "content": request.text},
+        ],
+        "audio": {
+            "format": request.format or provider.output_format or "wav",
+            "voice": f"data:{mime_type_for_path(reference_audio)};base64,{voice_base64}",
+        },
+    }
+    auth_header = MIMO_AUTH_HEADER
+    if auth_header == "auto":
+        auth_header = "api-key" if MIMO_API_KEY.startswith("tp-") else "authorization"
+    headers = {"Content-Type": "application/json"}
+    if auth_header == "api-key":
+        headers["api-key"] = MIMO_API_KEY
+    else:
+        headers["Authorization"] = f"Bearer {MIMO_API_KEY}"
+    timeout = httpx.Timeout(provider.timeout, connect=10.0)
+    async with httpx.AsyncClient(timeout=timeout) as client:
+        response = await client.post(
+            f"{provider.url}/chat/completions",
+            headers=headers,
+            json=payload,
+        )
+        response.raise_for_status()
+        data = response.json()
+    try:
+        audio_base64 = data["choices"][0]["message"]["audio"]["data"]
+    except Exception as exc:
+        raise RuntimeError(f"Mimo returned no audio data: {data}") from exc
+    audio_data = base64.b64decode(audio_base64)
+    if len(audio_data) < 128:
+        raise RuntimeError("Mimo generated an invalid or empty audio file")
+    return audio_data
+
+
 async def synthesize_with_provider(provider_id: str, request: TTSRequest) -> tuple[str, bytes]:
     provider = PROVIDERS[provider_id]
     if provider.kind == "fallback":
@@ -776,6 +945,8 @@ async def synthesize_with_provider(provider_id: str, request: TTSRequest) -> tup
         return provider.id, await call_http_provider(provider, request)
     if provider.kind == "command":
         return provider.id, await call_command_provider(provider, request)
+    if provider.kind == "mimo":
+        return provider.id, await call_mimo_provider(provider, request)
     raise RuntimeError(f"Unsupported provider kind: {provider.kind}")
 
 
@@ -813,40 +984,104 @@ async def get_voices(provider_id: str):
             Voice(name="cloned-reference", display_name="Qwen cloned reference"),
         ]
     if provider.kind == "http":
-        try:
-            data = await qwen_get("/voices")
-            voices = data.get("voices", {})
-            result = [
-                Voice(name=voice_id, display_name=voice.get("name") or voice_id)
-                for voice_id, voice in voices.items()
-                if voice.get("enabled", True)
-            ]
-            if result:
-                return result
-        except Exception as exc:
-            logger.warning("Failed to read Qwen voices: %s", exc)
+        voices = load_voice_definitions()
+        result = [
+            Voice(name=voice_id, display_name=voice.get("name") or voice_id)
+            for voice_id, voice in voices.items()
+            if voice.get("enabled", True)
+        ]
+        if result:
+            return result
         return [Voice(name=provider.default_voice, display_name=provider.name)]
     return [Voice(name=provider.default_voice, display_name=provider.name)]
 
 
 @app.get("/voice-admin/config")
 async def voice_admin_config():
-    return await qwen_get("/config")
+    ensure_voice_hub_dirs()
+    return {
+        "data_dir": str(VOICE_HUB_DATA_DIR),
+        "config_dir": str(CONFIG_DIR),
+        "voices_dir": str(VOICE_UPLOAD_DIR),
+        "processed_dir": str(PROCESSED_VOICE_DIR),
+        "public_url": VOICE_HUB_PUBLIC_URL,
+    }
 
 
 @app.post("/voice-admin/config")
 async def save_voice_admin_config(payload: dict):
-    return await qwen_post("/config", payload)
+    ensure_voice_hub_dirs()
+    return {
+        "data_dir": str(VOICE_HUB_DATA_DIR),
+        "config_dir": str(CONFIG_DIR),
+        "voices_dir": str(VOICE_UPLOAD_DIR),
+        "processed_dir": str(PROCESSED_VOICE_DIR),
+        "public_url": VOICE_HUB_PUBLIC_URL,
+        "managed": True,
+    }
 
 
 @app.get("/voice-admin/files")
 async def voice_admin_files():
-    return await qwen_get("/voice-files")
+    ensure_voice_hub_dirs()
+    voices = load_voice_definitions()
+    configured_by_audio = {
+        Path(config.get("source_audio", "")).name: voice_id
+        for voice_id, config in voices.items()
+        if config.get("source_audio")
+    }
+    files = []
+    for path in sorted(VOICE_UPLOAD_DIR.iterdir()):
+        if not path.is_file() or path.suffix.lower() not in SUPPORTED_UPLOAD_EXTS:
+            continue
+        voice_id = configured_by_audio.get(path.name) or _safe_id(path.stem)
+        files.append(
+            {
+                "file_name": path.name,
+                "path": str(path),
+                "id": voice_id,
+                "configured": voice_id in voices,
+                "config": voices.get(voice_id),
+            }
+        )
+    return {"voices_dir": str(VOICE_UPLOAD_DIR), "files": files}
 
 
 @app.get("/voice-admin/voices")
 async def voice_admin_voices():
-    return await qwen_get("/voices")
+    return {"path": str(VOICE_DEFINITIONS_PATH), "voices_dir": str(VOICE_UPLOAD_DIR), "voices": load_voice_definitions()}
+
+
+@app.post("/voice-admin/upload")
+async def voice_admin_upload(file: UploadFile = File(...)):
+    ensure_voice_hub_dirs()
+    filename = _safe_filename(file.filename or "audio.wav")
+    target = VOICE_UPLOAD_DIR / filename
+    if target.exists():
+        timestamp = now_shanghai().strftime("%Y%m%d%H%M%S")
+        target = VOICE_UPLOAD_DIR / f"{Path(filename).stem}_{timestamp}{Path(filename).suffix}"
+    size = 0
+    try:
+        with target.open("wb") as handle:
+            while True:
+                chunk = await file.read(1024 * 1024)
+                if not chunk:
+                    break
+                size += len(chunk)
+                handle.write(chunk)
+    finally:
+        await file.close()
+    if size < 128:
+        target.unlink(missing_ok=True)
+        raise HTTPException(status_code=400, detail="audio file is empty or invalid")
+    return {
+        "file_name": target.name,
+        "path": str(target),
+        "id": _safe_id(target.stem),
+        "configured": False,
+        "config": None,
+        "size": size,
+    }
 
 
 @app.get("/voice-admin/gpu-status")
@@ -859,19 +1094,103 @@ async def voice_admin_gpu_load():
     return await qwen_post("/gpu-load", {}, timeout=300.0)
 
 
+@app.post("/voice-admin/qwen-start")
+async def voice_admin_qwen_start():
+    return await qwen_post("/qwen-start", {}, timeout=180.0)
+
+
+@app.post("/voice-admin/qwen-stop")
+async def voice_admin_qwen_stop():
+    return await qwen_post("/qwen-stop", {}, timeout=60.0)
+
+
 @app.post("/voice-admin/process")
 async def voice_admin_process(payload: dict):
-    return await qwen_post("/process-audio", payload, timeout=180.0)
+    ensure_voice_hub_dirs()
+    source = Path(str(payload.get("source_audio") or ""))
+    if not source.exists() or not source.is_file():
+        raise HTTPException(status_code=404, detail="source audio not found")
+    if VOICE_UPLOAD_DIR.resolve() not in source.resolve().parents and source.resolve() != VOICE_UPLOAD_DIR.resolve():
+        raise HTTPException(status_code=403, detail="source audio must be inside voice hub voices directory")
+    voice_id = _safe_id(str(payload.get("id") or source.stem))
+    result = await qwen_post(
+        "/process-audio",
+        {
+            **payload,
+            "id": voice_id,
+            "source_audio_url": audio_file_url(str(source)),
+        },
+        timeout=180.0,
+    )
+    bridge_reference = str(result.get("reference_audio") or "")
+    if not bridge_reference:
+        raise HTTPException(status_code=502, detail="Qwen bridge did not return reference audio")
+    async with httpx.AsyncClient(timeout=60.0) as client:
+        response = await client.get(f"{QWEN_URL}/audio-file", params={"path": bridge_reference})
+        response.raise_for_status()
+        audio_data = response.content
+    if len(audio_data) < 128:
+        raise HTTPException(status_code=502, detail="Qwen bridge returned empty processed audio")
+    target = PROCESSED_VOICE_DIR / f"{voice_id}.wav"
+    target.write_bytes(audio_data)
+    return {"reference_audio": str(target), "bridge_reference_audio": bridge_reference}
 
 
 @app.post("/voice-admin/transcribe")
 async def voice_admin_transcribe(payload: dict):
-    return await qwen_post("/transcribe", payload, timeout=180.0)
+    audio_path = str(payload.get("audio_path") or "")
+    request_payload = dict(payload)
+    if audio_path:
+        path = Path(audio_path)
+        if path.exists() and path.is_file():
+            request_payload["audio_url"] = audio_file_url(str(path))
+    return await qwen_post("/transcribe", request_payload, timeout=180.0)
 
 
 @app.post("/voice-admin/voices")
 async def voice_admin_save_voice(payload: dict):
-    return await qwen_post("/voices", payload)
+    voice_id = _safe_id(str(payload.get("id") or payload.get("name") or "voice"))
+    name = str(payload.get("name") or voice_id).strip()
+    reference_text = str(payload.get("reference_text") or "").strip()
+    if not reference_text:
+        raise HTTPException(status_code=400, detail="reference_text is required")
+    source_audio = str(payload.get("source_audio") or "")
+    reference_audio = str(payload.get("reference_audio") or source_audio)
+    for value, label in ((source_audio, "source_audio"), (reference_audio, "reference_audio")):
+        if value and not Path(value).exists():
+            raise HTTPException(status_code=404, detail=f"{label} not found")
+    voices = load_voice_definitions()
+    config = {
+        "id": voice_id,
+        "name": name,
+        "source_audio": source_audio,
+        "reference_audio": reference_audio,
+        "reference_text": reference_text,
+        "enabled": bool(payload.get("enabled", True)),
+    }
+    voices[voice_id] = config
+    save_voice_definitions(voices)
+    await sync_voice_to_qwen(config)
+    return config
+
+
+@app.get("/voice-admin/docs/{doc_id}")
+async def voice_admin_doc(doc_id: str):
+    docs = {
+        "api": ("VOICE_HUB_API.md", "AI API 文档"),
+        "usage": ("VOICE_HUB_USAGE.md", "使用说明"),
+        "hermes": ("HERMES_TTS_CONFIG.md", "Hermes 接入说明"),
+    }
+    if doc_id not in docs:
+        raise HTTPException(status_code=404, detail="unknown document")
+    filename, title = docs[doc_id]
+    path = (VOICE_HUB_DOCS_DIR / filename).resolve()
+    docs_root = VOICE_HUB_DOCS_DIR.resolve()
+    if docs_root not in path.parents and path != docs_root:
+        raise HTTPException(status_code=403, detail="invalid document path")
+    if not path.exists() or not path.is_file():
+        raise HTTPException(status_code=404, detail=f"document not found: {filename}")
+    return {"id": doc_id, "title": title, "filename": filename, "content": path.read_text(encoding="utf-8")}
 
 
 @app.get("/voice-admin/styles")
@@ -913,6 +1232,19 @@ async def voice_admin_style_preview(payload: dict):
 
 @app.get("/voice-admin/audio-file")
 async def voice_admin_audio_file(path: str, request: Request):
+    file_path = Path(path)
+    if file_path.exists() and file_path.is_file():
+        voice_root = VOICE_UPLOAD_DIR.resolve()
+        resolved = file_path.resolve()
+        if voice_root not in resolved.parents and resolved != voice_root:
+            raise HTTPException(status_code=403, detail="path outside voice hub voices directory")
+        audio_data = file_path.read_bytes()
+        return ranged_audio_response(
+            audio_data,
+            media_type=audio_content_type(audio_data),
+            request=request,
+            cache_control="no-store",
+        )
     async with httpx.AsyncClient(timeout=60.0) as client:
         response = await client.get(f"{QWEN_URL}/audio-file", params={"path": path})
         response.raise_for_status()
@@ -1012,6 +1344,15 @@ async def check_status():
                         service=provider.id,
                         status=status,
                         error=None if status == "configured" else f"Missing executable: {executable}",
+                    )
+                )
+            elif provider.kind == "mimo":
+                statuses.append(
+                    ServiceStatus(
+                        service=provider.id,
+                        status="configured" if MIMO_API_KEY else "missing",
+                        error=None if MIMO_API_KEY else "Missing MIMO_API_KEY",
+                        details={"model": MIMO_MODEL, "base_url": MIMO_BASE_URL},
                     )
                 )
     return statuses

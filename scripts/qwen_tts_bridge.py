@@ -3,9 +3,11 @@ import os
 import shutil
 import subprocess
 import tempfile
+import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlparse
+from urllib.request import Request, urlopen
 
 from gradio_client import Client, handle_file
 
@@ -27,9 +29,16 @@ DEFAULT_REF_TEXT = (
 
 LANGUAGE = "Chinese"
 MODEL_SIZE = os.getenv("QWEN_TTS_MODEL_SIZE", "1.7B")
+QWEN_START_SCRIPT = Path(os.getenv("QWEN_TTS_START_SCRIPT", str(BASE_DIR / "start_qwen3_tts_stack.ps1")))
+QWEN_APP_ROOT = Path(os.getenv("QWEN_TTS_APP_ROOT", r"D:\models\pinokio\api\Qwen3-TTS-Pinokio.git\app"))
+QWEN_PYTHON = Path(os.getenv("QWEN_TTS_PYTHON", str(QWEN_APP_ROOT / "venv" / "Scripts" / "python.exe")))
+QWEN_PYTHONW = Path(os.getenv("QWEN_TTS_PYTHONW", str(QWEN_APP_ROOT / "venv" / "Scripts" / "pythonw.exe")))
+QWEN_APP = Path(os.getenv("QWEN_TTS_APP", str(QWEN_APP_ROOT / "app.py")))
+QWEN_OUT_LOG = BASE_DIR / "qwen3_tts_lan.out.log"
+QWEN_ERR_LOG = BASE_DIR / "qwen3_tts_lan.err.log"
 MAX_CHUNK_CHARS = 120
 CHUNK_GAP = 0.12
-SEED = 165808582
+SEED = int(os.getenv("QWEN_TTS_SEED", "20260722"))
 SUPPORTED_AUDIO_EXTS = {".wav", ".mp3", ".m4a", ".flac", ".ogg"}
 FFMPEG = os.getenv("FFMPEG_PATH") or shutil.which("ffmpeg") or r"D:\models\pinokio\bin\miniforge\Library\bin\ffmpeg.exe"
 TRADITIONAL_TO_SIMPLIFIED = str.maketrans(
@@ -147,6 +156,34 @@ def _safe_id(value: str) -> str:
     return cleaned or "voice"
 
 
+def _is_url(value: str) -> bool:
+    return value.startswith("http://") or value.startswith("https://")
+
+
+def download_audio(url: str) -> Path:
+    suffix = Path(urlparse(url).path).suffix.lower()
+    if suffix not in SUPPORTED_AUDIO_EXTS:
+        suffix = ".wav"
+    request = Request(url, headers={"User-Agent": "QwenTTSBridge/1.2"})
+    with urlopen(request, timeout=60) as response:
+        data = response.read()
+    if len(data) < 128:
+        raise RuntimeError(f"远程音频为空或无效: {url}")
+    target = Path(tempfile.gettempdir()) / f"qwen_tts_bridge_ref_{next(tempfile._get_candidate_names())}{suffix}"
+    target.write_bytes(data)
+    return target
+
+
+def materialize_audio(path_value: str, url_value: str = "") -> tuple[Path, bool]:
+    url_value = str(url_value or "").strip()
+    path_value = str(path_value or "").strip()
+    if url_value:
+        return download_audio(url_value), True
+    if _is_url(path_value):
+        return download_audio(path_value), True
+    return Path(path_value), False
+
+
 def _load_config() -> dict:
     if CONFIG_PATH.exists():
         try:
@@ -210,40 +247,52 @@ def list_audio_files() -> list[dict]:
     return items
 
 
-def resolve_voice(voice_id: str | None) -> tuple[Path, str]:
+def resolve_voice(voice_id: str | None) -> tuple[str, str, str]:
     if voice_id:
         voice = load_voices().get(voice_id)
         if voice and voice.get("enabled", True):
-            return Path(voice["reference_audio"]), str(voice["reference_text"])
-    return DEFAULT_REF_AUDIO, DEFAULT_REF_TEXT
+            return (
+                str(voice.get("reference_audio") or ""),
+                str(voice.get("reference_text") or ""),
+                str(voice.get("reference_audio_url") or ""),
+            )
+    return str(DEFAULT_REF_AUDIO), DEFAULT_REF_TEXT, ""
 
 
 def synthesize(text: str, voice_id: str | None = None) -> Path:
-    ref_audio, ref_text = resolve_voice(voice_id)
+    ref_audio_value, ref_text, ref_audio_url = resolve_voice(voice_id)
+    ref_audio, cleanup_ref = materialize_audio(ref_audio_value, ref_audio_url)
     if not ref_audio.exists():
         raise RuntimeError(f"参考音频不存在: {ref_audio}")
     if not ref_text.strip():
         raise RuntimeError("参考文本为空")
 
-    client = Client(QWEN_URL)
-    generated_audio, status = client.predict(
-        handle_file(str(ref_audio)),
-        ref_text,
-        text,
-        LANGUAGE,
-        False,
-        MODEL_SIZE,
-        MAX_CHUNK_CHARS,
-        CHUNK_GAP,
-        SEED,
-        api_name="/generate_voice_clone",
-    )
-    if not generated_audio:
-        raise RuntimeError(f"Qwen returned no audio: {status}")
-    src = Path(generated_audio)
-    dst = Path(tempfile.gettempdir()) / f"qwen_tts_bridge_{next(tempfile._get_candidate_names())}.wav"
-    shutil.copy2(src, dst)
-    return dst
+    try:
+        client = Client(QWEN_URL)
+        generated_audio, status = client.predict(
+            handle_file(str(ref_audio)),
+            ref_text,
+            text,
+            LANGUAGE,
+            False,
+            MODEL_SIZE,
+            MAX_CHUNK_CHARS,
+            CHUNK_GAP,
+            SEED,
+            api_name="/generate_voice_clone",
+        )
+        if not generated_audio:
+            raise RuntimeError(f"Qwen returned no audio: {status}")
+        src = Path(generated_audio)
+        dst = Path(tempfile.gettempdir()) / f"qwen_tts_bridge_{next(tempfile._get_candidate_names())}.wav"
+        shutil.copy2(src, dst)
+        return dst
+    finally:
+        if cleanup_ref:
+            try:
+                ref_audio.unlink(missing_ok=True)
+            except OSError:
+                pass
 
 
 def transcribe_audio(audio_path: Path) -> str:
@@ -290,18 +339,30 @@ def save_voice(payload: dict) -> dict:
     voice_id = _safe_id(str(payload.get("id") or payload.get("name") or "voice"))
     name = str(payload.get("name") or voice_id).strip()
     source_audio = Path(str(payload.get("source_audio") or ""))
-    reference_audio = Path(str(payload.get("reference_audio") or source_audio))
+    reference_audio_value = str(payload.get("reference_audio") or source_audio)
+    reference_audio_url = str(payload.get("reference_audio_url") or "").strip()
+    source_audio_url = str(payload.get("source_audio_url") or "").strip()
+    reference_audio, cleanup_ref = materialize_audio(reference_audio_value, reference_audio_url)
     reference_text = str(payload.get("reference_text") or "").strip()
-    if not reference_audio.exists():
-        raise RuntimeError(f"参考音频不存在: {reference_audio}")
-    if not reference_text:
-        raise RuntimeError("参考文本不能为空")
+    try:
+        if not reference_audio.exists():
+            raise RuntimeError(f"参考音频不存在: {reference_audio}")
+        if not reference_text:
+            raise RuntimeError("参考文本不能为空")
+    finally:
+        if cleanup_ref:
+            try:
+                reference_audio.unlink(missing_ok=True)
+            except OSError:
+                pass
     voices = load_voices()
     voices[voice_id] = {
         "id": voice_id,
         "name": name,
         "source_audio": str(source_audio) if source_audio else "",
-        "reference_audio": str(reference_audio),
+        "source_audio_url": source_audio_url,
+        "reference_audio": reference_audio_value,
+        "reference_audio_url": reference_audio_url,
         "reference_text": reference_text,
         "enabled": bool(payload.get("enabled", True)),
     }
@@ -319,6 +380,7 @@ def qwen_pid() -> int | None:
             capture_output=True,
             timeout=5,
             check=False,
+            **hidden_subprocess_kwargs(),
         )
         for line in result.stdout.splitlines():
             parts = line.split()
@@ -327,6 +389,124 @@ def qwen_pid() -> int | None:
     except Exception:
         return None
     return None
+
+
+def hidden_subprocess_kwargs() -> dict:
+    if os.name != "nt":
+        return {}
+    startupinfo = subprocess.STARTUPINFO()
+    startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+    startupinfo.wShowWindow = 0
+    creationflags = 0
+    if hasattr(subprocess, "CREATE_NO_WINDOW"):
+        creationflags |= subprocess.CREATE_NO_WINDOW
+    return {"startupinfo": startupinfo, "creationflags": creationflags}
+
+
+def wait_for_qwen(timeout_seconds: int = 120) -> int | None:
+    deadline = time.time() + timeout_seconds
+    while time.time() < deadline:
+        pid = qwen_pid()
+        if pid:
+            return pid
+        time.sleep(1)
+    return qwen_pid()
+
+
+def start_qwen_service() -> dict:
+    pid = qwen_pid()
+    if pid:
+        status = gpu_status()
+        status.update({"action": "start", "message": "Qwen3-TTS 已经在运行", "started": False})
+        return status
+
+    launch_python = QWEN_PYTHONW if QWEN_PYTHONW.exists() else QWEN_PYTHON
+    if not launch_python.exists():
+        raise RuntimeError(f"Qwen Python 不存在: {launch_python}")
+    if not QWEN_APP.exists():
+        raise RuntimeError(f"Qwen app.py 不存在: {QWEN_APP}")
+
+    creationflags = 0
+    startupinfo = None
+    if os.name == "nt":
+        creationflags = subprocess.CREATE_NEW_PROCESS_GROUP
+        if hasattr(subprocess, "CREATE_NO_WINDOW"):
+            creationflags |= subprocess.CREATE_NO_WINDOW
+        if hasattr(subprocess, "DETACHED_PROCESS"):
+            creationflags |= subprocess.DETACHED_PROCESS
+        startupinfo = subprocess.STARTUPINFO()
+        startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+        startupinfo.wShowWindow = 0
+
+    env = os.environ.copy()
+    env.update(
+        {
+            "PYTHONUTF8": "1",
+            "PYTHONIOENCODING": "utf-8",
+            "HF_ENDPOINT": env.get("HF_ENDPOINT", "https://hf-mirror.com"),
+            "HF_HUB_ENABLE_HF_TRANSFER": env.get("HF_HUB_ENABLE_HF_TRANSFER", "0"),
+            "QWEN_TTS_MODEL_SIZE": MODEL_SIZE,
+        }
+    )
+    stdout = QWEN_OUT_LOG.open("ab")
+    stderr = QWEN_ERR_LOG.open("ab")
+    subprocess.Popen(
+        [str(launch_python), str(QWEN_APP)],
+        cwd=str(QWEN_APP_ROOT),
+        stdout=stdout,
+        stderr=stderr,
+        env=env,
+        creationflags=creationflags,
+        startupinfo=startupinfo,
+    )
+    stdout.close()
+    stderr.close()
+
+    pid = wait_for_qwen(120)
+    status = gpu_status()
+    status.update(
+        {
+            "action": "start",
+            "started": bool(pid),
+            "message": "Qwen3-TTS 已启动" if pid else "已发送启动命令，Qwen3-TTS 还在启动中",
+        }
+    )
+    return status
+
+
+def stop_qwen_service() -> dict:
+    pid = qwen_pid()
+    if not pid:
+        status = gpu_status()
+        status.update({"action": "stop", "stopped": False, "message": "Qwen3-TTS 当前没有运行"})
+        return status
+
+    if os.name == "nt":
+        result = subprocess.run(
+            ["taskkill", "/PID", str(pid), "/T", "/F"],
+            text=True,
+            encoding="gbk",
+            errors="ignore",
+            capture_output=True,
+            timeout=20,
+            check=False,
+            **hidden_subprocess_kwargs(),
+        )
+    else:
+        result = subprocess.run(
+            ["kill", "-TERM", str(pid)],
+            text=True,
+            capture_output=True,
+            timeout=20,
+            check=False,
+        )
+    if result.returncode != 0:
+        raise RuntimeError((result.stderr or result.stdout or "停止 Qwen3-TTS 失败").strip())
+
+    time.sleep(1)
+    status = gpu_status()
+    status.update({"action": "stop", "stopped": True, "message": "Qwen3-TTS 已关闭"})
+    return status
 
 
 def nvidia_smi_query(args: list[str]) -> str:
@@ -338,6 +518,7 @@ def nvidia_smi_query(args: list[str]) -> str:
         capture_output=True,
         timeout=8,
         check=False,
+        **hidden_subprocess_kwargs(),
     )
     if result.returncode != 0:
         raise RuntimeError((result.stderr or result.stdout or "nvidia-smi failed").strip())
@@ -434,21 +615,45 @@ class Handler(BaseHTTPRequestHandler):
                 self._send_json(200, config)
             elif parsed.path == "/voices":
                 self._send_json(200, save_voice(payload))
+            elif parsed.path == "/qwen-start":
+                self._send_json(200, start_qwen_service())
+            elif parsed.path == "/qwen-stop":
+                self._send_json(200, stop_qwen_service())
             elif parsed.path == "/gpu-load":
                 self._send_json(200, load_model_to_gpu())
             elif parsed.path == "/process-audio":
-                source = Path(str(payload.get("source_audio") or ""))
-                voice_id = str(payload.get("id") or source.stem)
-                out = process_audio(
-                    source,
-                    voice_id,
-                    float(payload.get("start") or 0),
-                    float(payload.get("duration") or 20),
+                source, cleanup_source = materialize_audio(
+                    str(payload.get("source_audio") or ""),
+                    str(payload.get("source_audio_url") or ""),
                 )
+                voice_id = str(payload.get("id") or source.stem)
+                try:
+                    out = process_audio(
+                        source,
+                        voice_id,
+                        float(payload.get("start") or 0),
+                        float(payload.get("duration") or 20),
+                    )
+                finally:
+                    if cleanup_source:
+                        try:
+                            source.unlink(missing_ok=True)
+                        except OSError:
+                            pass
                 self._send_json(200, {"reference_audio": str(out)})
             elif parsed.path == "/transcribe":
-                audio_path = Path(str(payload.get("audio_path") or ""))
-                self._send_json(200, {"text": transcribe_audio(audio_path)})
+                audio_path, cleanup_audio = materialize_audio(
+                    str(payload.get("audio_path") or ""),
+                    str(payload.get("audio_url") or ""),
+                )
+                try:
+                    self._send_json(200, {"text": transcribe_audio(audio_path)})
+                finally:
+                    if cleanup_audio:
+                        try:
+                            audio_path.unlink(missing_ok=True)
+                        except OSError:
+                            pass
             elif parsed.path == "/tts":
                 text = str(payload.get("text") or "").strip()
                 voice = str(payload.get("voice") or "").strip() or None

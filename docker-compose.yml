@@ -18,17 +18,27 @@ services:
       - REQUIRE_API_KEY=${REQUIRE_API_KEY:-false}
       - QWEN_URL=${QWEN_URL:-http://192.168.31.167:7861}
       - QWEN_TIMEOUT=${QWEN_TIMEOUT:-75}
+      - VOICE_HUB_PUBLIC_URL=${VOICE_HUB_PUBLIC_URL:-http://192.168.31.180:9000}
+      - VOICE_HUB_DATA_DIR=/opt/data/voice-hub
+      - VOICE_HUB_CONFIG_DIR=/opt/data/voice-hub/config
+      - VOICE_HUB_VOICES_DIR=/opt/data/voice-hub/voices
+      - VOICE_HUB_DOCS_DIR=/app/docs
       - ALIYUN_DEFAULT_VOICE=${ALIYUN_DEFAULT_VOICE:-zhimi_emo}
       - ALIYUN_OUTPUT_FORMAT=${ALIYUN_OUTPUT_FORMAT:-wav}
       - ALIYUN_TIMEOUT=${ALIYUN_TIMEOUT:-180}
       - ALIYUN_TTS_COMMAND=${ALIYUN_TTS_COMMAND:-/usr/local/bin/python /opt/data/skills/aliyun-tts/scripts/aliyun_tts.py {text_file} {output_path} --voice {voice} --format {format}}
-      - VOICE_HUB_CONFIG_DIR=/app/config
-      - VOICE_STYLE_PATH=/opt/data/voice_styles.json
+      - MIMO_API_KEY=${MIMO_API_KEY:-}
+      - MIMO_BASE_URL=${MIMO_BASE_URL:-https://api.xiaomimimo.com/v1}
+      - MIMO_MODEL=${MIMO_MODEL:-mimo-v2.5-tts-voiceclone}
+      - MIMO_AUTH_HEADER=${MIMO_AUTH_HEADER:-auto}
+      - MIMO_TIMEOUT=${MIMO_TIMEOUT:-180}
+      - VOICE_STYLE_PATH=/opt/data/voice-hub/config/voice-styles.json
       - VOICE_HUB_TARGET_TTS_CHARS=${VOICE_HUB_TARGET_TTS_CHARS:-45}
       - VOICE_HUB_MAX_TTS_CHARS=${VOICE_HUB_MAX_TTS_CHARS:-60}
     volumes:
       - /volume1/docker/hermes-agent/data:/opt/data
       - ./config:/app/config
+      - ./docs:/app/docs:ro
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:9000/health', timeout=5).read()"]
       interval: 30s
@@ -50,10 +60,17 @@ services:
     restart: unless-stopped
     ports:
       - "3003:3003"
+    environment:
+      - PORT=3003
+      - API_UPSTREAM=http://voice-hub-gateway:9000
+    volumes:
+      - ./tts-frontend/dist:/app:ro
+      - ./tts-frontend/server.js:/server.js:ro
+    command: ["node", "/server.js"]
     depends_on:
       - voice-hub-gateway
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:3003"]
+      test: ["CMD", "node", "-e", "require('http').get('http://127.0.0.1:3003', r => { const ok = r.statusCode < 500; r.resume(); r.on('end', () => process.exit(ok ? 0 : 1)); }).on('error', () => process.exit(1))"]
       interval: 30s
       timeout: 10s
       retries: 3
