@@ -1,8 +1,0 @@
-[submodule "chatterbox-tts"]
-	path = chatterbox-tts
-	url = https://github.com/isaacgounton/Chatterbox-TTS-Server.git
-	branch = live
-[submodule "openai-edge-tts"]
-	path = openai-edge-tts
-	url = https://github.com/isaacgounton/openai-edge-tts.git
-	branch = live

@@ -151,7 +151,7 @@ Do not manually prepend style prompts.
 To edit voice style, GET /voice-admin/styles first, update only your own voice entry, then POST the full styles object back.
 ```
 
-## 12. Upstream and Submodules
+## 12. Upstream
 
 This project started from Awesome-TTS and has been adapted into a NAS voice center workflow.
 
@@ -161,17 +161,7 @@ Original upstream:
 https://github.com/isaacgounton/awesome-tts
 ```
 
-The GitHub entries:
-
-- `chatterbox-tts @ 99fd7b6`
-- `openai-edge-tts @ 6caaceb`
-
-are Git submodule pointers inherited from upstream Awesome-TTS. They mean this repository references fixed commits from two external repositories:
-
-- `chatterbox-tts`: `https://github.com/isaacgounton/Chatterbox-TTS-Server.git`
-- `openai-edge-tts`: `https://github.com/isaacgounton/openai-edge-tts.git`
-
-The current Voice Hub main path does not depend on these two submodules. They are kept for upstream compatibility and can be removed later if they are no longer needed.
+The legacy upstream submodules `chatterbox-tts` and `openai-edge-tts` are not used by the current Voice Hub main path and have been removed from this repository.
 
 ## 13. License
 
