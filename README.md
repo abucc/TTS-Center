@@ -139,30 +139,3 @@ MIMO_BASE_URL=https://token-plan-cn.xiaomimimo.com/v1
 MIMO_MODEL=mimo-v2.5-tts-voiceclone
 MIMO_AUTH_HEADER=auto
 ```
-
-不要提交真实 `.env`、API key、token、上传音频、生成音频或私人运行数据。
-
-## 11. AI 调用规则
-
-```text
-统一调用 POST http://192.168.31.180:9000/tts。
-provider=local-first，voice=页面配置的音色 ID，text=原始朗读文本。
-不要自己拼接风格提示词。
-修改音色风格时，先 GET /voice-admin/styles，只改自己的音色项，再 POST 回完整 styles。
-```
-
-## 12. 上游项目
-
-本项目基于 Awesome-TTS 改造，当前主要服务于 NAS 语音中心工作流。
-
-原上游：
-
-```text
-https://github.com/isaacgounton/awesome-tts
-```
-
-上游旧 submodule `chatterbox-tts` 和 `openai-edge-tts` 没有被当前语音中心主链路使用，已从本仓库移除。
-
-## 13. 许可证
-
-除非具体文件另有说明，本仓库沿用上游 MIT License。

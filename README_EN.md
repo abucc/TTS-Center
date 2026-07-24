@@ -139,30 +139,3 @@ MIMO_BASE_URL=https://token-plan-cn.xiaomimimo.com/v1
 MIMO_MODEL=mimo-v2.5-tts-voiceclone
 MIMO_AUTH_HEADER=auto
 ```
-
-Do not commit real `.env` files, API keys, tokens, uploaded audio, generated audio, or private runtime data.
-
-## 11. Agent Rules
-
-```text
-Use POST http://192.168.31.180:9000/tts for TTS.
-Set provider=local-first, voice=<configured voice ID>, text=<raw text>.
-Do not manually prepend style prompts.
-To edit voice style, GET /voice-admin/styles first, update only your own voice entry, then POST the full styles object back.
-```
-
-## 12. Upstream
-
-This project started from Awesome-TTS and has been adapted into a NAS voice center workflow.
-
-Original upstream:
-
-```text
-https://github.com/isaacgounton/awesome-tts
-```
-
-The legacy upstream submodules `chatterbox-tts` and `openai-edge-tts` are not used by the current Voice Hub main path and have been removed from this repository.
-
-## 13. License
-
-This repository keeps the upstream MIT license unless a file states otherwise.
